@@ -516,6 +516,8 @@ export default class XNATSegmentationPanel extends React.Component {
       isFractional = labelmap3D.isFractional;
     }
 
+    let exportDisabledMessage;
+
     // Note: For now disable export and adding of segments if the labelmap is fractional.
     const ExportCallbackOrComponent = isFractional
       ? null
@@ -579,6 +581,7 @@ export default class XNATSegmentationPanel extends React.Component {
               ExportCallbackOrComponent={ExportCallbackOrComponent}
               onImportButtonClick={() => this.setState({ importing: true })}
               onExportButtonClick={() => this.setState({ exporting: true })}
+              exportDisabledMessage={exportDisabledMessage}
             />
           </div>
           <div className="roiCollectionBody">
