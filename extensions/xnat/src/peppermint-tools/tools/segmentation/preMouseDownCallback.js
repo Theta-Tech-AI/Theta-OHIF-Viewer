@@ -12,6 +12,8 @@ export default function preMouseDownCallback(element) {
   } = segmentationModule.getters.labelmap2D(element);
 
   console.log({
+    labelmap3D,
+    segmentationModule,
     SphericaMouseDown: segmentationModule.getters.labelmap2D(element),
   });
 

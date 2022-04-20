@@ -20,6 +20,7 @@ export default class XNATCircleScissorsTool extends RectangleScissorsTool {
     preMouseDownCallback(detail.element);
 
     const { event } = detail;
+
     if (event.ctrlKey) {
       this.activeStrategy = 'ERASE_INSIDE';
     } else {

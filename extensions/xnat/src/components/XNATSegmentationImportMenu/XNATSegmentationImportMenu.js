@@ -10,8 +10,10 @@ import { Icon } from '@ohif/ui';
 import { Loader } from '../../elements';
 import cornerstone from 'cornerstone-core';
 import { getEnabledElement } from '../../../../cornerstone/src/state';
+import csTools from 'cornerstone-tools';
 
 import '../XNATRoiPanel.styl';
+const triggerEvent = csTools.importInternal('util/triggerEvent');
 
 const { studyMetadataManager } = utils;
 
@@ -165,7 +167,7 @@ export default class XNATSegmentationImportMenu extends React.Component {
         cornerstone.displayImage(element, image);
         const RectangleScissorsTool = cornerstoneTools.RectangleScissorsTool;
         cornerstoneTools.addTool(RectangleScissorsTool);
-        cornerstoneTools.setToolActive('RectangleScissors', {
+        cornerstoneTools.setToolActive('RectangleScissorsTool', {
           mouseButtonMask: 1,
         });
         cornerstone.updateImage(element);
@@ -183,25 +185,32 @@ export default class XNATSegmentationImportMenu extends React.Component {
 
         let toolState = cornerstoneTools.getToolState(
           element,
-          'RectangleScissors'
+          'RectangleScissorsTool'
         );
 
-        console.log({ toolState });
+        // console.log({ toolState });
 
         if (toolState) {
           toolState.data[0].pixelData = [...pixelData];
         } else {
-          cornerstoneTools.addToolState(element, 'RectangleScissors', {
+          cornerstoneTools.addToolState(element, 'RectangleScissorsTool', {
             pixelData,
           });
         }
 
-        toolState = cornerstoneTools.getToolState(element, 'RectangleScissors');
+        toolState = cornerstoneTools.getToolState(
+          element,
+          'RectangleScissorsTool'
+        );
 
         toolState.data[0].invalidated = true;
-        cornerstone.updateImage(element);
 
-        console.log({ toolState });
+        triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
+
+        // cornerstone.updateImage(element);
+        cornerstoneTools.store.state.enabledElements.forEach(element => {
+          cornerstone.updateImage(element);
+        });
       });
   }
 
