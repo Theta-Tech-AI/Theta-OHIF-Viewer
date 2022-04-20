@@ -13,6 +13,7 @@ import { getEnabledElement } from '../../../../cornerstone/src/state';
 import csTools from 'cornerstone-tools';
 
 import '../XNATRoiPanel.styl';
+import { generateSegmentationMetadata } from '../../peppermint-tools';
 const triggerEvent = csTools.importInternal('util/triggerEvent');
 
 const { studyMetadataManager } = utils;
@@ -139,6 +140,41 @@ export default class XNATSegmentationImportMenu extends React.Component {
    *
    * @returns {null}
    */
+
+  writeToCanvas(el) {
+    const {
+      labelmap3D,
+      currentImageIdIndex,
+      activeLabelmapIndex,
+    } = segmentationModule.getters.labelmap2D(el);
+
+    console.log({
+      labelmap3D,
+      segmentationModule,
+      SphericaMouseDown: segmentationModule.getters.labelmap2D(el),
+    });
+
+    let segmentIndex = labelmap3D.activeSegmentIndex;
+    let metadata = labelmap3D.metadata[segmentIndex];
+
+    console.log({ metadata, segmentIndex });
+
+    if (!metadata) {
+      metadata = generateSegmentationMetadata('Unnamed Segment');
+
+      segmentIndex = labelmap3D.activeSegmentIndex = 1;
+
+      segmentationModule.setters.metadata(
+        el,
+        activeLabelmapIndex,
+        segmentIndex,
+        metadata
+      );
+
+      triggerEvent(el, 'peppermintautosegmentgenerationevent', {});
+    }
+  }
+
   async onImportButtonClick() {
     this._updateImportingText('');
     this.setState({ importing: true });
@@ -151,6 +187,8 @@ export default class XNATSegmentationImportMenu extends React.Component {
     if (!element) {
       return;
     }
+
+    this.writeToCanvas(element);
 
     // retrieving cornerstone enable element object
     const enabled_element = cornerstone.getEnabledElement(element);
@@ -165,52 +203,40 @@ export default class XNATSegmentationImportMenu extends React.Component {
       .loadImage(image.imageId)
       .then(image => {
         cornerstone.displayImage(element, image);
-        const RectangleScissorsTool = cornerstoneTools.RectangleScissorsTool;
-        cornerstoneTools.addTool(RectangleScissorsTool);
-        cornerstoneTools.setToolActive('RectangleScissorsTool', {
-          mouseButtonMask: 1,
-        });
+        // const RectangleScissorsTool = cornerstoneTools.RectangleScissorsTool;
+        // cornerstoneTools.addTool(RectangleScissorsTool);
+        // cornerstoneTools.setToolActive('RectangleScissors', {
+        //   mouseButtonMask: 1,
+        // });
         cornerstone.updateImage(element);
       })
       .then(() => {
         let width = 512;
         let height = 512;
         let channel = 1;
+
         let pixelData = new Uint8ClampedArray(width * height * channel);
         for (let i = 128; i < 256; i++) {
           for (let j = 256; j < 384; j++) {
             pixelData[i * width + j] = 1;
           }
         }
-
-        let toolState = cornerstoneTools.getToolState(
+        const toolState = cornerstoneTools.getToolState(
           element,
-          'RectangleScissorsTool'
+          'XNATRectangleScissorsTool'
         );
 
-        // console.log({ toolState });
-
+        console.log({ XnatToolState: toolState });
         if (toolState) {
           toolState.data[0].pixelData = [...pixelData];
+          toolState.data[0].invalidated = true;
         } else {
-          cornerstoneTools.addToolState(element, 'RectangleScissorsTool', {
+          cornerstoneTools.addToolState(element, 'XNATRectangleScissorsTool', {
             pixelData,
           });
         }
 
-        toolState = cornerstoneTools.getToolState(
-          element,
-          'RectangleScissorsTool'
-        );
-
-        toolState.data[0].invalidated = true;
-
-        triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
-
-        // cornerstone.updateImage(element);
-        cornerstoneTools.store.state.enabledElements.forEach(element => {
-          cornerstone.updateImage(element);
-        });
+        cornerstone.updateImage(element);
       });
   }
 

@@ -27,4 +27,6 @@ export default class XNATCircleScissorsTool extends RectangleScissorsTool {
       this.activeStrategy = 'FILL_INSIDE';
     }
   }
+
+  
 }
