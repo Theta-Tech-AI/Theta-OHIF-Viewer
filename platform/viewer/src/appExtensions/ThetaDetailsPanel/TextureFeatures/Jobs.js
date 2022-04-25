@@ -198,11 +198,11 @@ const Jobs = ({
   const performOverlay = (series_uid, instance_uid) => {
     if (base_url.endsWith('/')) {
       const image_id = `${base_url}series/${series_uid}/instances/${instance_uid}/frames/1`;
-      console.log('WithSlash', { image_id });
+      // console.log('WithSlash', { image_id });
       addImageLayer(image_id);
     } else {
       const image_id = `${base_url}/series/${series_uid}/instances/${instance_uid}/frames/1`;
-      console.log('WithoutSlash', { image_id });
+      // console.log('WithoutSlash', { image_id });
       addImageLayer(image_id);
     }
   };

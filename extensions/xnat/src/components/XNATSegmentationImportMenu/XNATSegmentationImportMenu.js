@@ -199,45 +199,24 @@ export default class XNATSegmentationImportMenu extends React.Component {
     // get current image
     const image = cornerstone.getImage(element);
 
-    cornerstone
-      .loadImage(image.imageId)
-      .then(image => {
-        cornerstone.displayImage(element, image);
-        // const RectangleScissorsTool = cornerstoneTools.RectangleScissorsTool;
-        // cornerstoneTools.addTool(RectangleScissorsTool);
-        // cornerstoneTools.setToolActive('RectangleScissors', {
-        //   mouseButtonMask: 1,
-        // });
-        cornerstone.updateImage(element);
-      })
-      .then(() => {
-        let width = 512;
-        let height = 512;
-        let channel = 1;
+    const tool_data = cornerstoneTools.getToolState(element, 'RectangleRoi');
+    const data = tool_data.data[0];
 
-        let pixelData = new Uint8ClampedArray(width * height * channel);
-        for (let i = 128; i < 256; i++) {
-          for (let j = 256; j < 384; j++) {
-            pixelData[i * width + j] = 1;
-          }
-        }
-        const toolState = cornerstoneTools.getToolState(
-          element,
-          'XNATRectangleScissorsTool'
-        );
+    localStorage.setItem('toolData', JSON.stringify(data));
 
-        console.log({ XnatToolState: toolState });
-        if (toolState) {
-          toolState.data[0].pixelData = [...pixelData];
-          toolState.data[0].invalidated = true;
-        } else {
-          cornerstoneTools.addToolState(element, 'XNATRectangleScissorsTool', {
-            pixelData,
-          });
-        }
+    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
+    cornerstone.updateImage(element);
 
-        cornerstone.updateImage(element);
-      });
+    setTimeout(() => {
+      this.callBackToolData(element);
+    }, 2000);
+  }
+
+  async callBackToolData(element) {
+    const tool = JSON.parse(localStorage.getItem('toolData'));
+
+    cornerstoneTools.addToolState(element, 'RectangleRoi', tool);
+    cornerstone.updateImage(element);
   }
 
   /**
