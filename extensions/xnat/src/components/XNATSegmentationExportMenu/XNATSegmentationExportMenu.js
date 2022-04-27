@@ -72,10 +72,12 @@ export default class XNATSegmentationExportMenu extends React.Component {
 
     const xnat_label = `${label}_S${seriesInfo.SeriesNumber}`;
 
-    // console.log({ pixelData: this.props.labelmap3D.labelmaps2D[0].pixelData });
+    localStorage.setItem(
+      'labelmaps2D',
+      JSON.stringify(this.props.labelmap3D.labelmaps2D)
+    );
 
     // console.log({ seriesInfo, ExportProps: this.props, State: this.state });
-
 
     // get current image
     const image = cornerstone.getImage(element);
@@ -104,6 +106,8 @@ export default class XNATSegmentationExportMenu extends React.Component {
     });
 
     const maskExport = {
+      xnat_label,
+      old_image: image,
       image: newImage,
       study_uid: seriesInfo.studyInstanceUid,
       series_uid: seriesInfo.seriesInstanceUid,

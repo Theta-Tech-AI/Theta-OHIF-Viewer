@@ -19,6 +19,9 @@ const triggerEvent = csTools.importInternal('util/triggerEvent');
 const { studyMetadataManager } = utils;
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
+const { getters, setters, drawBrushPixels } = cornerstoneTools.getModule(
+  'segmentation'
+);
 
 const _getFirstImageIdFromSeriesInstanceUid = seriesInstanceUid => {
   const studies = studyMetadataManager.all();
@@ -141,38 +144,28 @@ export default class XNATSegmentationImportMenu extends React.Component {
    * @returns {null}
    */
 
-  writeToCanvas(el) {
+  writeToCanvas(element) {
     const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-    } = segmentationModule.getters.labelmap2D(el);
+      labelmap2D, // The `Labelmap2D` for this imageId.
+      labelmap3D, // The `Labelmap3D` for this stack.
+      currentImageIdIndex, // The currentImageIdIndex of this image in the stack.
+      activeLabelmapIndex, // The labelmapIndex of this active labelmap.
+    } = getters.labelmap2D(element);
 
-    console.log({
-      labelmap3D,
-      segmentationModule,
-      SphericaMouseDown: segmentationModule.getters.labelmap2D(el),
-    });
+    // console.log({
+    //   labelmap2D,
+    //   labelmap3D,
+    //   currentImageIdIndex,
+    //   activeLabelmapIndex,
+    // });
 
-    let segmentIndex = labelmap3D.activeSegmentIndex;
-    let metadata = labelmap3D.metadata[segmentIndex];
+    const oldlabelmap2D = JSON.parse(localStorage.getItem('labelmaps2D'));
 
-    console.log({ metadata, segmentIndex });
+    labelmap2D.pixelData = oldlabelmap2D[0].pixelData;
 
-    if (!metadata) {
-      metadata = generateSegmentationMetadata('Unnamed Segment');
+    setters.updateSegmentsOnLabelmap2D(labelmap2D);
 
-      segmentIndex = labelmap3D.activeSegmentIndex = 1;
-
-      segmentationModule.setters.metadata(
-        el,
-        activeLabelmapIndex,
-        segmentIndex,
-        metadata
-      );
-
-      triggerEvent(el, 'peppermintautosegmentgenerationevent', {});
-    }
+    cornerstone.updateImage(element);
   }
 
   async onImportButtonClick() {
@@ -190,7 +183,7 @@ export default class XNATSegmentationImportMenu extends React.Component {
 
     this.writeToCanvas(element);
 
-    // retrieving cornerstone enable element object
+    // // retrieving cornerstone enable element object
     const enabled_element = cornerstone.getEnabledElement(element);
     if (!enabled_element || !enabled_element.image) {
       return;
