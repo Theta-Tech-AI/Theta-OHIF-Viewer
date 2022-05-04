@@ -144,28 +144,38 @@ export default class XNATSegmentationImportMenu extends React.Component {
    * @returns {null}
    */
 
-  writeToCanvas(element) {
-    const {
-      labelmap2D, // The `Labelmap2D` for this imageId.
-      labelmap3D, // The `Labelmap3D` for this stack.
-      currentImageIdIndex, // The currentImageIdIndex of this image in the stack.
-      activeLabelmapIndex, // The labelmapIndex of this active labelmap.
-    } = getters.labelmap2D(element);
+  writeToCanvas(enabledElement) {
+    let imageIdIndices = [];
 
-    // console.log({
-    //   labelmap2D,
-    //   labelmap3D,
-    //   currentImageIdIndex,
-    //   activeLabelmapIndex,
-    // });
+    // get labelmaps2D from segmentation module
+    const { labelmaps2D } = segmentationModule.getters.labelmap3D(
+      enabledElement
+    );
 
-    const oldlabelmap2D = JSON.parse(localStorage.getItem('labelmaps2D'));
+    // collect and convert data back to json array, must replace with API data
+    const data = JSON.parse(localStorage.getItem('segmentation'));
 
-    labelmap2D.pixelData = oldlabelmap2D[0].pixelData;
+    // check if the undo array has data inside and push the image index inside created array
+    if (data && data.length) {
+      data[data.length - 1].forEach(item =>
+        imageIdIndices.push(item.imageIdIndex)
+      );
 
-    setters.updateSegmentsOnLabelmap2D(labelmap2D);
+       // add segmentation using the redo function inside the segmentation module
+      segmentationModule.setters.redo(enabledElement);
+    } else {
+      alert('Segmentation not found');
+      return;
+    }
 
-    cornerstone.updateImage(element);
+    // Update segments on Labelmap2D
+    imageIdIndices.forEach(imageIndex => {
+      segmentationModule.setters.updateSegmentsOnLabelmap2D(
+        labelmaps2D[imageIndex]
+      );
+    });
+
+    this.refreshCornerstoneViewports();
   }
 
   async onImportButtonClick() {
@@ -181,35 +191,58 @@ export default class XNATSegmentationImportMenu extends React.Component {
       return;
     }
 
-    this.writeToCanvas(element);
-
-    // // retrieving cornerstone enable element object
+    // retrieving cornerstone enable element object
     const enabled_element = cornerstone.getEnabledElement(element);
     if (!enabled_element || !enabled_element.image) {
       return;
     }
 
-    // get current image
-    const image = cornerstone.getImage(element);
-
-    const tool_data = cornerstoneTools.getToolState(element, 'RectangleRoi');
-    const data = tool_data.data[0];
-
-    localStorage.setItem('toolData', JSON.stringify(data));
-
-    cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState({});
-    cornerstone.updateImage(element);
-
-    setTimeout(() => {
-      this.callBackToolData(element);
-    }, 2000);
+    this.callBackSegmentation(element);
   }
 
-  async callBackToolData(element) {
-    const tool = JSON.parse(localStorage.getItem('toolData'));
+  async callBackSegmentation(enabledElement) {
+    const segmentationModule = csTools.getModule('segmentation');
 
-    cornerstoneTools.addToolState(element, 'RectangleRoi', tool);
-    cornerstone.updateImage(element);
+    const activeLabelmapIndex = segmentationModule.getters.activeLabelmapIndex(
+      enabledElement
+    );
+    if (activeLabelmapIndex === undefined) {
+      return;
+    }
+
+    const { undo, labelmaps2D } = segmentationModule.getters.labelmap3D(
+      enabledElement
+    );
+
+    console.log({ UndoData: undo });
+
+    let imageIdIndices = [];
+
+    localStorage.setItem('segmentation', JSON.stringify(undo));
+
+    // check if the undo array has data inside and push the image index inside created array
+    if (undo.length) {
+      undo[undo.length - 1].forEach(item =>
+        imageIdIndices.push(item.imageIdIndex)
+      );
+
+      // remove previously created segmentation using the undo function inside the segmentation module
+      segmentationModule.setters.undo(enabledElement);
+    }
+
+    // Update segments on Labelmap2D
+    imageIdIndices.forEach(imageIndex => {
+      segmentationModule.setters.updateSegmentsOnLabelmap2D(
+        labelmaps2D[imageIndex]
+      );
+    });
+
+    // refresh the canvas to update it
+    this.refreshCornerstoneViewports();
+
+    setTimeout(() => {
+      this.writeToCanvas(enabledElement);
+    }, 5000);
   }
 
   /**
@@ -237,6 +270,17 @@ export default class XNATSegmentationImportMenu extends React.Component {
     }
 
     return labelmap3D.metadata.some(data => data !== undefined);
+  }
+
+  /**
+   * function for refreshing canvas
+   */
+  refreshCornerstoneViewports() {
+    cornerstone.getEnabledElements().forEach(enabledElement => {
+      if (enabledElement.image) {
+        cornerstone.updateImage(enabledElement.element);
+      }
+    });
   }
 
   /**

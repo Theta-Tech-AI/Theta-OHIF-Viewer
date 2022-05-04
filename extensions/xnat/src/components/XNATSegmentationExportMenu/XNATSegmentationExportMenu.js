@@ -12,6 +12,7 @@ import { removeEmptyLabelmaps2D } from '../../peppermint-tools';
 import showNotification from '../common/showNotification';
 
 import '../XNATRoiPanel.styl';
+import TOOL_NAMES from '../../peppermint-tools/toolNames';
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 const globalToolStateManager =
@@ -57,9 +58,6 @@ export default class XNATSegmentationExportMenu extends React.Component {
     const { firstImageId, viewportData } = this.props;
     const roiCollectionName = this._roiCollectionName;
 
-    // console.log({ MaskExportClickState: this.state });
-    // console.log({ MaskExportClickProps: this.props });
-
     // Check the name isn't empty, and isn't just whitespace.
     if (roiCollectionName.replace(/ /g, '').length === 0) {
       return;
@@ -72,21 +70,9 @@ export default class XNATSegmentationExportMenu extends React.Component {
 
     const xnat_label = `${label}_S${seriesInfo.SeriesNumber}`;
 
-    localStorage.setItem(
-      'labelmaps2D',
-      JSON.stringify(this.props.labelmap3D.labelmaps2D)
-    );
-
-    // console.log({ seriesInfo, ExportProps: this.props, State: this.state });
-
     // get current image
     const image = cornerstone.getImage(element);
     // console.log({ image });
-
-    // const toolState = cornerstoneTools.getElementToolStateManager(element);
-
-    const toolState = cornerstoneTools.getToolState(element, 'stack');
-    console.log({ image, toolState });
 
     const segments = this.props.labelmap3D.labelmaps2D;
 
