@@ -53,6 +53,21 @@ const Jobs = ({
     'dicomWeb/studies'
   )}`;
 
+  // setting up client for API requests (centralize this client)
+  const client = axios.create({
+    baseURL: radcadapi,
+    timeout: 90000,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  client.interceptors.request.use(config => {
+    config.headers.Authorization = `Bearer ${access_token}`;
+    return config;
+  });
 
   // useEffect for checking data status
   useEffect(() => {
@@ -170,25 +185,12 @@ const Jobs = ({
     const source_series_uid = image.imageId.split('/')[16];
 
     try {
-      var requestOptions = {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${access_token}`,
-        },
-      };
-
-      await fetch(
-        `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}`,
-        requestOptions
-      )
-        .then(r => r.json().then(data => ({ status: r.status, data: data })))
+      await client
+        .get(`/instance?source=${source_uid}&texture=${seriesUID}`)
         .then(response => {
           const image_id = response['data']['texture_instance_uid'];
           performOverlay(seriesUID, image_id);
         });
-
-     
     } catch (err) {
       console.log(err);
     }

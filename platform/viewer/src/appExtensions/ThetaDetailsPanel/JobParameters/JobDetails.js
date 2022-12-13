@@ -40,6 +40,21 @@ const JobParameters = props => {
 
   const access_token = user.access_token;
 
+  const client = axios.create({
+    baseURL: radcadapi,
+    timeout: 90000,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  });
+
+  client.interceptors.request.use(config => {
+    config.headers.Authorization = `Bearer ${access_token}`;
+    return config;
+  });
+
   useEffect(() => {
     const view_ports = cornerstone.getEnabledElements();
     const viewports = view_ports[0];
@@ -168,11 +183,10 @@ const JobParameters = props => {
     }
   };
 
-  const sendParams = data => {
+  const sendParams = async data => {
     const series_uid = data.SeriesInstanceUID;
     const study_uid = data.StudyInstanceUID;
     const email = user.profile.email;
-    // const email = 'nick.fragakis@thetatech.ai';
 
     const body = {
       study_uid: study_uid,
@@ -188,20 +202,9 @@ const JobParameters = props => {
       },
     };
 
-    var requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access_token}`,
-      },
-      body: JSON.stringify(body),
-    };
-
-    fetch(`${radcadapi}/texturea`, requestOptions)
-      .then(r => r.json().then(data => ({ status: r.status, data: data })))
+    await client
+      .post(`/texture`, body)
       .then(response => {
-        console.log('response--------texture');
-        console.log(response);
         // cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
         //   {}
         // );

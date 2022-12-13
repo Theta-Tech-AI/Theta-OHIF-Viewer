@@ -77,7 +77,7 @@ function TableSearchFilter(props) {
 
   return translationsAreReady
     ? meta.map((field, i) => {
-        const { displayText, fieldName, PlaceHolder, inputType } = field;
+        const { displayText, fieldName, inputType } = field;
 
         return (
           <div
@@ -88,7 +88,6 @@ function TableSearchFilter(props) {
           >
             {inputType === 'text' && (
               <input
-                placeholder={PlaceHolder}
                 type="text"
                 id={`filter-${fieldName}`}
                 className="form-control studylist-search"
