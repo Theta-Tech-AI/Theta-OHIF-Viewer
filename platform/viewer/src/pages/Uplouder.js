@@ -2,10 +2,6 @@ import React, { useEffect } from 'react';
 import { Link as RouterLink, useLocation, matchPath } from 'react-router-dom';
 
 function UplouderPage() {
-  const state = window.store.getState();
-
-  const url = `http://localhost:3001?id_token=${state.oidc.user.id_token}`;
-
   return (
     <div
       style={{
@@ -17,8 +13,7 @@ function UplouderPage() {
       }}
     >
       <iframe
-        target="_blank"
-        src={url}
+        src="https://upload.ohif.thetatech.ai/"
         style={{
           position: 'absolute',
           top: '0',

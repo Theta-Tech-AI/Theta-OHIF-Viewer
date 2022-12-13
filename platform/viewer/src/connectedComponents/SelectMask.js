@@ -10,12 +10,11 @@ import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
 import ErrorBoundaryDialog from '../components/ErrorBoundaryDialog';
-import { commandsManager, extensionManager } from '../App.js';
+import { extensionManager } from '../App.js';
 import { ReconstructionIssues } from '../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
-import csTools from 'cornerstone-tools';
 
 import './Viewer.css';
 import JobsContextUtil from './JobsContextUtil.js';
@@ -66,7 +65,7 @@ class SelectMask extends Component {
 
   constructor(props) {
     super(props);
-    this.componentRef = React.createRef();
+
     const { activeServer } = this.props;
     const server = Object.assign({}, activeServer);
 
@@ -107,12 +106,6 @@ class SelectMask extends Component {
   onCornerstageLoaded = enabledEvt => {
     setTimeout(() => {
       const enabledElement = enabledEvt.detail.element;
-
-      const options = {
-        type: 'click',
-      };
-      commandsManager.runCommand('triggerAlgorithm', options);
-
       let tool_data = localStorage.getItem(this.props.studyInstanceUID);
       tool_data =
         tool_data && tool_data !== 'undefined' ? JSON.parse(tool_data) : {};
@@ -124,7 +117,7 @@ class SelectMask extends Component {
         if (tool_data.voi) viewport.voi = tool_data.voi;
         cornerstone.setViewport(enabledElement, viewport);
       }
-      // this.handleSidePanelChange('right', 'lung-module-similarity-panel');
+      this.handleSidePanelChange('right', 'lung-module-similarity-panel');
       // this.handleSidePanelChange('left', 'theta-details-panel');
     }, 2000);
   };
@@ -497,10 +490,7 @@ class SelectMask extends Component {
               </ErrorBoundaryDialog>
 
               {/* MAIN */}
-              <div
-                className={classNames('main-content')}
-                ref={this.componentRef}
-              >
+              <div className={classNames('main-content')}>
                 <ErrorBoundaryDialog context="ViewerMain">
                   <ConnectedViewerMain
                     studies={_removeUnwantedSeries(

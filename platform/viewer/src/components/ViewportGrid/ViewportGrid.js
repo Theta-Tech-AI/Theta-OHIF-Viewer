@@ -3,6 +3,7 @@ import cornerstoneTools from 'cornerstone-tools';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import throttle from 'lodash.throttle';
 import { utils } from '@ohif/core';
 import { useSnackbarContext, useLogger } from '@ohif/ui';
 //
@@ -15,6 +16,7 @@ import EmptyViewport from './EmptyViewport.js';
 // } from '../../context/AppContext';
 import { getEnabledElement } from '../../../../../extensions/cornerstone/src/state';
 import {
+  client,
   compressSeg,
   getSegArray,
   getSplitSegArray,
@@ -30,11 +32,9 @@ import refreshViewports from '../../../../../extensions/dicom-segmentation/src/u
 import { triggerEvent } from 'cornerstone-core';
 import { RenderLoadingModal } from '../../appExtensions/LungModuleSimilarityPanel/SearchParameters/SearchDetails';
 import { useLocation } from 'react-router';
-import { radcadapi } from '../../utils/constants';
+import eventBus from '../../lib/eventBus';
 
 const { loadAndCacheDerivedDisplaySets, studyMetadataManager } = utils;
-
-
 
 const ViewportGrid = function(props) {
   const {
@@ -112,19 +112,19 @@ const ViewportGrid = function(props) {
 
   useEffect(() => {
     //  storing this for series used nnunet api call, currently pass via redux series is null -- fix redux and use redux implementation
-    // localStorage.setItem('isSegmentLoaded', JSON.stringify(1));
+    localStorage.setItem('isSegmentLoaded', JSON.stringify(1));
 
-    // eventBus.on('importSegmentations', data => {
-    //   console.log('importSegmentations');
-    //   // throttledSearch();
-    //   // if (!fetchedSegmentations) onImportButtonClick();
-    //   // setFetchedSegmentations(false);
-    // });
+    eventBus.on('importSegmentations', data => {
+      console.log('importSegmentations');
+      // throttledSearch();
+      // if (!fetchedSegmentations) onImportButtonClick();
+      // setFetchedSegmentations(false);
+    });
     return () => {
       //  use localstorage to avoid duplicate segmentations issue 0 for false 1 for true
       // localStorage.setItem('isSegmentLoaded', JSON.stringify(0));
       removeSegments();
-      // eventBus.remove('importSegmentations');
+      eventBus.remove('importSegmentations');
     };
   }, []);
 
@@ -145,9 +145,7 @@ const ViewportGrid = function(props) {
       props,
     });
     const series_uid = props.viewportData[0].SeriesInstanceUID;
-    console.log('series_uid----------149'),
-      console.log(series_uid),
-      localStorage.setItem('series_uid', JSON.stringify(series_uid));
+    localStorage.setItem('series_uid', JSON.stringify(series_uid));
 
     const targeDiv = ref.current;
     const view_ports = cornerstone.getEnabledElements();
@@ -288,12 +286,8 @@ const ViewportGrid = function(props) {
       if (
         location.pathname.includes('/edit') &&
         fetchedSegmentations === 'idle'
-      ) {
-        // CALLED ATER 2 SECONDS
-        setTimeout(() => {
-          onImportButtonClick();
-        }, 5000);
-      }
+      )
+        onImportButtonClick();
     }
   }, [studies, viewportData, isStudyLoaded, snackbar]);
 
@@ -323,8 +317,6 @@ const ViewportGrid = function(props) {
       try {
         console.log('saving', props);
         const series_uid = props.viewportData[0].SeriesInstanceUID;
-        console.log({ series_uid });
-
         const email = props.user.profile.email;
 
         console.log({ segmentation });
@@ -358,39 +350,20 @@ const ViewportGrid = function(props) {
         });
 
         if (recordedHash && recordedHash === hashed) {
-          console.log('value not changed');
+          console.warn('value not changed');
           rej('value not changed');
         } else {
-          var requestOptions = {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              // Authorization: 'Bearer ' + state.oidc.user.access_token,
-            },
-            body: JSON.stringify(body),
-          };
-
-          let response = await fetch(
-            `${radcadapi}/segmentations`,
-            requestOptions
-          );
-
-          response = await response.json();
-          console.log({ saveddata: response });
-          updateAndSaveLocalSegmentations(body);
-          res({ response });
-
-          //   console.log('value changed. saving');
-          //   await client
-          //     .put(`/segmentations`, body)
-          //     .then(async response => {
-          //       console.log({ response });
-          //       updateAndSaveLocalSegmentations(body);
-          //       res({ response });
-          //     })
-          //     .catch(error => {
-          //       console.log(error);
-          //     });
+          console.warn('value changed. saving');
+          await client
+            .put(`/segmentations`, body)
+            .then(async response => {
+              console.log({ response });
+              updateAndSaveLocalSegmentations(body);
+              res({ response });
+            })
+            .catch(error => {
+              console.log(error);
+            });
         }
       } catch (error) {
         console.log({ error });
@@ -430,7 +403,7 @@ const ViewportGrid = function(props) {
       const asyncSaveSegs = segList.map((item, index) => {
         return () =>
           new Promise(async (resolve, reject) => {
-            console.log('asyncSaveSegs', { item, index });
+            console.warn('asyncSaveSegs', { item, index });
 
             const splitSegArray = getSplitSegArray({
               flatSegmentationArray: segArray,
@@ -471,7 +444,7 @@ const ViewportGrid = function(props) {
         resList.push(response);
       }
 
-      console.log({ resList });
+      console.warn({ resList });
       res({
         ['exportation complete']: resList,
       });
@@ -521,7 +494,7 @@ const ViewportGrid = function(props) {
       segList: segList,
     });
 
-    console.log({ response });
+    console.warn({ response });
 
     // this.setState({
     //   exporting: false,
@@ -532,13 +505,11 @@ const ViewportGrid = function(props) {
   };
 
   const addSegmentationToCanvas = ({ segmentation, label, element }) => {
-    console.log('------------------------addSegmentationToCanvas');
-    console.log({
+    console.warn({
       segmentation,
       label,
       element,
     });
-    console.log('------------------------END');
     const labelmap2D = segmentationModule.getters.labelmap2D
       ? segmentationModule.getters.labelmap2D(element)
       : false;
@@ -562,7 +533,7 @@ const ViewportGrid = function(props) {
     });
 
     if (!metadata) {
-      console.log('layer not occupied');
+      console.warn('layer not occupied');
 
       metadata = generateSegmentationMetadata(label);
       segmentIndex = labelmap3D.activeSegmentIndex;
@@ -586,7 +557,7 @@ const ViewportGrid = function(props) {
       }
       labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
 
-      console.log('updatedLabelmaps2s', {
+      console.warn('updatedLabelmaps2s', {
         labelmap2D,
         segmentIndex,
       });
@@ -597,7 +568,7 @@ const ViewportGrid = function(props) {
       });
     } else {
       //theres something on this layer so we need to find the last layer and work on the one after it
-      console.log('layer occupied', labelmap3D);
+      console.warn('layer occupied', labelmap3D);
 
       metadata = generateSegmentationMetadata(label);
       segmentIndex = labelmap3D.metadata.length;
@@ -662,7 +633,6 @@ const ViewportGrid = function(props) {
 
         const uncompressed = uncompress({
           segmentation: segDetails.segmentation,
-          isNnunet: item.includes('nnunet'),
           shape:
             typeof segDetails.shape === 'string'
               ? JSON.parse(segDetails.shape)
@@ -676,7 +646,7 @@ const ViewportGrid = function(props) {
           return;
         }
 
-        console.log({
+        console.warn({
           uncompressed,
           item,
         });
@@ -724,29 +694,19 @@ const ViewportGrid = function(props) {
         console.log('fetch segmentation', props);
 
         const series_uid = props.viewportData[0].SeriesInstanceUID;
-        console.log('series_uid----------719');
-        console.log(series_uid);
         // const email = 'nick.fragakis%40thetatech.ai';
         const email = props.user.profile.email;
 
         console.log({ series_uid });
 
         const body = {
-          email: email, //'nick.fragakis@thetatech.ai',
+          email: 'bimpongamoako@gmail.com', //'nick.fragakis@thetatech.ai',
         };
 
         console.log({ payload: body });
 
-        var requestOptions = {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        };
-
-        await fetch(
-          `${radcadapi}/segmentations?series=${series_uid}&email=${email}`,
-          requestOptions
-        )
-          .then(r => r.json().then(data => ({ status: r.status, data: data })))
+        await client
+          .get(`/segmentations?series=${series_uid}&email=${email}`, body)
           .then(async response => {
             console.log({ response });
             res(response.data);
@@ -754,16 +714,6 @@ const ViewportGrid = function(props) {
           .catch(error => {
             console.log(error);
           });
-
-        // await client
-        //   .get(`/segmentations?series=${series_uid}&email=${email}`, body)
-        //   .then(async response => {
-        //     console.log({ response });
-        //     res(response.data);
-        //   })
-        //   .catch(error => {
-        //     console.log(error);
-        //   });
       } catch (error) {
         console.log({ error });
         rej(error);
@@ -772,6 +722,7 @@ const ViewportGrid = function(props) {
   };
 
   const onImportButtonClick = async () => {
+    //  const segmentations = this.fetchSegmentationsFromLocalStorage();
     if (location.pathname.includes('/edit')) {
       const segmentations = await fetchSegmentations();
       console.log({ segmentations });
