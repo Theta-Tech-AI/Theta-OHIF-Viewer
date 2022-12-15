@@ -580,9 +580,6 @@ const mapStateToProps = state => {
   };
 };
 
-const ConnectedSearchDetails = connect(
-  mapStateToProps,
-  null
-)(SearchDetails);
+const ConnectedSearchDetails = connect(mapStateToProps, null)(SearchDetails);
 
 export default withModal(ConnectedSearchDetails);

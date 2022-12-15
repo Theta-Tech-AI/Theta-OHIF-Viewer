@@ -15,7 +15,6 @@ import { ReconstructionIssues } from './../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
-// import * as html2pdf from 'html2pdf.js';
 
 import './Viewer.css';
 import JobsContextUtil from './JobsContextUtil.js';
@@ -26,12 +25,12 @@ import { getEnabledElement } from '../../../../extensions/cornerstone/src/state'
 import eventBus from '../lib/eventBus';
 import { Icon } from '../../../ui/src/elements/Icon';
 import { radcadapi } from '../utils/constants';
+import { Morphology3DComponent } from '../components/3DSegmentation/3D';
 
 const RadiomicSummary = () => {
   const printDiv = () => {
     // e.preventDefault();
-    const bodyElement = document.getElementsByTagName('body')[0];
-
+    // const bodyElement = document.getElementsByTagName('body')[0];
     // bodyElement.classList.add('printing');
     // const exporter = new html2pdf(bodyElement, { filename: 'NotaSimple.pdf' });
     // exporter.getPdf(true);
@@ -178,32 +177,6 @@ const RadiomicSummary = () => {
   );
 };
 
-const Morphology = () => {
-  return (
-    <div
-      className=""
-      style={{
-        width: '100%',
-        height: '100%',
-        padding: '20px',
-        borderRadius: '8px',
-        background: '#000000',
-      }}
-    >
-      <div className="">
-        <h1
-          style={{
-            textAlign: 'left',
-            margin: 0,
-          }}
-        >
-          3D Morphology{' '}
-        </h1>
-      </div>
-    </div>
-  );
-};
-
 class Radiomics extends Component {
   static propTypes = {
     studies: PropTypes.arrayOf(
@@ -312,7 +285,7 @@ class Radiomics extends Component {
         isComplete: radiomicsDone == 1 ? true : false,
       });
       this.triggerReload();
-    }, 2000);
+    }, 5000);
   };
 
   componentWillUnmount() {
@@ -768,7 +741,7 @@ class Radiomics extends Component {
 
             </div> */}
             <div className="container-item">
-              <Morphology />
+              {this.state.isComplete && <Morphology3DComponent />}
             </div>
           </div>
         </div>

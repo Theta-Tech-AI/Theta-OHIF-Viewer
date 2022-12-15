@@ -9,9 +9,9 @@ import OHIF, { MODULE_TYPES, DICOMSR } from '@ohif/core';
 import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
-import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
-import { extensionManager } from './../App.js';
-import { ReconstructionIssues } from './../../../core/src/enums.js';
+import ErrorBoundaryDialog from '../components/ErrorBoundaryDialog';
+import { extensionManager } from '../App.js';
+import { ReconstructionIssues } from '../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
@@ -24,7 +24,7 @@ import ConnectedStudyBrowser from './ConnectedStudyBrowser';
 import { radcadapi } from '../utils/constants';
 import { getEnabledElement } from '../../../../extensions/cornerstone/src/state';
 
-class RadiomicsReport extends Component {
+class SelectMask extends Component {
   static propTypes = {
     studies: PropTypes.arrayOf(
       PropTypes.shape({
@@ -136,6 +136,11 @@ class RadiomicsReport extends Component {
     //     console.log('measurement completed', event);
     //   });
     // }
+    const enabledElement = getEnabledElement(this.props.activeViewportIndex);
+    if (enabledElement)
+      cornerstoneTools.globalImageIdSpecificToolStateManager.clear(
+        enabledElement
+      );
 
     cornerstone.events.removeEventListener(
       cornerstone.EVENTS.ELEMENT_ENABLED,
@@ -215,6 +220,7 @@ class RadiomicsReport extends Component {
 
     this.handleFetchAndSetSeries(rest.studyInstanceUIDs[0]);
     localStorage.setItem('radiomicsDone', JSON.stringify(0));
+    localStorage.setItem('mask', null);
 
     const timepointApi = new TimepointApi(currentTimepointId, {
       onTimepointsUpdated: this.onTimepointsUpdated,
@@ -526,7 +532,7 @@ class RadiomicsReport extends Component {
     );
   }
 }
-export default withRouter(withDialog(RadiomicsReport));
+export default withRouter(withDialog(SelectMask));
 
 /**
  * Async function to check if there are any inconsistences in the series.
