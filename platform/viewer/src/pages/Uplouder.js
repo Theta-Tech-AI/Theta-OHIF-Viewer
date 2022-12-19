@@ -4,7 +4,10 @@ import { Link as RouterLink, useLocation, matchPath } from 'react-router-dom';
 function UplouderPage() {
   const state = window.store.getState();
 
-  const url = `https://upload.ohif.thetatech.ai/?id_token=${state.oidc.user.id_token}`;
+  let url = null;
+
+  if (state.oidc.user.id_token)
+    url = `https://upload.ohif.thetatech.ai/?id_token=${state.oidc.user.id_token}`;
 
   return (
     <div
