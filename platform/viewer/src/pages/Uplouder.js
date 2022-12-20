@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link as RouterLink, useLocation, matchPath } from 'react-router-dom';
 
 function UplouderPage() {
+  // sample page 
   return (
     <div
       style={{
