@@ -42,7 +42,6 @@ const TextureFeature = props => {
   // getting all jobs for the current series being displayed in viewport
   const getJobs = async jobsArr => {
     try {
-
       var requestOptions = {
         method: 'GET',
         headers: {
@@ -71,7 +70,6 @@ const TextureFeature = props => {
           }
           setIsLoading(false);
         });
-
     } catch (error) {
       console.log(error);
       setIsLoading(false);

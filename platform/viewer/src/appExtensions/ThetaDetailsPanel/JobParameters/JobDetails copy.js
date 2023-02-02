@@ -36,9 +36,9 @@ const JobParameters = props => {
   const { overlayStatus, setOverlayStatus } = useContext(JobsContext);
   const { opacityStatus, setOpacityStatus } = useContext(JobsContext);
   const { colorMapStatus, setColorMapStatus } = useContext(JobsContext);
-  const { UINotificationService } = servicesManager.services;
 
   const access_token = user.access_token;
+  const { UINotificationService } = servicesManager.services;
 
   useEffect(() => {
     const view_ports = cornerstone.getEnabledElements();
@@ -86,6 +86,53 @@ const JobParameters = props => {
       setIsDisabled(false);
     }
 
+    // // retrieving cornerstone enable element object
+    // const enabled_element = cornerstone.getEnabledElement(element);
+    // if (!enabled_element || !enabled_element.image) {
+    //   return;
+    // }
+
+    // // retriveing all current layers
+    // const allLayers = cornerstone.getLayers(element);
+
+    // if (allLayers.length <= 0) {
+    //   createBaseLayerControl(element, enabled_element.image.imageId);
+    // }
+
+    // setTimeout(() => {
+    //   // getting active layer for modification
+    //   const layer = cornerstone.getActiveLayer(element);
+
+    //   if (!layer) return;
+
+    //   // updating all state variables to their new values
+    //   setSync(enabled_element.syncViewports);
+    //   setAcLayer(layer.layerId);
+    //   setLayers([...allLayers]);
+    //   setElement(viewports.element);
+    //   setEnabledElement(viewports);
+    // }, 700);
+
+    // Pull event from cornerstone-tools
+    // const { EVENTS } = cornerstoneTools;
+    // element.addEventListener(EVENTS.MEASUREMENT_COMPLETED, eventhandler);
+
+    // return () =>
+    // element.removeEventListener(EVENTS.MEASUREMENT_COMPLETED, eventhandler);
+  }, []);
+
+  useEffect(() => {
+    const view_ports = cornerstone.getEnabledElements();
+    const viewports = view_ports[0];
+
+    // console.log({ viewports, view_ports });
+
+    // setting active viewport reference to element variable
+    const element = getEnabledElement(view_ports.indexOf(viewports));
+    if (!element) {
+      return;
+    }
+
     // retrieving cornerstone enable element object
     const enabled_element = cornerstone.getEnabledElement(element);
     if (!enabled_element || !enabled_element.image) {
@@ -112,13 +159,6 @@ const JobParameters = props => {
       setElement(viewports.element);
       setEnabledElement(viewports);
     }, 700);
-
-    // Pull event from cornerstone-tools
-    // const { EVENTS } = cornerstoneTools;
-    // element.addEventListener(EVENTS.MEASUREMENT_COMPLETED, eventhandler);
-
-    // return () =>
-    // element.removeEventListener(EVENTS.MEASUREMENT_COMPLETED, eventhandler);
   }, []);
 
   useEffect(() => {
@@ -197,7 +237,7 @@ const JobParameters = props => {
       body: JSON.stringify(body),
     };
 
-    fetch(`${radcadapi}/texture`, requestOptions)
+    fetch(`${radcadapi}/texturea`, requestOptions)
       .then(r => r.json().then(data => ({ status: r.status, data: data })))
       .then(response => {
         console.log('response--------texture');
@@ -207,7 +247,7 @@ const JobParameters = props => {
         // );
         // cornerstone.updateImage(element);
 
-        if (response.status === 202 || response.status === 200 ) {
+        if (response.status === 202) {
           UINotificationService.show({
             message:
               'Job triggered successfully. Please wait for it to be completed',
@@ -280,7 +320,7 @@ const JobParameters = props => {
 
   return (
     <div className="component">
-      {/* <div
+      <div
         style={{
           display: 'flex',
           flexDirection: 'row',
@@ -297,46 +337,46 @@ const JobParameters = props => {
         >
           {activeTab ? ' Hide Layout Parameter' : ' Show Layout Parameter'}
         </div>
-      </div> */}
+      </div>
 
-      {/* {activeTab && (
-        <>
-          <div className="title-header">Layer Controls</div>
+      {/* {activeTab && ( */}
+      <>
+        <div className="title-header">Layer Controls</div>
 
-          <h4>Opacity Settings</h4>
-          <form>
-            <label>
-              <input
-                id="imageOpacity"
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={opacity}
-                onChange={onHandleOpacuty}
-                disabled={overlayStatus === true ? false : true}
-              />
-            </label>
+        <h4>Opacity Settings</h4>
+        <form>
+          <label>
+            <input
+              id="imageOpacity"
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={opacity}
+              onChange={onHandleOpacuty}
+              disabled={overlayStatus === true ? false : true}
+            />
+          </label>
 
-            <h4>Color Maps</h4>
-            <label>
-              <select
-                id="colormaps"
-                className="select-container"
-                onChange={onHandleColorChange}
-                value={colorMap}
-                disabled={overlayStatus === true ? false : true}
-              >
-                {colors.map((color, index) => (
-                  <option key={index} value={color.id}>
-                    {color.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </form>
-        </>
-      )} */}
+          <h4>Color Maps</h4>
+          <label>
+            <select
+              id="colormaps"
+              className="select-container"
+              onChange={onHandleColorChange}
+              value={colorMap}
+              disabled={overlayStatus === true ? false : true}
+            >
+              {colors.map((color, index) => (
+                <option key={index} value={color.id}>
+                  {color.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </form>
+      </>
+      {/* )} */}
 
       {Object.keys(toolData).length > 0 && (
         <div>
