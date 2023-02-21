@@ -4,7 +4,6 @@ import { _3DSegmentationApiClass } from './3DApi';
 import Plot from 'react-plotly.js';
 import * as Plotly from 'plotly.js';
 import debounce from 'lodash.debounce';
-import './3d.css';
 
 class Morphology3DComponent extends React.Component {
   constructor(props) {
@@ -26,6 +25,7 @@ class Morphology3DComponent extends React.Component {
     // Function binds
     this.getImage = this.getImage.bind(this);
     this.changeProperty = this.changeProperty.bind(this);
+    this.get3DShot = this.get3DShot.bind(this);
     this.changeSegmentationLabel = this.changeSegmentationLabel.bind(this);
     this.loadSegmentations = this.loadSegmentations.bind(this);
     this.load3DData = this.load3DData.bind(this);
@@ -37,6 +37,15 @@ class Morphology3DComponent extends React.Component {
     this.setState({ series_uid });
     await this.loadSegmentations(series_uid);
     this.setState({ loadingApp: false });
+    /**
+     * 1. is label from segmentation?  ^^
+     * 2. How to select segmentation label   ^^
+     * 3. Drop down to select the label ^^
+     * 4. The background of plotly ^^
+     * 5. An error boundary for the 3D ^^
+     * 6. Cache the response for the label
+     * 7. Cache implement for response
+     */
   }
 
   async componentDidUpdate(_, state) {
@@ -69,9 +78,9 @@ class Morphology3DComponent extends React.Component {
         series_uid
       );
       this.setState({ segmentationLabels });
-      const currentSegmentationLabel = segmentationLabels[1];
-      this.setState({ currentSegmentationLabel: segmentationLabels[1] });
-      // await this.load3DData(currentSegmentationLabel, series_uid);
+      const currentSegmentationLabel = segmentationLabels[0];
+      this.setState({ currentSegmentationLabel: segmentationLabels[0] });
+      await this.load3DData(currentSegmentationLabel, series_uid);
     } catch (error) {
       // handle getting segmentation error
     }
@@ -109,6 +118,10 @@ class Morphology3DComponent extends React.Component {
     this.setState({ currentSegmentationLabel: selectedSegmentationLabel });
   }
 
+  get3DShot() {
+    // implementation
+  }
+
   async getImage() {
     const customScene = this.graphRef.current.el.layout.scene;
 
@@ -125,6 +138,13 @@ class Morphology3DComponent extends React.Component {
       height: 600,
     });
 
+    // const localImageUrl = window.URL.createObjectURL(
+    //   new Blob([response], { type: 'application/zip' })
+    // );
+    console.log('localImageUrl');
+    console.log(response);
+    console.log('localImageUrl----');
+
     localStorage.setItem(
       'print-chart',
       JSON.stringify({
@@ -135,6 +155,14 @@ class Morphology3DComponent extends React.Component {
     this.setState({
       currentImage: response,
     });
+
+    // then(function(base64Str) {
+    //   // if (this.state.currentImage)
+    //   //   window.URL.revokeObjectURL(this.state.currentImage);
+
+    //   // document.getElementById('jpg-export').src = base64Str;
+    //   // return base64Str;
+    // });
   }
 
   onPlotlyUpdate = figure => {
@@ -161,19 +189,65 @@ class Morphology3DComponent extends React.Component {
     );
 
     return (
-      <section className="morphology-section">
-        <h1 className="morphology-heading">3D Morphology</h1>
+      <section
+        style={{
+          width: '95vw',
+          height: '100%',
+          padding: '20px',
+          borderRadius: '8px',
+          background: '#000000',
+        }}
+      >
+        <h1
+          style={{
+            textAlign: 'left',
+            margin: 0,
+          }}
+        >
+          3D Morphology
+        </h1>
         {this.state.loadingApp ? (
           <TextContainer title="Loading 3D Morphology Component. . ." />
         ) : (
           <>
-            <nav className="hide-on-print morphology-nav">
-              <div className="morphology-tab-container">
+            <nav
+              className="hide-on-print"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                width: '100%',
+                overflowX: 'hidden',
+                margin: '30px 0px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  columnGap: '10px',
+                  width: 'fit-content',
+                  alignItems: 'center',
+                }}
+              >
                 {tabs.map(tab => (
                   <div
-                    className={`morphology-tab ${
-                      this.state.currentProperty === tab ? 'active' : ''
-                    }`}
+                    style={{
+                      padding: '9px 15px',
+                      color: `${
+                        this.state.currentProperty === tab
+                          ? '#00a4d9'
+                          : '#6D6E72'
+                      }`,
+                      fontSize: '16px',
+                      borderRadius: '50px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      backgroundColor:
+                        this.state.currentProperty === tab
+                          ? 'rgb(26, 28, 33)'
+                          : 'transparent',
+                    }}
                     onClick={this.changeProperty.bind(this, tab)}
                     key={tab}
                   >
@@ -181,9 +255,22 @@ class Morphology3DComponent extends React.Component {
                   </div>
                 ))}
               </div>
-              <div className="morphology-select-container">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  rowGap: '10px',
+                  justifyContent: 'start',
+                }}
+              >
                 <select
-                  className="morphology-select"
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '13px',
+                    fontSize: '15px',
+                    backgroundColor: 'rgb(26, 28, 33)',
+                    color: '#fff',
+                  }}
                   id="segmentation_labels"
                   name="SegmentationLabels"
                   onChange={this.changeSegmentationLabel}
@@ -197,21 +284,31 @@ class Morphology3DComponent extends React.Component {
                   ))}
                 </select>
                 <label
-                  className="morphology-select-label"
+                  style={{
+                    fontSize: '15px',
+                    color: '#a8a8a8',
+                    fontStyle: 'bold',
+                  }}
                   htmlFor="segmentation_labels"
                 >
                   Segmentation Label
                 </label>
               </div>
             </nav>
-            <div className="hide-on-print morphology-plot-container">
+            <div
+              className="hide-on-print"
+              style={{ width: '90%', height: '600px' }}
+            >
               {this.state.loadingGraph ? (
                 <TextContainer title="Loading 3D. . ." />
               ) : !this.state.loadingGraph && this.state.segmentationError ? (
                 <TextContainer title={this.state.segmentationError} />
               ) : (
                 <Plot
-                  className="morphology-plot"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
                   data={[
                     {
                       ...this.state.graph,

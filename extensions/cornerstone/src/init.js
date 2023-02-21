@@ -4,6 +4,7 @@ import cornerstone from 'cornerstone-core';
 import csTools from 'cornerstone-tools';
 import merge from 'lodash.merge';
 import initCornerstoneTools from './initCornerstoneTools.js';
+// import SquareRoiTool from './tools/SquareRoiTool.js';
 import measurementServiceMappingsFactory from './utils/measurementServiceMappings/measurementServiceMappingsFactory';
 
 /**
@@ -106,7 +107,7 @@ export default function init({ servicesManager, configuration }) {
     // from the supported configuration properties in `cornerstone-tools`
     const toolsWithHideableHandles = annotations.filter(
       tool =>
-        !['RectangleRoiTool', 'EllipticalRoiTool'].includes(
+        !['RectangleRoiTool', 'SquareRoiTool', 'EllipticalRoiTool'].includes(
           tool.name
         )
     );

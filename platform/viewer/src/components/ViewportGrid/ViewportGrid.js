@@ -33,6 +33,7 @@ import { useLocation } from 'react-router';
 import { radcadapi } from '../../utils/constants';
 import { JobsContext } from '../../context/JobsContext';
 import { servicesManager } from '../../App';
+const { UINotificationService } = servicesManager.services;
 
 const { loadAndCacheDerivedDisplaySets, studyMetadataManager } = utils;
 
@@ -82,7 +83,6 @@ const ViewportGrid = function(props) {
   );
 
   const [fetchedSegmentations, setFetchedSegmentations] = useState('idle');
-  const { UINotificationService } = servicesManager.services;
 
   const removeSegments = () => {
     const view_ports = cornerstone.getEnabledElements();
@@ -146,21 +146,8 @@ const ViewportGrid = function(props) {
 
   useEffect(() => {
     localStorage.setItem('fetchsegments', JSON.stringify(0));
-
-    //  storing this for series used nnunet api call, currently pass via redux series is null -- fix redux and use redux implementation
-    // localStorage.setItem('isSegmentLoaded', JSON.stringify(1));
-
-    // eventBus.on('importSegmentations', data => {
-    //   console.log('importSegmentations');
-    //   // throttledSearch();
-    //   // if (!fetchedSegmentations) onImportButtonClick();
-    //   // setFetchedSegmentations(false);
-    // });
     return () => {
-      //  use localstorage to avoid duplicate segmentations issue 0 for false 1 for true
-      // localStorage.setItem('isSegmentLoaded', JSON.stringify(0));
-      // removeSegments();
-      // eventBus.remove('importSegmentations');
+      removeSegments();
     };
   }, []);
 
