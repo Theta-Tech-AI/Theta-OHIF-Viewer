@@ -29,9 +29,11 @@ const getPixelSpacing = importInternal('util/getPixelSpacing');
 const getLogger = importInternal('util/getLogger');
 const { rectangleRoiCursor } = importInternal('tools/cursors');
 
-// import { rectangleRoiCursor } from '../cursors/index.js';
-
 const logger = getLogger('tools:annotation:RectangleRoiTool');
+
+export function clip(val, low, high) {
+  return Math.min(Math.max(low, val), high);
+}
 
 /**
  * @public
@@ -52,7 +54,7 @@ export default class SquareRoiTool extends BaseAnnotationTool {
         hideHandlesIfMoving: false,
         renderDashed: false,
         showMinMax: false,
-        showHounsfieldUnits: true
+        showHounsfieldUnits: true,
       },
       svgCursor: rectangleRoiCursor,
     };
@@ -60,6 +62,98 @@ export default class SquareRoiTool extends BaseAnnotationTool {
     super(props, defaultProps);
 
     this.throttledUpdateCachedStats = throttle(this.updateCachedStats, 110);
+  }
+
+  convertToSquare(data) {
+    const start = data.handles.start;
+    const end = data.handles.end;
+
+    const width = Math.abs(end.x - start.x);
+    const height = Math.abs(end.y - start.y);
+
+    // Determine the side length of the square based on the longest side of the rectangle
+    const sideLength = Math.max(width, height);
+
+    // Update the end handle to create a square
+    end.x = start.x < end.x ? start.x + sideLength : start.x - sideLength;
+    end.y = start.y < end.y ? start.y + sideLength : start.y - sideLength;
+
+    // Invalidate the data so that the cached stats will be updated
+    data.invalidated = true;
+  }
+
+  handleSelected(element, data, coords, interactionType) {
+    // Call the convertToSquare method to convert the rectangle to a square
+    this.convertToSquare(data);
+
+    // Redraw the tool
+    cornerstone.updateImage(element);
+  }
+
+  handleDragCallback(evt, toolData, handle) {
+    const data = toolData.data;
+    const eventData = evt.detail;
+
+    // Get current and opposite handles
+    const currentHandle = data.handles[handle];
+    const oppositeHandle = data.handles.opposite;
+
+    // Ensure we have current and opposite handles
+    if (!currentHandle || !oppositeHandle) {
+      return;
+    }
+
+    // Calculate square dimensions from drag event
+    const dx = Math.abs(currentHandle.x - oppositeHandle.x);
+    const dy = Math.abs(currentHandle.y - oppositeHandle.y);
+    const squareSide = Math.max(dx, dy);
+
+    // Update end handle to ensure square ROI
+    data.handles.end.x = data.handles.start.x + squareSide;
+    data.handles.end.y = data.handles.start.y + squareSide;
+  }
+
+  _dragCallback(evt, fixedHandle) {
+    const eventData = evt.detail;
+    const { element, image } = eventData;
+    const cornerstone = cornerstone;
+    const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
+
+    const canvasCoords = cornerstone.pixelToCanvas(
+      element,
+      eventData.currentPoints.image
+    );
+
+    const currentHandle = this.handles[this._moving];
+
+    currentHandle.x = eventData.currentPoints.image.x;
+    currentHandle.y = eventData.currentPoints.image.y;
+
+    const dx = fixedHandle.x - currentHandle.x;
+    const dy = fixedHandle.y - currentHandle.y;
+    const d = Math.sqrt(dx * dx + dy * dy);
+
+    // Calculate the difference in pixel spacing (if available)
+    const rowSpacing = rowPixelSpacing || 1;
+    const colSpacing = colPixelSpacing || 1;
+
+    // Use the maximum of the two differences as the new side length
+    const newSideLength = Math.max(
+      Math.abs(dx * colSpacing),
+      Math.abs(dy * rowSpacing)
+    );
+
+    // Calculate the new end handle coordinates based on the new side length
+    currentHandle.x =
+      fixedHandle.x - Math.sign(dx) * (newSideLength / colSpacing);
+    currentHandle.y =
+      fixedHandle.y - Math.sign(dy) * (newSideLength / rowSpacing);
+
+    // Clamp the handle coordinates to the image dimensions
+    currentHandle.x = clip(currentHandle.x, 0, image.width - 1);
+    currentHandle.y = clip(currentHandle.y, 0, image.height - 1);
+
+    cornerstone.updateImage(element);
   }
 
   createNewMeasurement(eventData) {
@@ -74,21 +168,24 @@ export default class SquareRoiTool extends BaseAnnotationTool {
       return;
     }
 
-    return {
+    const initialCoords = {
+      x: eventData.currentPoints.image.x,
+      y: eventData.currentPoints.image.y,
+    };
+
+    const newMeasurement = {
       visible: true,
       active: true,
       color: undefined,
       invalidated: true,
       handles: {
         start: {
-          x: eventData.currentPoints.image.x,
-          y: eventData.currentPoints.image.y,
+          ...initialCoords,
           highlight: true,
           active: false,
         },
         end: {
-          x: eventData.currentPoints.image.x,
-          y: eventData.currentPoints.image.y,
+          ...initialCoords,
           highlight: true,
           active: true,
         },
@@ -103,6 +200,9 @@ export default class SquareRoiTool extends BaseAnnotationTool {
         },
       },
     };
+    // this.convertToSquare(newMeasurement);
+
+    return newMeasurement;
   }
 
   pointNearTool(element, data, coords, interactionType) {
@@ -133,7 +233,16 @@ export default class SquareRoiTool extends BaseAnnotationTool {
 
     const distanceToPoint = cornerstoneMath.rect.distanceToPoint(rect, coords);
 
-    return distanceToPoint < distance;
+    // return distanceToPoint < distance;
+    // Check if the point is near the tool
+    const isNearTool = distanceToPoint < distance;
+
+    // If the point is near the tool, call the handleSelected method
+    if (isNearTool) {
+      this.handleSelected(element, data, coords, interactionType);
+    }
+
+    return isNearTool;
   }
 
   updateCachedStats(image, element, data) {
@@ -211,6 +320,7 @@ export default class SquareRoiTool extends BaseAnnotationTool {
 
         // Draw
         drawSquare(
+          // drawRect(
           context,
           element,
           data.handles.start,

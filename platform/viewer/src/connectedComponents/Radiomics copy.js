@@ -329,7 +329,7 @@ class Radiomics extends Component {
         const result = await response.json();
         return result.series;
       } catch (error) {
-        console.error('fetcheSeries caught', { error });
+        console.log('fetcheSeries caught', { error });
         return [];
       }
     })();

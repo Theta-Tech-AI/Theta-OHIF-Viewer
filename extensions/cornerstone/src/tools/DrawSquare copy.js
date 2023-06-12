@@ -60,7 +60,6 @@ export default function(
   initialRotation = 0.0
 ) {
   if (coordSystem === 'pixel') {
-
     corner1 = pixelToCanvas(element, corner1);
     corner2 = pixelToCanvas(element, corner2);
   }
@@ -81,28 +80,29 @@ export default function(
     corner1 = rotatePoint(corner1, centerPoint, -rotation);
     corner2 = rotatePoint(corner2, centerPoint, -rotation);
   }
+
   const w = Math.abs(corner1.x - corner2.x);
   const h = Math.abs(corner1.y - corner2.y);
-  const sideLength = Math.min(w, h);
+  const size = Math.min(w, h);
 
   corner1 = {
-    x: Math.min(corner1.x, corner2.x),
-    y: Math.min(corner1.y, corner2.y),
+    x: Math.min(corner1.x, corner2.x) + (w - size) / 2,
+    y: Math.min(corner1.y, corner2.y) + (h - size) / 2,
   };
 
   corner2 = {
-    x: corner1.x + sideLength,
-    y: corner1.y + sideLength,
+    x: corner1.x + size,
+    y: corner1.y + size,
   };
 
   let corner3 = {
-    x: corner1.x + sideLength,
+    x: corner1.x + size,
     y: corner1.y,
   };
 
   let corner4 = {
     x: corner1.x,
-    y: corner1.y + sideLength,
+    y: corner1.y + size,
   };
 
   if (Math.abs(rotation) > 0.05) {

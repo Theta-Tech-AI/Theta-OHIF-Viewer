@@ -147,10 +147,24 @@ class OHIFStandaloneViewer extends Component {
           />
           <Route path="/" render={() => <LoginPage />} />
           <Route
-            component={() => {
+            // component={() => {
+            //   userManager.getUser().then(user => {
+            //     if (user) {
+            //       userManager.signinSilent();
+            //     } else {
+            //       userManager.signinRedirect();
+            //     }
+            //   });
+
+            //   return null;
+            // }}
+            render={() => {
               userManager.getUser().then(user => {
                 if (user) {
-                  userManager.signinSilent();
+                  userManager.signinSilent().catch(error => {
+                      ('Silent login failed', error);
+                    userManager.signinRedirect();
+                  });
                 } else {
                   userManager.signinRedirect();
                 }
@@ -163,12 +177,6 @@ class OHIFStandaloneViewer extends Component {
       );
     }
 
-    /**
-     * Note: this approach for routing is caused by the conflict between
-     * react-transition-group and react-router's <Switch> component.
-     *
-     * See http://reactcommunity.org/react-transition-group/with-react-router/
-     */
     const routes = [
       {
         exact: true,
