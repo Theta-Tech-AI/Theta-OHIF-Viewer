@@ -71,7 +71,7 @@ function StudyListRoute(props) {
   );
   // ~~ DEBOUNCED INPUT
   const debouncedSort = useDebounce(sort, 200);
-  const debouncedFilters = useDebounce(filterValues, 400);
+  const debouncedFilters = useDebounce(filterValues, 600);
 
   // Google Cloud Adapter for DICOM Store Picking
   const { appConfig = {} } = appContext;
