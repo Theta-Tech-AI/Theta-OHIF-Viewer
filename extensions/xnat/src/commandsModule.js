@@ -15,7 +15,7 @@ const refreshCornerstoneViewports = () => {
   });
 };
 
-const getEnabledElement = (activeIndex) => {
+const getEnabledElement = activeIndex => {
   const enabledElements = cornerstone.getEnabledElements();
   return enabledElements[activeIndex].element;
 };
@@ -39,7 +39,9 @@ const actions = {
     }
 
     let imageIdIndices = [];
-    const { undo, redo, labelmaps2D } = segmentationModule.getters.labelmap3D(enabledElement);
+    const { undo, redo, labelmaps2D } = segmentationModule.getters.labelmap3D(
+      enabledElement
+    );
     if (operation === 'undo' && undo.length) {
       undo[undo.length - 1].forEach(item =>
         imageIdIndices.push(item.imageIdIndex)
@@ -155,16 +157,16 @@ const definitions = {
     storeContexts: [],
     options: { evt: null },
   },
-  undo: {
-    commandFn: actions.brushUndoRedo,
-    storeContexts: ['viewports'],
-    options: { operation: 'undo' },
-  },
-  redo: {
-    commandFn: actions.brushUndoRedo,
-    storeContexts: ['viewports'],
-    options: { operation: 'redo' },
-  },
+  // undo: {
+  //   commandFn: actions.brushUndoRedo,
+  //   storeContexts: ['viewports'],
+  //   options: { operation: 'undo' },
+  // },
+  // redo: {
+  //   commandFn: actions.brushUndoRedo,
+  //   storeContexts: ['viewports'],
+  //   options: { operation: 'redo' },
+  // },
 };
 
 export default {
