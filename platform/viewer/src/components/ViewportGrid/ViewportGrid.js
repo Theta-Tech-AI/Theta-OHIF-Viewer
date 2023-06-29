@@ -49,10 +49,9 @@ export const RenderLoadingModal = () => {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
+        zIndex: 7,
       }}
     >
-      {/* <RenderLoadingIcon size={70} /> */}
       <div
         style={{
           color: 'white',
@@ -244,19 +243,19 @@ const ViewportGrid = function(props) {
       rows,
       columns,
     };
-    if (
-      location.pathname.includes('/edit')
-      // location.pathname.includes('/radionics')
-    )
-      targeDiv.addEventListener('mouseup', handleDragEnd);
+    // if (
+    //   location.pathname.includes('/edit')
+    //   // location.pathname.includes('/radionics')
+    // )
+    //   targeDiv.addEventListener('mouseup', handleDragEnd);
 
     return () => {
-      if (
-        location.pathname.includes('/edit')
-        // location.pathname.includes('/selectmask')
-        // ||location.pathname.includes('/radionics')
-      )
-        targeDiv.removeEventListener('mouseup', handleDragEnd);
+      // if (
+      //   location.pathname.includes('/edit')
+      //   // location.pathname.includes('/selectmask')
+      //   // ||location.pathname.includes('/radionics')
+      // )
+      //   targeDiv.removeEventListener('mouseup', handleDragEnd);
     };
   }, [activeViewportIndex]);
 
@@ -374,7 +373,7 @@ const ViewportGrid = function(props) {
 
   useEffect(() => {
     eventBus.on('brushUndoRedo', data => {
-      handleDragEnd({});
+      // handleDragEnd({});
     });
     // clean up eventbus
     return () => {
@@ -464,10 +463,11 @@ const ViewportGrid = function(props) {
             body: JSON.stringify(body),
           };
 
-          let response = await fetch(
-            `${radcadapi}/segmentations`,
-            requestOptions
-          );
+          // let response = await fetch(
+          //   `${radcadapi}/segmentations`,
+          //   requestOptions
+          // );
+          let response = {};
 
           UINotificationService.show({
             title: 'Segment saved successfully',
@@ -475,7 +475,7 @@ const ViewportGrid = function(props) {
             autoClose: true,
           });
           setLoading(true);
-          response = await response.json();
+          // response = await response.json();
           setLoading(false);
           console.log({ saveddata: response });
           // updateAndSaveLocalSegmentations(body);
