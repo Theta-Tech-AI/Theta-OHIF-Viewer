@@ -195,6 +195,7 @@ const JobParameters = props => {
       },
       body: JSON.stringify(body),
     };
+    // sample
 
     fetch(`${radcadapi}/texture`, requestOptions)
       .then(r => r.json().then(data => ({ status: r.status, data: data })))
