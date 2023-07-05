@@ -33,6 +33,7 @@ import { BrainMode, radcadapi } from '../../utils/constants';
 import { JobsContext } from '../../context/JobsContext';
 import { servicesManager } from '../../App';
 import eventBus from '../../lib/eventBus';
+import { useCacheMonitor } from '../../customHooks/useCacheMonitor';
 const { UINotificationService } = servicesManager.services;
 
 const { loadAndCacheDerivedDisplaySets, studyMetadataManager } = utils;
@@ -92,6 +93,7 @@ const ViewportGrid = function(props) {
     return null;
   }
   const location = useLocation();
+  useCacheMonitor();
 
   const snackbar = useSnackbarContext();
   const logger = useLogger();
