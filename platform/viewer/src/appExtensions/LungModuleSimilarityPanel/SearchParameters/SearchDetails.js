@@ -376,11 +376,11 @@ const SearchDetails = props => {
 
       console.log({ response, jobId, instance_uid, email });
       if (jobId) {
-        let currJob;
-        if (response.results.length > 0) currJob = response.results[0];
-        // const currJob = response.results.find(result => {
-        //   return result.job_id === jobId;
-        // });
+        // let currJob;
+        // if (response.results.length > 0) currJob = response.results[0];
+        const currJob = response.results.find(result => {
+          return result.job_id === jobId;
+        });
         console.log({ currJob });
 
         if (currJob && currJob.status === 'DONE') {
