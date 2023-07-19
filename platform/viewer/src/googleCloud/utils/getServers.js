@@ -23,7 +23,7 @@ const getServers = (data, name) => {
       wadoUriRoot,
       qidoRoot,
       wadoRoot,
-      supportsFuzzyMatching: false,
+      supportsFuzzyMatching: true,
       qidoSupportsIncludeField: false,
     },
   ];
