@@ -139,134 +139,7 @@ function createPdfStructure(
   };
 }
 
-function createLeftColumns(
-  percentage,
-  dataset,
-  datasetId,
-  isMalignant,
-  imageDataUrl9,
-  imageDataUrl3
-) {
-  return {
-    columns: [
-      {
-        width: 'auto',
-        style: 'smallImg',
-        stack: [
-          {
-            stack: [
-              {
-                canvas: [
-                  {
-                    type: 'rect',
-                    x: 0,
-                    y: 0,
-                    w: 100,
-                    h: 122,
-                    lineWidth: 1,
-                    lineColor: 'blue',
-                  },
-                ],
-              },
-              {
-                image: imageDataUrl3,
-                width: 98,
-                height: 72,
-                margin: [1, -121, 0, 20],
-              },
-              {
-                margin: [10, -13, 0, 20],
-                stack: [
-                  {
-                    columnGap: 0,
-                    columns: [
-                      { text: '0' + dataset, bold: true },
-                      {
-                        margin: [-30, 0, 0, 0],
-                        stack: [
-                          {
-                            columns: [
-                              {
-                                text: 'Similarity:',
-                                bold: true,
-                                fontSize: 8,
-                              },
-                              {
-                                text: `${percentage}%`,
-                                fontSize: 8,
-                                margin: [0, 0, 0, 0],
-                              },
-                            ],
-                          },
-                          {
-                            columns: [
-                              {
-                                text: 'Dataset:',
-                                fontSize: 8,
-                                bold: true,
-                              },
-                              {
-                                text: dataset,
-                                fontSize: 8,
-                                margin: [0, 0, 0, 0],
-                              },
-                            ],
-                          },
-                          {
-                            columns: [
-                              {
-                                text: 'Dataset Id:',
-                                fontSize: 8,
-                                bold: true,
-                                margin: [-1, 0, 0, 0],
-                              },
-                              {
-                                text: datasetId,
-                                fontSize: 8,
-                                margin: [3, 0, 0, 0],
-                              },
-                            ],
-                          },
-                          {
-                            columns: [
-                              {
-                                text: 'Malignant:',
-                                bold: true,
-                                fontSize: 8,
-                              },
-                              {
-                                text: isMalignant ? 'Yes' : 'No',
-                                color: isMalignant ? 'red' : 'blue',
-                                fontSize: 8,
-                                margin: [2, 0, 0, 0],
-                              },
-                            ],
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        stack: [
-          {
-            image: imageDataUrl9,
-            width: 130,
-            height: 120,
-          },
-        ],
-        margin: [5, 0, 5, 0],
-      },
-    ],
-  };
-}
-
-function createRightColumns(
+function createSimilarScansSection(
   similarity,
   dataset,
   datasetId,
@@ -391,18 +264,6 @@ function createRightColumns(
       },
     ],
   };
-}
-
-function createSimilarScansSection(
-  similarity,
-  dataset,
-  datasetId,
-  malignant,
-  originalQueryImg,
-  scanImg,
-  scanLargeImg
-) {
-  return {};
 }
 
 function createReportSummaryTable(
@@ -563,32 +424,6 @@ function createMorphologyHeader() {
   };
 }
 
-function createCollageRadiomicsHeader() {
-  return {
-    table: {
-      widths: ['25%', '72%'],
-      body: [
-        [
-          {
-            text: 'Collage Radiomics',
-            style: 'jumbotronHeader',
-            colSpan: 2,
-          },
-          {},
-        ],
-      ],
-    },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    },
-    style: 'jumbotron',
-    margin: [0, 30, 0, 20],
-  };
-}
-
 const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
   let contents = [];
   let contents3 = null;
@@ -627,7 +462,7 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
     const isEvenIndex = index % 2 === 0;
     if (isEvenIndex) {
       contents2.push(
-        createRightColumns(
+        createSimilarScansSection(
           data.similarity_score,
           index + 1,
           data.data_id,
@@ -639,7 +474,7 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
       );
     } else {
       contents2.push(
-        createRightColumns(
+        createSimilarScansSection(
           data.similarity_score,
           index + 1,
           data.data_id,
@@ -726,7 +561,7 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
       },
       {
         text:
-          'The Nodify XL2 test is a blood-based lung nodule test designed to help identify low to moderate risk patients with an incidental lung nodule that is likely benign. The test integrates two circulating proteins measured by mass spectrometry with clinical risk factors associated with lung cancer into a proprietary algorithm that generates a numerical test result. The Nodify XL2 test is intended for patients at least 40 years of age with an incidental lung nodule between 8 and 30mm and a pre-test risk of malignancy of 50% or less calculated using the solitary pulmonary nodule calculator!. Nodify XL2 was developed and clinically validated in a population with a prevalence of cancer of 16%23. The Nodify XL2 test has not been evaluated outside of this population.',
+          'The report is produced by utilizing ResNet models for the classification of lung nodules, with the primary objective of identifying instances with malignant characteristics. The outcomes delineate scans that bear resemblance, particularly those exhibiting malignant indentations, along with their corresponding prediction numbers and unique identification identifiers for each analogous scan.        ',
         fontSize: 7,
         width: 200,
         margin: [0, 5, 0, 0],
