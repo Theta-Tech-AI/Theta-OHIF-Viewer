@@ -316,20 +316,15 @@ class Radiomics extends Component {
     });
 
     eventBus.on('fetchscans', data => {
-      console.log({
-        fetchscans: data,
-      });
-
-      try {
-        if (similarityResultState.knn.length > 1) {
-          this.setState({
-            isSimilarlookingScans: true,
-          });
-        }
-      } catch (error) {}
+      // try {
+      //   if (similarityResultState.knn.length > 1) {
+      //     this.setState({});
+      //   }
+      // } catch (error) {}
 
       this.setState({
         similarityResultState: data,
+        isSimilarlookingScans: true,
       });
     });
     eventBus.on('jobstatus', data => {
@@ -353,6 +348,7 @@ class Radiomics extends Component {
       // handleRestoreToolState(cornerstone, enabledElement, instance_uid);
       eventBus.dispatch('completeLoadingState', {});
       eventBus.dispatch('completeLoadingState', {});
+      this.triggerReload();
     } catch (error) {
       console.log(error);
       eventBus.dispatch('completeLoadingState', {});
@@ -380,8 +376,6 @@ class Radiomics extends Component {
 
       this.handleSidePanelChange('right', 'theta-details-panel');
       this.handleSidePanelChange('left', 'lung-module-similarity-panel');
-
-      this.triggerReload();
     }, 2000);
 
     setTimeout(() => {
@@ -740,9 +734,15 @@ class Radiomics extends Component {
                     background: 'transparent',
                   }}
                 >
-                  <div>
-                    <b>Running Collage Job {this.state.job.data.job}</b>
-                  </div>
+                  {this.state.job.data.status != 'DONE' ? (
+                    <div>
+                      <b>Running Collage Job {this.state.job.data.job}</b>
+                    </div>
+                  ) : (
+                    <div>
+                      <b>Getting Similar looking Scans </b>
+                    </div>
+                  )}
                   {/* Not the best way to go about this */}
                   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
                   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
@@ -758,20 +758,26 @@ class Radiomics extends Component {
                       <FontAwesomeIcon icon={faSpinner} />
                     )}
                     {this.state.job.data.status === 'ERROR' && (
-                      <FontAwesomeIcon
-                        icon={faExclamationTriangle}
-                        // onClick={showError}
-                      />
+                      <FontAwesomeIcon icon={faExclamationTriangle} />
                     )}
-                    {this.state.job.data.status === 'DONE' && (
-                      <FontAwesomeIcon icon={faCheckCircle} />
-                    )}
+
+                    {this.state.job.data.status === 'DONE' &&
+                      !this.state.isSimilarlookingScans && (
+                        <div>
+                          <FontAwesomeIcon icon={faRunning} />
+                        </div>
+                      )}
+
+                    {this.state.job.data.status === 'DONE' &&
+                      this.state.isSimilarlookingScans && (
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                      )}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            <p
+            <div
               style={{
                 color: 'white',
                 fontSize: '40px',
@@ -781,8 +787,35 @@ class Radiomics extends Component {
                 alignItems: 'center',
               }}
             >
-              Loading...
-            </p>
+              <div
+                style={{
+                  fontSize: '40px',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  className="accordion-title"
+                  style={{
+                    background: 'transparent',
+                  }}
+                >
+                  <div>
+                    <b>Fetching Data  </b>
+                  </div>
+                  {/* Not the best way to go about this */}
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  <div>
+                    <div>
+                      <FontAwesomeIcon icon={faSpinner} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
