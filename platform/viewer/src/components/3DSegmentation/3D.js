@@ -182,8 +182,8 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
           >
             3D Morphology
           </h1>
-
-          <div>
+            <div style={{display: 'flex', gap: 34, marginTop: 15, flexDirection: 'row'}}>
+            <div>
             <label htmlFor="segmentationLabel">Segmentation Label: </label>
             <select
               style={{
@@ -205,14 +205,7 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
               ))}
             </select>
           </div>
-          {segmentationError ? (
-            <p>Error: {segmentationError}</p>
-          ) : loadingGraph ? (
-            // <p>Loading segmentation data...</p>
-            <RenderLoadingModal />
-          ) : (
-            <>
-              <div>
+          <div>
                 <label htmlFor="property">Property: </label>
                 <select
                   style={{
@@ -233,7 +226,15 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
                     </option>
                   ))}
                 </select>
-              </div>
+          </div>
+            </div> 
+          {segmentationError ? (
+            <p>Error: {segmentationError}</p>
+          ) : loadingGraph ? (
+            // <p>Loading segmentation data...</p>
+            <RenderLoadingModal />
+          ) : (
+            <>
               <div>
                 <Plot
                   //  style={{
