@@ -18,10 +18,13 @@ import {
 } from '../../../../../platform/viewer/src/appExtensions/LungModuleSimilarityPanel/utils';
 import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { setItem } from '@ohif/viewer/src/lib/localStorageUtils';
+import Worker from './segments.worker';
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
 class XNATSegmentationExportMenu extends React.Component {
+  worker = new Worker();
+
   constructor(props = {}) {
     super(props);
 
@@ -35,6 +38,16 @@ class XNATSegmentationExportMenu extends React.Component {
       dateTime,
       exporting: false,
     };
+    this.worker.onmessage = event => {
+      this.setState({
+        exporting: false,
+      });
+      this.props.onExportCancel();
+    };
+  }
+
+  componentWillUnmount() {
+    this.worker.terminate();
   }
 
   componentDidMount() {
@@ -159,23 +172,9 @@ class XNATSegmentationExportMenu extends React.Component {
           body: JSON.stringify(body),
         };
 
-        let response = await fetch(
-          `${radcadapi}/segmentations`,
-          requestOptions
-        );
+        this.worker.postMessage(requestOptions);
 
-        response = await response.json();
-
-        // await client
-        //   .put(`/segmentations`, body)
-        //   .then(async response => {
-        //     console.log({ response });
-        //     this.updateAndSaveLocalSegmentations(body);
-        res({ response });
-        //   })
-        //   .catch(error => {
-        //     console.log(error);
-        //   });
+        res({});
       } catch (error) {
         console.log({ error });
       }
@@ -183,81 +182,73 @@ class XNATSegmentationExportMenu extends React.Component {
   }
 
   async saveExportations({ element, segList }) {
-    return new Promise(async (res, rej) => {
-      console.log({ segList });
-      const imagePlaneModule =
-        cornerstone.metaData.get('imagePlaneModule', this.props.firstImageId) ||
-        {};
-      const { rows, columns } = imagePlaneModule;
-      const numSlices = this.props.viewport.viewportSpecificData['0']
-        .numImageFrames;
-      const labelmap2D = segmentationModule.getters.labelmap2D(element);
-      const shape = {
-        slices: numSlices,
-        rows: rows,
-        cols: columns,
-      };
+    // return new Promise(async (res, rej) => {
+    console.log({ segList });
+    const imagePlaneModule =
+      cornerstone.metaData.get('imagePlaneModule', this.props.firstImageId) ||
+      {};
+    const { rows, columns } = imagePlaneModule;
+    const numSlices = this.props.viewport.viewportSpecificData['0']
+      .numImageFrames;
+    const labelmap2D = segmentationModule.getters.labelmap2D(element);
+    const shape = {
+      slices: numSlices,
+      rows: rows,
+      cols: columns,
+    };
 
-      //improvement: we dont need to flatten the data do we?
-      const segArray = getSegArray({
-        segmentations: labelmap2D.labelmap3D.labelmaps2D,
-        numSlices,
-        rows,
-        columns,
-      });
-      console.log({ segArray });
-
-      const segmentations = {};
-
-      const asyncSaveSegs = segList.map((item, index) => {
-        return () =>
-          new Promise(async (resolve, reject) => {
-            console.warn('asyncSaveSegs', { item, index });
-
-            const splitSegArray = getSplitSegArray({
-              flatSegmentationArray: segArray,
-              index: item.index,
-            });
-
-            console.log({
-              item,
-              index,
-              splitSegArray,
-            });
-
-            const compressedSeg = await compressSeg(splitSegArray);
-            console.log({
-              compressedSeg,
-            });
-
-            const response = await this.saveSegmentation({
-              segmentation: compressedSeg,
-              label: item.metadata.SegmentLabel,
-              shape,
-            });
-            console.log({
-              response,
-            });
-
-            resolve(response);
-          });
-      });
-
-      console.log({ asyncSaveSegs });
-      console.log({ segmentations });
-
-      const resList = [];
-
-      for (const fn of asyncSaveSegs) {
-        const response = await fn();
-        resList.push(response);
-      }
-
-      console.warn({ resList });
-      res({
-        ['exportation complete']: resList,
-      });
+    this.worker.postMessage({
+      segList: segList,
+      labelmap2D: labelmap2D,
+      numSlices: numSlices,
+      rows: rows,
+      columns: columns,
+      shape,
+      series_uid: this.props.viewport.viewportSpecificData[0].SeriesInstanceUID,
+      email: this.props.user.profile.email,
     });
+
+    // //improvement: we dont need to flatten the data do we?
+    // const segArray = getSegArray({
+    //   segmentations: labelmap2D.labelmap3D.labelmaps2D,
+    //   numSlices,
+    //   rows,
+    //   columns,
+    // });
+    // console.log({ segArray });
+
+    // const segmentations = {};
+
+    // const asyncSaveSegs = segList.map((item, index) => {
+    //   return () =>
+    //     new Promise(async (resolve, reject) => {
+    //       const splitSegArray = getSplitSegArray({
+    //         flatSegmentationArray: segArray,
+    //         index: item.index,
+    //       });
+
+    //       const compressedSeg = await compressSeg(splitSegArray);
+
+    //       const response = await this.saveSegmentation({
+    //         segmentation: compressedSeg,
+    //         label: item.metadata.SegmentLabel,
+    //         shape,
+    //       });
+    //       resolve(response);
+    //     });
+    // });
+
+    // const resList = [];
+
+    // for (const fn of asyncSaveSegs) {
+    //   const response = await fn();
+    //   resList.push(response);
+    // }
+
+    // res({
+    //   ['exportation complete']: resList,
+    // });
+    // });
   }
 
   async handleExportSegmentations(segList) {
@@ -295,7 +286,7 @@ class XNATSegmentationExportMenu extends React.Component {
     });
 
     try {
-      const response = await this.saveExportations({
+      this.saveExportations({
         element,
         segList: segList ? segList : this.state.segList,
       });
@@ -303,10 +294,10 @@ class XNATSegmentationExportMenu extends React.Component {
     } catch (error) {}
     setItem('hasUnsavedChanges', false);
 
-    this.setState({
-      exporting: false,
-    });
-    this.props.onExportCancel();
+    // this.setState({
+    //   exporting: false,
+    // });
+    // this.props.onExportCancel();
 
     return;
   }

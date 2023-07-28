@@ -20,6 +20,7 @@ import MaskRoiPropertyModal from './XNATSegmentationMenu/MaskRoiPropertyModal.js
 import showModal from './common/showModal.js';
 import refreshViewports from '../utils/refreshViewports';
 import { connect } from 'react-redux';
+import eventBus from '@ohif/viewer/src/lib/eventBus.js';
 
 // import './XNATRoiPanel.styl';
 // import {
@@ -66,6 +67,7 @@ export const _getFirstImageId = ({
  * the Brush tools.
  */
 class XNATSegmentationPanel extends React.Component {
+  timeout = null;
   static propTypes = {
     isOpen: PropTypes.any,
     studies: PropTypes.any,
@@ -157,6 +159,22 @@ class XNATSegmentationPanel extends React.Component {
       'finishedmaskimportusingmodalevent',
       this.cornerstoneEventListenerHandler
     );
+
+    eventBus.on('brushUndoRedo', this.handleDragEnd);
+    cornerstoneTools.store.state.enabledElements.forEach(enabledElement => {
+      enabledElement.addEventListener(
+        'cornerstonetoolsmouseup',
+        this.handleDragEnd
+      );
+      enabledElement.addEventListener(
+        'cornerstonetoolstouchend',
+        this.handleDragEnd
+      );
+      enabledElement.addEventListener(
+        'cornerstonetoolsmeasurementcompleted',
+        this.handleDragEnd
+      );
+    });
   }
 
   removeEventListeners() {
@@ -171,6 +189,36 @@ class XNATSegmentationPanel extends React.Component {
     document.removeEventListener(
       'finishedmaskimportusingmodalevent',
       this.cornerstoneEventListenerHandler
+    );
+
+    eventBus.remove('brushUndoRedo');
+    cornerstoneTools.store.state.enabledElements.forEach(enabledElement => {
+      enabledElement.removeEventListener(
+        'cornerstonetoolsmouseup',
+        this.handleDragEndCancel
+      );
+      enabledElement.removeEventListener(
+        'cornerstonetoolstouchend',
+        this.handleDragEndCancel
+      );
+      enabledElement.removeEventListener(
+        'cornerstonetoolsmeasurementcompleted',
+        this.handleDragEndCancel
+      );
+    });
+  }
+
+  handleDragEndCancel() {}
+
+  handleDragEnd() {
+    const tool_to_avoid = ['Pan', 'Zoom', 'Reset', 'More', 'Wwwc'];
+    const last_active_tool = localStorage.getItem('setToolActive') || null;
+    if (tool_to_avoid.includes(last_active_tool)) return;
+
+    this.timeout && clearTimeout(this.timeout);
+    this.timeout = setTimeout(
+      () => document.getElementById('triggerExportSegmentations').click(),
+      2000
     );
   }
 
@@ -445,6 +493,7 @@ class XNATSegmentationPanel extends React.Component {
    * onDeleteClick - A callback that deletes a segment form the series.
    *
    * @returns {null}
+   *
    */
   onDeleteClick(segmentIndex) {
     //ToDo: use confirmDeleteOnDeleteClick

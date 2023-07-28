@@ -5,7 +5,7 @@
  */
 const loadWebWorkers = {
   test: /\.worker\.js$/,
-  include: /vtk\.js[\/\\]Sources/,
+  // include: /vtk\.js[\/\\]Sources/,
   use: [
     {
       loader: 'worker-loader',

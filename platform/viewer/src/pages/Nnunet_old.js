@@ -7,6 +7,7 @@ import { isEmpty } from 'lodash';
 import { servicesManager } from '../App';
 import { CSSTransition } from 'react-transition-group';
 import { radcadapi } from '../utils/constants';
+import { getItem } from '../lib/localStorageUtils';
 const { UIDialogService, UINotificationService } = servicesManager.services;
 
 function useInterval(callback, delay) {
@@ -180,7 +181,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       };
 
       let response = await fetch(
-        `${radcadapi}/job-status?email=${email}&job_type=NNUNET_LUNG`,
+        `${radcadapi}/job-status?email=${email}&job_type=NNUNET_BRAIN`,
         requestOptions
       );
       response = await response.json();
@@ -201,12 +202,13 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       const study_uid = studyInstanceUIDs;
       const email = user.profile.email;
       const state = window.store.getState();
+      const parameters = getItem('parameters');
 
       const body = {
-        parameters: {},
         study_uid: study_uid[0],
         series_uid: series_uid,
         email: email,
+        parameters,
       };
 
       var requestOptions = {
@@ -218,7 +220,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
         body: JSON.stringify(body),
       };
 
-      const response = await fetch(`${radcadapi}/nnunet_lung`, requestOptions);
+      const response = await fetch(`${radcadapi}/nnunet_brain`, requestOptions);
       const result = await response.json();
 
       setProcessState(true);

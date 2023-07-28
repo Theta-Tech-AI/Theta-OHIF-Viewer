@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { JobsContext } from '../context/JobsContext';
+import { setItem } from '../lib/localStorageUtils';
 
 export default function JobsContextUtil({
   series,
@@ -16,6 +17,26 @@ export default function JobsContextUtil({
 
   useEffect(() => {
     setSeries(series);
+
+    try {
+      let modalities = {};
+      let requiredModalities = ['FLAIR', 'T1CE', 'T2'];
+
+      let modalityMapping = {
+        T1CE: 'T1-Contrast',
+      };
+      series.forEach(item => {
+        if (requiredModalities.includes(item.Modality)) {
+          let modality = item.Modality;
+          // Check if a mapping exists for the modality and use it if it does
+          if (modalityMapping.hasOwnProperty(modality)) {
+            modality = modalityMapping[modality];
+          }
+          modalities[modality] = item.SeriesInstanceUID;
+        }
+      });
+      setItem('parameters', { modalities: modalities });
+    } catch (error) {}
   }, [series]);
 
   useEffect(() => {
