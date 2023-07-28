@@ -287,7 +287,7 @@ const NavigateIcons = () => {
             className="btn"
             style={{ backgroundColor: 'transparent' }}
             disabled={isForNavigationDisabled}
-            onClick={handleBackWrapper}
+            onClick={handleBack}
           >
             <ReactTooltip id={`back`} delayShow={250} border={true}>
               {/* <span>Back</span> */}
@@ -309,7 +309,7 @@ const NavigateIcons = () => {
               backgroundColor: 'transparent',
             }}
             disabled={isBackNavigationDisabled}
-            onClick={handleNextWrapper}
+            onClick={handleNext}
           >
             <ReactTooltip id={`forward`} delayShow={250} border={true}>
               {/* <span>Forward</span> */}
