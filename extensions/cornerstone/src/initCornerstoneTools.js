@@ -34,7 +34,9 @@ export default function(configuration = {}) {
   cornerstoneTools.toolColors.setActiveColor('rgb(0, 255, 0)');
 
   cornerstoneTools.store.state.touchProximity = 40;
-
+  cornerstoneTools.store.state.deleteIfHandleOutsideImage = false;
+  cornerstoneTools.store.state.preventHandleOutsideImage = false;
+  
   // Configure stack prefetch
   cornerstoneTools.stackPrefetch.setConfiguration({
     maxImagesToPrefetch: Infinity,
