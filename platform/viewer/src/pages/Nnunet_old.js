@@ -236,61 +236,61 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
   }, 16000);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetch(radcadapi + '/endpoint-status', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (
-            data['nnUNet-3d-fullres-lung-endpoint'] === 'RUNNING' &&
-            data['nnUNet-4D-Brain-lite-3modality-endpoint'] === 'RUNNING' &&
-            data['cbir-siames-backbone'] === 'RUNNING'
-          ) {
-            setLoading(false);
-            clearInterval(interval);
-            checkExistingSegmentations();
-          } else {
-            UINotificationService.show({
-              title: 'Endpoint warming up',
-              type: 'error',
-              autoClose: true,
-            });
-          }
-        })
-        .catch(error => console.error(error));
-    }, 60000);
+    // const interval = setInterval(() => {
+    //   fetch(radcadapi + '/endpoint-status', {
+    //     method: 'GET',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //   })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //       if (
+    //         data['nnUNet-3d-fullres-lung-endpoint'] === 'RUNNING' &&
+    //         data['nnUNet-4D-Brain-lite-3modality-endpoint'] === 'RUNNING' &&
+    //         data['cbir-siames-backbone'] === 'RUNNING'
+    //       ) {
+    setLoading(false);
+    clearInterval(interval);
+    checkExistingSegmentations();
+    //       } else {
+    //         UINotificationService.show({
+    //           title: 'Endpoint warming up',
+    //           type: 'error',
+    //           autoClose: true,
+    //         });
+    //       }
+    //     })
+    //     .catch(error => console.error(error));
+    // }, 60000);
 
-    fetch(radcadapi + '/endpoint-status', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (
-          data['nnUNet-3d-fullres-lung-endpoint'] === 'RUNNING' &&
-          data['nnUNet-4D-Brain-lite-3modality-endpoint'] === 'RUNNING' &&
-          data['cbir-encoder'] === 'RUNNING'
-        ) {
-          setLoading(false);
-          clearInterval(interval);
-          checkExistingSegmentations();
-        } else {
-          UINotificationService.show({
-            title: 'Endpoint warming up',
-            type: 'error',
-            autoClose: true,
-          });
-        }
-      })
-      .catch(error => console.error(error));
+    // fetch(radcadapi + '/endpoint-status', {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // })
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     if (
+    //       data['nnUNet-3d-fullres-lung-endpoint'] === 'RUNNING' &&
+    //       data['nnUNet-4D-Brain-lite-3modality-endpoint'] === 'RUNNING' &&
+    //       data['cbir-encoder'] === 'RUNNING'
+    //     ) {
+    //       setLoading(false);
+    //       clearInterval(interval);
+    //       checkExistingSegmentations();
+    //     } else {
+    //       UINotificationService.show({
+    //         title: 'Endpoint warming up',
+    //         type: 'error',
+    //         autoClose: true,
+    //       });
+    //     }
+    //   })
+    //   .catch(error => console.error(error));
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   const loadingIcon = (
