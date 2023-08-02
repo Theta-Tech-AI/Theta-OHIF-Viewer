@@ -251,7 +251,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
     //         data['cbir-siames-backbone'] === 'RUNNING'
     //       ) {
     setLoading(false);
-    clearInterval(interval);
+    // clearInterval(interval);
     checkExistingSegmentations();
     //       } else {
     //         UINotificationService.show({
