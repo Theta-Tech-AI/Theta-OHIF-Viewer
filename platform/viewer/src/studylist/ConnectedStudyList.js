@@ -10,6 +10,7 @@ const mapStateToProps = state => {
   return {
     server: activeServer,
     user: state.oidc.user,
+    currentMode: state.mode,
   };
 };
 

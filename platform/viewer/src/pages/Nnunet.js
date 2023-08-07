@@ -7,6 +7,7 @@ import { isEmpty } from 'lodash';
 import { servicesManager } from '../App';
 import { CSSTransition } from 'react-transition-group';
 import { radcadapi } from '../utils/constants';
+import { ProgressBar } from '../components/LoadingBar';
 
 const { UIDialogService, UINotificationService } = servicesManager.services;
 
@@ -60,12 +61,14 @@ export const startNnunetProcess = async (
 ) => {
   try {
     UIDialogService.dismiss({ id: 'ForceRerun' });
+    const parameters = getItem('parameters');
 
-    const url = radcadapi + '/nnunet_lung';
+    const url = radcadapi + '/nnunet_brain';
     const body = JSON.stringify({
-      studyInstanceUID: studyInstanceUID,
-      seriesInstanceUID: seriesInstanceUID,
-      userEmail: user.profile.email,
+      study_uid: studyInstanceUID,
+      series_uid: seriesInstanceUID,
+      email: user.profile.email,
+      parameters,
     });
     const response = await fetch(url, {
       method: 'POST',
@@ -75,6 +78,7 @@ export const startNnunetProcess = async (
       },
       body: body,
     });
+
     const data = await response.json();
     return data;
   } catch (error) {
@@ -87,7 +91,7 @@ export const checkJobStatus = async userEmail => {
   try {
     const url =
       radcadapi +
-      `/nnunet/job-status?user_email=${userEmail}&job_type=NNUNET_LUNG`;
+      `/nnunet/job-status?user_email=${userEmail}&job_type=NNUNET_BRAIN`;
     const response = await fetch(url, {
       method: 'GET',
     });
@@ -144,11 +148,13 @@ const ForceRerun = props => {
 
 function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
   const [processStarted, setProcessStarted] = useState(false);
-  const [count, setCount] = useState(1);
   const user = useSelector(state => state.oidc.user);
   const location = useLocation();
   const history = useHistory();
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState('active');
+  const [helperText, setHelperText] = useState('Processing nnunet job...');
 
   const handleOnSuccess = () => {
     const direction = localStorage.getItem('direction');
@@ -200,19 +206,32 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
     if (processStarted) {
       const status = await checkJobStatus(user.profile.email);
 
-      if (status === 'DONE' || status === 'ERROR') {
+      if (status === 'DONE') {
         handleOnSuccess();
+        setStatus('success');
+        setHelperText('Done!');
+      } else if (status === 'RUNNING') {
+        setStatus('active');
+        setHelperText('nnunet job is running...');
+      } else if (status === 'ERROR') {
+        setStatus('active');
+        setHelperText('nnunet job is starting...');
+      } else if (status === 'ERROR') {
+        setStatus('error');
+        setHelperText('An error occurred!');
       }
     }
   }, 16000);
 
   useEffect(async () => {
     const series_uid = JSON.parse(localStorage.getItem('series_uid') || '');
-
+    setStatus('active');
+    setHelperText('Checking if segmentations exist...');
     const segmentationsList = await getExistingSegmentations(
       series_uid,
       user.profile.email
     );
+    setHelperText('starting nnunet process...');
     if (isEmpty(segmentationsList)) {
       await startNnunetProcess(
         studyInstanceUIDs[0],
@@ -221,17 +240,21 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       );
       setProcessStarted(true);
     } else {
+      let has_nnunet = false;
+      const segmentationsList2 = Object.keys(segmentationsList) || [];
+      for (const segment_label_name of segmentationsList2) {
+        if (segment_label_name.includes('nnunet')) {
+          has_nnunet = true;
+          break;
+        }
+      }
       showLoadSegmentationDialog(
-        segmentationsList.includes('nnunet')
+        has_nnunet
           ? 'Nnunet segmentations exist, do you re-run nnunet segmentation?'
           : 'Non-nnunet segmentations exist, do you run nnunet segmentation?'
       );
     }
   }, []);
-
-  const loadingIcon = (
-    <Icon name="circle-notch" className="loading-icon-spin loading-icon" />
-  );
 
   return (
     <Page>
@@ -251,8 +274,33 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
               <h1 className="nnunet-page__title">
                 Loading nnU-Net Segmentation
               </h1>
+              <ProgressBar
+                indeterminate
+                status={status}
+                helperText={helperText}
+              />
+
+              {/* <ProgressBar
+                indeterminate
+                status="success"
+                helperText="42/256 items"
+              />
+              <ProgressBar
+                progress={progress}
+                helperText="Fetching assets..."
+                status="active"
+              />
+              <ProgressBar
+                progress={75}
+                helperText="42/256 items"
+                status="success"
+              />
+              <ProgressBar
+                progress={100}
+                helperText="Failed to load items"
+                status="error"
+              /> */}
             </div>
-            {loadingIcon}
           </>
         )}
       </div>
