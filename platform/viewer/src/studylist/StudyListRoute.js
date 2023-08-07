@@ -242,14 +242,14 @@ function StudyListRoute(props) {
           </h1>
         </div>
         <div className="actions">
-          <div className="form-inline btn-group pull-right">
+          {/* <div className="form-inline btn-group pull-right">
             <button
               className="btn btn-outline"
               onClick={() => setShowImportIdcModal(true)}
             >
               {t('Import IDC')}
             </button>
-          </div>
+          </div> */}
           <PreferenceButton />
 
           {studyListFunctionsEnabled && healthCareApiButtons}
