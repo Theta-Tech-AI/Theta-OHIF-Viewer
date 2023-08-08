@@ -26,8 +26,6 @@ import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
 import * as Plotly from 'plotly.js';
-import ReactDOM from 'react-dom';
-import html2canvas from 'html2canvas';
 
 import './Viewer.css';
 import JobsContextUtil from './JobsContextUtil.js';
@@ -45,8 +43,7 @@ import PdfMaker from '../lib/PdfMaker';
 import handleScrolltoIndex from '../utils/handleScrolltoIndex';
 import { handleRestoreToolState } from '../utils/syncrhonizeToolState';
 import ConnectedStudyBrowser from './ConnectedStudyBrowser';
-
-const toolImport = cornerstoneTools.import;
+import { ProgressBar } from '../components/LoadingBar';
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
 // const currentMode = BrainMode;
@@ -641,7 +638,43 @@ class Radiomics extends Component {
     }, 500);
   };
 
+  getHelperText = () => {
+    const { job, isSimilarlookingScans } = this.state;
+
+    if (!job || !job.data) return 'Generating Report details...';
+
+    switch (job.data.status) {
+      case 'RUNNING':
+        return `Running Collage Job ${job.data.job} - ${job.data.instances_done}/${job.instances}`;
+      case 'PENDING':
+        return 'Collage Job pending...';
+      case 'ERROR':
+        return 'Error occurred...';
+      case 'DONE':
+        return isSimilarlookingScans
+          ? 'Collage Job completed!'
+          : 'Getting similar looking scans...';
+      default:
+        return 'Generating Report details...';
+    }
+  };
+
+  // Function to generate progress based on the status
+  getProgress = () => {
+    const { job } = this.state;
+
+    if (!job || !job.data || job.data.status !== 'RUNNING') return 0;
+
+    const progress = (job.data.instances_done / job.instances) * 100;
+    return Math.min(progress, 100);
+  };
+
   render() {
+    const { studies } = this.props;
+    const { isComplete, jobs, isSimilarlookingScans, job } = this.state;
+    const helperText = this.getHelperText();
+    const progress = this.getProgress();
+
     if (this.state.loading) {
       return (
         <div
@@ -653,7 +686,7 @@ class Radiomics extends Component {
             alignItems: 'center',
           }}
         >
-          <p style={{ color: 'white', fontSize: '40px' }}>Loading...</p>
+          <ProgressBar indeterminate status="active" helperText={helperText} />
         </div>
       );
     }
@@ -690,132 +723,67 @@ class Radiomics extends Component {
         />
         <div
           style={{
-            // width: '100vw',
-            // height: '100vh',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            background: 'rgba(23,28,33,0.99)',
+            width: '100vw',
+            height: '100vh',
             // display: 'flex',
-            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
+            position: 'absolute',
+            background: 'rgba(23,28,33,0.99)',
+            fontSize: '24px',
             zIndex: 8,
-            // display: 'none',
-            display:
-              this.state.isComplete && this.state.isSimilarlookingScans
-                ? 'none'
-                : 'flex',
+            display: isComplete && isSimilarlookingScans ? 'none' : 'flex',
           }}
         >
-          {this.state.job && this.state.job.data ? (
-            <div
-              style={{
-                color: 'white',
-                fontSize: '40px',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '40px',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <div
-                  className="accordion-title"
-                  style={{
-                    background: 'transparent',
-                  }}
-                >
-                  {this.state.job.data.status != 'DONE' ? (
-                    <div>
-                      <b>Running Collage Job {this.state.job.data.job}</b>
-                    </div>
-                  ) : (
-                    <div>
-                      <b>Getting Similar looking Scans </b>
-                    </div>
-                  )}
-                  {/* Not the best way to go about this */}
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  <div>
-                    {this.state.job.data.status === 'RUNNING' && (
-                      <div>
-                        <FontAwesomeIcon icon={faRunning} />
-                        &nbsp; {this.state.job.data.instances_done}/
-                        {this.state.job.instances}
-                      </div>
-                    )}
-                    {this.state.job.data.status === 'PENDING' && (
-                      <FontAwesomeIcon icon={faSpinner} />
-                    )}
-                    {this.state.job.data.status === 'ERROR' && (
-                      <FontAwesomeIcon icon={faExclamationTriangle} />
-                    )}
+          {job && job.data ? (
+            <div>
+              {job.data.status === 'RUNNING' && (
+                <ProgressBar
+                  progress={progress}
+                  status="active"
+                  helperText={helperText}
+                />
+              )}
+              {job.data.status === 'PENDING' && (
+                <ProgressBar
+                  indeterminate
+                  status="active"
+                  helperText={helperText}
+                />
+              )}
+              {job.data.status === 'ERROR' && (
+                <ProgressBar
+                  progress={100}
+                  status="error"
+                  helperText={helperText}
+                />
+              )}
 
-                    {this.state.job.data.status === 'DONE' &&
-                      !this.state.isSimilarlookingScans && (
-                        <div>
-                          <FontAwesomeIcon icon={faRunning} />
-                        </div>
-                      )}
-
-                    {this.state.job.data.status === 'DONE' &&
-                      this.state.isSimilarlookingScans && (
-                        <FontAwesomeIcon icon={faCheckCircle} />
-                      )}
-                  </div>
+              {job.data.status === 'DONE' && !this.state.isSimilarlookingScans && (
+                <div>
+                  <ProgressBar
+                    indeterminate
+                    status="active"
+                    helperText={helperText}
+                  />
                 </div>
-              </div>
+              )}
+
+              {job.data.status === 'DONE' &&
+                this.state.isSimilarlookingScans && (
+                  <ProgressBar
+                    progress={100}
+                    status="success"
+                    helperText={helperText}
+                  />
+                )}
             </div>
           ) : (
-            <div
-              style={{
-                color: 'white',
-                fontSize: '40px',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '40px',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-              >
-                <div
-                  className="accordion-title"
-                  style={{
-                    background: 'transparent',
-                  }}
-                >
-                  <div>
-                    <b>Fetching Data  </b>
-                  </div>
-                  {/* Not the best way to go about this */}
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  <div>
-                    <div>
-                      <FontAwesomeIcon icon={faSpinner} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ProgressBar
+              indeterminate
+              status="active"
+              helperText={helperText}
+            />
           )}
         </div>
 

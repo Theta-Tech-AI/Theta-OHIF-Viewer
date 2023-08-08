@@ -27,7 +27,13 @@ import { getItem, setItem } from '../lib/localStorageUtils';
 const { urlUtil: UrlUtil } = OHIF.utils;
 
 function StudyListRoute(props) {
-  const { history, server, user, studyListFunctionsEnabled } = props;
+  const {
+    history,
+    server,
+    currentMode,
+    user,
+    studyListFunctionsEnabled,
+  } = props;
   const [t] = useTranslation('Common');
   // ~~ STATE
   const [sort, setSort] = useState({
@@ -242,14 +248,14 @@ function StudyListRoute(props) {
           </h1>
         </div>
         <div className="actions">
-          <div className="form-inline btn-group pull-right">
+          {/* <div className="form-inline btn-group pull-right">
             <button
               className="btn btn-outline"
               onClick={() => setShowImportIdcModal(true)}
             >
               {t('Import IDC')}
             </button>
-          </div>
+          </div> */}
           <PreferenceButton />
 
           {studyListFunctionsEnabled && healthCareApiButtons}
