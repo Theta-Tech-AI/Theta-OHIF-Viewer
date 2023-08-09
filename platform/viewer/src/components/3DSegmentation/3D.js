@@ -178,6 +178,7 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
             style={{
               textAlign: 'left',
               margin: 0,
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             3D Morphology

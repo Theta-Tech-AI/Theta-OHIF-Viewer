@@ -808,6 +808,7 @@ class Radiomics extends Component {
                     style={{
                       textAlign: 'left',
                       margin: 0,
+                      fontFamily: "'Inter', sans-serif",
                     }}
                   >
                     Similar Looking Scans
@@ -847,6 +848,7 @@ class Radiomics extends Component {
                     style={{
                       textAlign: 'left',
                       margin: 0,
+                      fontFamily: "'Inter', sans-serif",
                     }}
                   >
                     Collage

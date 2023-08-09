@@ -38,9 +38,10 @@ const Summary = props => {
           style={{
             textAlign: 'left',
             margin: 0,
+            fontFamily: "'Inter', sans-serif",
           }}
         >
-          RadCard Report Summary
+          RadCad Report Summary
         </h1>
       </div>
 
@@ -62,11 +63,47 @@ const Summary = props => {
             className="cad"
             style={{
               color: '#00c7ee',
+              fontFamily: "'Inter', sans-serif",
             }}
           >
-            Patient ID : {' '}
+            Patient ID :{' '}
           </h2>
-          <h2> {patientData.PatientID} </h2>
+          <h2
+            style={{
+              color: '#C4C4C4',
+            }}
+          >
+            {' '}
+            {patientData.PatientID}{' '}
+          </h2>
+        </div>
+
+        <div
+          className=""
+          style={{
+            display: 'flex',
+            marginTop: 12,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <h2
+            className="cad"
+            style={{
+              color: '#00c7ee',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            Patient Name :{' '}
+          </h2>
+          <h2
+            style={{
+              color: '#C4C4C4',
+            }}
+          >
+            {' '}
+            {patientData.PatientName}{' '}
+          </h2>
         </div>
 
         <div
@@ -84,29 +121,15 @@ const Summary = props => {
               color: '#00c7ee',
             }}
           >
-            Patient Name : {' '}
+            Classifier :{' '}
           </h2>
-          <h2> {patientData.PatientName} </h2>
-        </div>
-
-        <div
-          className=""
-          style={{
-            display: 'flex',
-            marginTop: 12,
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          }}
-        >
           <h2
-            className="cad"
             style={{
-              color: '#00c7ee',
+              color: '#C4C4C4',
             }}
           >
-            Classifier : {' '}
+            Resnet-18{' '}
           </h2>
-          <h2>Resnet-18 </h2>
         </div>
 
         <div
@@ -123,9 +146,13 @@ const Summary = props => {
               color: '#00c7ee',
             }}
           >
-            Malignant Score : {' '}
+            Malignant Score :{' '}
           </h2>
-          <h2>
+          <h2
+            style={{
+              color: '#C4C4C4',
+            }}
+          >
             {similarityResultState.score
               ? similarityResultState.score
               : ' loading...'}
