@@ -145,34 +145,6 @@ const ViewportGrid = function(props) {
     }
   };
 
-  const removeSegments2 = () => {
-    const view_ports = cornerstone.getEnabledElements();
-    const viewports = view_ports[0];
-
-    const element = getEnabledElement(view_ports.indexOf(viewports));
-
-    const segmentationState = segmentationModule.state;
-    let firstImageId = _getFirstImageId(props.viewportData[0]);
-    const brushStackState = segmentationState.series[firstImageId];
-
-    if (!brushStackState) {
-      return [];
-    }
-
-    const labelmap3D =
-      brushStackState.labelmaps3D[brushStackState.activeLabelmapIndex];
-
-    if (!labelmap3D) {
-      return [];
-    }
-
-    const metadata = labelmap3D.metadata;
-
-    // if (!metadata) {
-    //   return [];
-    // }
-  };
-
   useEffect(() => {
     localStorage.setItem('fetchsegments', JSON.stringify(0));
     eventBus.on('completeLoadingState', data => {
