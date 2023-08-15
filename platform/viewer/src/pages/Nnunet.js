@@ -8,6 +8,7 @@ import { servicesManager } from '../App';
 import { CSSTransition } from 'react-transition-group';
 import { radcadapi } from '../utils/constants';
 import { ProgressBar } from '../components/LoadingBar';
+import { getItem } from '../lib/localStorageUtils';
 
 const { UIDialogService, UINotificationService } = servicesManager.services;
 
@@ -86,19 +87,31 @@ export const startNnunetProcess = async (
   }
 };
 
-// checkJobStatus function
-export const checkJobStatus = async userEmail => {
-  try {
-    const url =
-      radcadapi +
-      `/nnunet/job-status?user_email=${userEmail}&job_type=NNUNET_BRAIN`;
-    const response = await fetch(url, {
-      method: 'GET',
-    });
-    const data = await response.json();
-    return data.status;
-  } catch (error) {
-    console.error('Error checking nnUNet job status: ', error);
+export const checkJobStatus = async user => {
+  const maxAttempts = 1;
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    try {
+      const url =
+        radcadapi +
+        `/nnunet/job-status?user_email=${user.profile.email}&job_type=NNUNET_BRAIN`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.access_token}`,
+        },
+      });
+      const data = await response.json();
+      return data.status;
+    } catch (error) {
+      console.error('Error checking nnUNet job status: ', error);
+      attempts++;
+      if (attempts === maxAttempts) {
+        return 'ERROR';
+      }
+    }
   }
 };
 
@@ -196,6 +209,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
             JSON.parse(localStorage.getItem('series_uid')),
             user
           );
+          setProcessStarted(true);
         },
         onClose: () => handleOnExist(),
       },
@@ -204,7 +218,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
 
   useInterval(async () => {
     if (processStarted) {
-      const status = await checkJobStatus(user.profile.email);
+      const status = await checkJobStatus(user);
 
       if (status === 'DONE') {
         handleOnSuccess();
@@ -213,9 +227,6 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       } else if (status === 'RUNNING') {
         setStatus('active');
         setHelperText('nnunet job is running...');
-      } else if (status === 'ERROR') {
-        setStatus('active');
-        setHelperText('nnunet job is starting...');
       } else if (status === 'ERROR') {
         setStatus('error');
         setHelperText('An error occurred!');
