@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { hot } from 'react-hot-loader/root';
+import * as Sentry from '@sentry/react';
 
 import OHIFCornerstoneExtension from '@ohif/extension-cornerstone';
 
@@ -272,6 +273,24 @@ class App extends Component {
     }
   }
 }
+
+Sentry.init({
+  dsn:
+    'https://f172758b48bff329bfa19c4ef5142d16@o4505702706380800.ingest.sentry.io/4505702712541184',
+  integrations: [
+    new Sentry.BrowserTracing({
+      tracePropagationTargets: [
+        'localhost',
+        'http://localhost:3000',
+        'https://dev.ohif.thetatech.ai',
+      ],
+    }),
+    new Sentry.Replay(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
 
 function _initServices(services) {
   servicesManager.registerServices(services);
