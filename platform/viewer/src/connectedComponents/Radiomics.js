@@ -639,9 +639,10 @@ class Radiomics extends Component {
   };
 
   getHelperText = () => {
-    const { job, isSimilarlookingScans } = this.state;
+    const { job, isSimilarlookingScans, isComplete } = this.state;
 
-    if (!job || !job.data) return 'Generating Report details...';
+    // if (!job || !job.data) return 'Processing Collage Features...';
+    if (!job || !job.data) return 'Processing Report details...';
 
     switch (job.data.status) {
       case 'RUNNING':
@@ -655,7 +656,7 @@ class Radiomics extends Component {
           ? 'Collage Job completed!'
           : 'Getting similar looking scans...';
       default:
-        return 'Generating Report details...';
+        return 'Processing Report details...';
     }
   };
 
@@ -725,7 +726,6 @@ class Radiomics extends Component {
           style={{
             width: '100vw',
             height: '100vh',
-            // display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             position: 'absolute',
@@ -813,7 +813,10 @@ class Radiomics extends Component {
                   marginTop: '20px',
                   width: '100%',
                   borderRadius: '8px',
-                  background: '#000000',
+                  background:
+                    isComplete && isSimilarlookingScans
+                      ? '#000000'
+                      : 'rgba(23,28,33,0.99)',
                   padding: '20px',
                 }}
               >
@@ -851,7 +854,10 @@ class Radiomics extends Component {
               <div
                 style={{
                   width: '100%',
-                  background: '#000000',
+                  background:
+                    isComplete && isSimilarlookingScans
+                      ? '#000000'
+                      : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',
                   padding: '20px',
                 }}
