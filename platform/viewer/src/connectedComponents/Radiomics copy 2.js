@@ -4,13 +4,23 @@ import classNames from 'classnames';
 import './Radiomics.css';
 import { withRouter } from 'react-router';
 import cornerstoneTools from 'cornerstone-tools';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faRunning,
+  faExclamationTriangle,
+  faCheckCircle,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
 import OHIF, { MODULE_TYPES, DICOMSR } from '@ohif/core';
 import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
 import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
-import { commandsManager, extensionManager } from './../App.js';
+import {
+  commandsManager,
+  extensionManager,
+  servicesManager,
+} from './../App.js';
 import { ReconstructionIssues } from './../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
@@ -24,323 +34,49 @@ import JobsContextUtil from './JobsContextUtil.js';
 import { getEnabledElement } from '../../../../extensions/cornerstone/src/state';
 import eventBus from '../lib/eventBus';
 import { Icon } from '../../../ui/src/elements/Icon';
-import { radcadapi } from '../utils/constants';
+import { BrainMode, radcadapi } from '../utils/constants';
 import { Morphology3DComponent } from '../components/3DSegmentation/3D';
+// import { Morphology3DComponent } from '../components/3DSegmentation/3D_old';
 import pdfmake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import exportComponent from '../lib/ExportComponent';
+import Summary from '../components/Summary';
+import PdfMaker from '../lib/PdfMaker';
+import handleScrolltoIndex from '../utils/handleScrolltoIndex';
+import { handleRestoreToolState } from '../utils/syncrhonizeToolState';
+import ConnectedStudyBrowser from './ConnectedStudyBrowser';
+
+const toolImport = cornerstoneTools.import;
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
+// const currentMode = BrainMode;
 
-const exportComponent = node => {
-  if (!node.current) {
-    throw new Error("'node' must be a RefObject");
-  }
+let hasRestoredState = false;
 
-  const element = ReactDOM.findDOMNode(node.current);
-
-  return html2canvas(element, {
-    scrollY: -window.scrollY,
-    allowTaint: true,
-    useCORS: true,
-  });
-};
-
-const generateTemplate = (SimilarScans, ohif_image, chart, chart2) => {
-  const contents = [];
-  const images = {};
-  // add radcad
-
-  contents.push(
-    {
-      stack: [
-        {
-          text: 'RadCard Report Summary',
-          style: 'header',
-        },
-      ],
-      style: 'header',
-      background: 'lightgray',
-    },
-    {
-      alignment: 'left',
-      columns: ['Patient Id : ', 'ab123'],
-    },
-    {
-      alignment: 'left',
-      columns: ['Classifier : ', 'ResNet -18'],
-    },
-    {
-      alignment: 'left',
-      columns: ['Prediction : ', 'Nescrosis'],
-    },
-    {
-      alignment: 'left',
-      columns: ['Confidence : ', '81%'],
-    }
-  );
-
-  contents.push(
-    {
-      text: 'Collage Radiomics',
-      style: 'header',
-    },
-    {
-      image: ohif_image,
-      width: 520,
-      height: 500,
-    }
-  );
-
-  contents.push({
-    text: 'Similar looking Scans',
-    style: 'header',
-    pageBreak: 'before',
-  });
-  images['query'] = SimilarScans.query;
-
-  SimilarScans.knn.forEach((data, index) => {
-    const imageIndex = 'img' + index;
-    images[imageIndex + 'thumb'] = data.region_thumbnail_url;
-    images[imageIndex] = data.image_url;
-    const malignant = data.malignant ? ' Yes' : 'No';
-    if (index == 0)
-      contents.push({
-        margin: [0, 10],
-        stack: [
-          {
-            image: 'query',
-            fit: [150, 150],
-          },
-          {
-            text: 'Original Query',
-            fontsize: 14,
-          },
-        ],
-      });
-
-    contents.push({
-      alignment: 'right',
-      // pageBreak: 'before',
-      columns: [
-        {
-          alignment: 'left',
-          fontSize: 14,
-          stack: [
-            {
-              image: imageIndex + 'thumb',
-              fit: [150, 150],
-            },
-            'Similarity:' + data.similarity_score,
-            'Dataset:' + data.dataset,
-            'Dataset Id:' + data.data_id,
-            'Malignant: ' + malignant,
-          ],
-        },
-        {
-          width: 400,
-          stack: [
-            // {
-            //   image: imageIndex,
-            //   fit: [300, 300],
-            // },
-            {
-              image: chart[index],
-              fit: [300, 300],
-              // relativePosition: {
-              //   y: -355,
-              //   x: -15,
-              // },
-              // opacity: 0.2,
-            },
-          ],
-        },
-      ],
-    });
-    contents.push({ text: '', margin: [0, 10] });
-    if (index % 2 == 0) {
-    } else contents.push({ text: '', pageBreak: 'before' });
-  });
-
-  // contents.push(
-  //   {
-  //     text: 'Morphology',
-  //     style: 'header',
-  //     pageBreak: 'before',
-  //   },
-  //   {
-  //     image: chart2,
-  //     fit: [518, 500],
-  //   }
-  // );
-
-  return {
-    content: contents,
-    defaultStyle: {
-      fontSize: 14,
-    },
-    styles: {
-      header: {
-        background: 'lightgray',
-        fontSize: 28,
-        bold: true,
-        margin: [0, 20],
-      },
-      normal: {
-        fontSize: 22,
-      },
-    },
-    images,
-  };
-};
-
-const RadiomicSummary = props => {
-  useEffect(() => {
-    localStorage.setItem(
-      'summary',
-      JSON.stringify({
-        name: 'sadsad',
-        name2: 'sadsad',
-        name3: 'sadsad',
-      })
-    );
-  }, []);
-
+export const RenderLoadingModal = () => {
   return (
     <div
       style={{
+        position: 'absolute',
         width: '100%',
-        background: '#000000',
-        borderRadius: '8px',
-        padding: '20px',
+        height: '100%',
+        background: 'rgba(0,0,0,0.9)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 8,
       }}
     >
       <div
         style={{
-          paddingBottom: '40px',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: 26,
         }}
       >
-        <h1
-          style={{
-            textAlign: 'left',
-            margin: 0,
-          }}
-        >
-          RadCard Report Summary
-        </h1>
+        Loading...
       </div>
-
-      <div
-        style={{
-          height: '100%',
-          flex: 1,
-        }}
-      >
-        <div
-          className=""
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <h2
-            className="cad"
-            style={{
-              color: '#00c7ee',
-            }}
-          >
-            Patient ID :{' '}
-          </h2>
-          <h2>abc123 </h2>
-        </div>
-        <div
-          className=""
-          style={{
-            display: 'flex',
-            marginTop: 12,
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <h2
-            className="cad"
-            style={{
-              color: '#00c7ee',
-            }}
-          >
-            Classifier:{' '}
-          </h2>
-          <h2>Resnet-18 </h2>
-        </div>
-
-        <div
-          className=""
-          style={{
-            display: 'flex',
-            marginTop: 12,
-            flexDirection: 'row',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <h2
-            className="cad"
-            style={{
-              color: '#00c7ee',
-            }}
-          >
-            Prediction:{' '}
-          </h2>
-          <h2>Necrosis</h2>
-        </div>
-
-        <div
-          className=""
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            marginTop: 12,
-            justifyContent: 'flex-start',
-          }}
-        >
-          <h2
-            className="cad"
-            style={{
-              color: '#00c7ee',
-            }}
-          >
-            Confidence:{' '}
-          </h2>
-          <h2>81%</h2>
-        </div>
-
-        <div
-          className=""
-          style={{
-            marginTop: 12,
-          }}
-        >
-          <button
-            onClick={props.triggerDownload}
-            // style={{
-            //   marginTop: '20px',
-            //   border: '1px yellow solid',
-            //   fontSize: '24px',
-            //   background: 'black',
-            //   color: 'white',
-            //   padding: '12px',
-            // }}
-            className="btn btn-primary btn-large"
-          >
-            Print To PDF
-          </button>
-        </div>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-        }}
-      ></div>
     </div>
   );
 };
@@ -382,6 +118,7 @@ class Radiomics extends Component {
     activeViewportIndex: PropTypes.number.isRequired,
     isStudyLoaded: PropTypes.bool,
     dialog: PropTypes.object,
+    currentMode: PropTypes.string,
   };
 
   constructor(props) {
@@ -395,10 +132,13 @@ class Radiomics extends Component {
       isRightSidePanelOpen: false,
       selectedRightSidePanel: '',
       selectedExtraPanel: '',
+      showImages: false,
       // selectedRightSidePanel: 'xnat-segmentation-panel',
       thumbnails: [],
-      imageRefs: [],
-      similarityResultState: {},
+      job: null,
+      isComplete: false,
+      isSimilarlookingScans: false,
+      similarityResultState: { knn: [] },
       isEditSelection: true,
     };
 
@@ -407,6 +147,7 @@ class Radiomics extends Component {
     this.componentRef = React.createRef();
     this.componentRefNode = React.createRef();
     this.imageRefs = [];
+
     const { activeServer } = this.props;
     const server = Object.assign({}, activeServer);
 
@@ -427,84 +168,11 @@ class Radiomics extends Component {
         disassociate: this.disassociateStudy,
       },
     });
-
+    this.onImageRendered = this.onImageRendered.bind(this);
+    this.onHandleThumbnailClick = this.onHandleThumbnailClick.bind(this);
     this._getActiveViewport = this._getActiveViewport.bind(this);
     this.fetchSeriesRef = false;
     this.source_series_ref = [];
-
-    // this.canvas = this.canvas.bind(this);
-    // this.componentRef = this.componentRef.bind(this);
-  }
-
-  loadLastActiveStudy() {
-    // let active_study = JSON.parse(localStorage.getItem('active_study'));
-
-    if (this.state.thumbnails[0].thumbnails[1].displaySetInstanceUID)
-      this.props.onThumbnailClick(
-        this.state.thumbnails[0].thumbnails[1].displaySetInstanceUID,
-        this.props.studies
-      );
-  }
-
-  onCornerstageLoaded = enabledEvt => {
-    setTimeout(() => {
-      const enabledElement = enabledEvt.detail.element;
-
-      commandsManager.runCommand('setToolActive', {
-        toolName: 'Pan',
-      });
-
-      let tool_data = localStorage.getItem(this.props.studyInstanceUID);
-      tool_data =
-        tool_data && tool_data !== 'undefined' ? JSON.parse(tool_data) : {};
-      if (enabledElement && tool_data) {
-        let viewport = cornerstone.getViewport(enabledElement);
-        if (tool_data.x) viewport.translation.x = tool_data.x;
-        if (tool_data.y) viewport.translation.y = tool_data.y;
-        if (tool_data.scale) viewport.scale = tool_data.scale;
-        if (tool_data.voi) viewport.voi = tool_data.voi;
-        cornerstone.setViewport(enabledElement, viewport);
-      }
-
-      this.handleSidePanelChange('right', 'theta-details-panel');
-      this.handleSidePanelChange('left', 'lung-module-similarity-panel');
-
-      //  handle radiomicsDone
-      const radiomicsDone = JSON.parse(
-        localStorage.getItem('radiomicsDone') || 0
-      );
-      this.setState({
-        isComplete: radiomicsDone == 1 ? true : false,
-      });
-      this.triggerReload();
-    }, 5000);
-    setTimeout(() => {
-      let similarityResultState = JSON.parse(
-        localStorage.getItem('print-similarscans') || { knn: [] }
-      );
-      similarityResultState = similarityResultState[0];
-
-      console.log({ similarityResultState });
-      this.setState({
-        similarityResultState,
-      });
-    }, 10000);
-  };
-
-  componentWillUnmount() {
-    if (this.props.dialog) {
-      this.props.dialog.dismissAll();
-    }
-    const view_ports = cornerstone.getEnabledElements();
-    const viewports = view_ports[0];
-    const element = getEnabledElement(view_ports.indexOf(viewports));
-    if (element)
-      cornerstoneTools.globalImageIdSpecificToolStateManager.clear(element);
-
-    cornerstone.events.removeEventListener(
-      cornerstone.EVENTS.ELEMENT_ENABLED,
-      this.onCornerstageLoaded
-    );
   }
 
   retrieveTimepoints = filter => {
@@ -572,6 +240,26 @@ class Radiomics extends Component {
     }
   };
 
+  componentWillUnmount() {
+    eventBus.remove('fetchscans');
+    eventBus.remove('jobstatus');
+
+    if (this.props.dialog) {
+      this.props.dialog.dismissAll();
+    }
+
+    const view_ports = cornerstone.getEnabledElements();
+    const viewports = view_ports[0];
+    const element = getEnabledElement(view_ports.indexOf(viewports));
+    if (element)
+      cornerstoneTools.globalImageIdSpecificToolStateManager.clear(element);
+
+    cornerstone.events.removeEventListener(
+      cornerstone.EVENTS.ELEMENT_ENABLED,
+      this.onCornerstageLoaded
+    );
+  }
+
   componentDidMount() {
     const { studies, isStudyLoaded, ...rest } = this.props;
     const { TimepointApi, MeasurementApi } = OHIF.measurements;
@@ -620,6 +308,110 @@ class Radiomics extends Component {
       cornerstone.EVENTS.ELEMENT_ENABLED,
       this.onCornerstageLoaded
     );
+
+    eventBus.on('handleThumbnailClick', data => {
+      setTimeout(() => {
+        this.onHandleThumbnailClick();
+      }, 4000);
+    });
+
+    eventBus.on('fetchscans', data => {
+      // try {
+      //   if (similarityResultState.knn.length > 1) {
+      //     this.setState({});
+      //   }
+      // } catch (error) {}
+
+      this.setState({
+        similarityResultState: data,
+        isSimilarlookingScans: true,
+      });
+    });
+    eventBus.on('jobstatus', data => {
+      console.log({
+        jobstatus: data,
+      });
+      this.setState({
+        job: data,
+      });
+    });
+  }
+
+  onHandleThumbnailClick = () => {
+    try {
+      const enabledElement = getEnabledElement(this.props.activeViewportIndex);
+      const image = cornerstone.getImage(enabledElement);
+      const instance_uid = image.imageId.split('/')[14];
+      const strippedImageId = image.imageId.split('studies/')[1];
+      const seriesUid = strippedImageId.split('/')[2]; // get series UID instead of SOP instance UID
+      handleScrolltoIndex(enabledElement, seriesUid);
+      // handleRestoreToolState(cornerstone, enabledElement, instance_uid);
+      eventBus.dispatch('completeLoadingState', {});
+      eventBus.dispatch('completeLoadingState', {});
+      this.triggerReload();
+    } catch (error) {
+      console.log(error);
+      eventBus.dispatch('completeLoadingState', {});
+      eventBus.dispatch('completeLoadingState', {});
+    }
+  };
+
+  onCornerstageLoaded = enabledEvt => {
+    commandsManager.runCommand('setToolActive', {
+      toolName: 'Pan',
+    });
+
+    // enabledElement.addEventListener(
+    //   cornerstone.EVENTS.IMAGE_RENDERED,
+    //   this.onImageRendered
+    // );
+
+    setTimeout(() => {
+      const radiomicsDone = JSON.parse(
+        localStorage.getItem('radiomicsDone') || 0
+      );
+      this.setState({
+        isComplete: radiomicsDone == 1 ? true : false,
+      });
+
+      this.handleSidePanelChange('right', 'theta-details-panel');
+      this.handleSidePanelChange('left', 'lung-module-similarity-panel');
+    }, 2000);
+
+    setTimeout(() => {
+      try {
+        const enabledElement = enabledEvt.detail.element;
+        handleScrolltoIndex(enabledElement);
+        const image = cornerstone.getImage(enabledElement);
+        const instance_uid = image.imageId.split('/')[14];
+        handleRestoreToolState(cornerstone, enabledElement, instance_uid);
+      } catch (error) {
+        console.log(error);
+      }
+    }, 2500);
+  };
+
+  // Handle the event with a function that applies the synchronization logic
+  onImageRendered(event) {
+    if (!hasRestoredState) {
+      const element = event.target;
+      const enabledElements = cornerstone.getEnabledElements();
+      const imageIdIndex = enabledElements.indexOf(element);
+
+      const enabledElement = event.detail.element;
+
+      if (
+        matchPath(this.props.location.pathname, {
+          path:
+            '/edit/:project/locations/:location/datasets/:dataset/dicomStores/:dicomStore/study/:studyInstanceUIDs',
+          exact: true,
+        })
+      ) {
+        this.handleSidePanelChange('right', 'xnat-segmentation-panel');
+      }
+
+      hasRestoredState = true;
+    }
   }
 
   async handleFetchAndSetSeries(studyInstanceUID) {
@@ -637,7 +429,7 @@ class Radiomics extends Component {
         const result = await response.json();
         return result.series;
       } catch (error) {
-        console.error('fetcheSeries caught', { error });
+        console.log('fetcheSeries caught', { error });
         return [];
       }
     })();
@@ -655,14 +447,6 @@ class Radiomics extends Component {
         document.getElementById('trigger').click();
       } catch (error) {}
     }, 5000);
-    // if (window && window.parent) {
-    //   window.parent.postMessage(
-    //     {
-    //       action: 'triggerExternalReload',
-    //     },
-    //     '*'
-    //   );
-    // }
   }
 
   handleBack = () => {
@@ -747,83 +531,181 @@ class Radiomics extends Component {
     let chart = null;
     let ohif_image = null;
 
-    let similarityResultState = JSON.parse(
-      localStorage.getItem('print-similarscans') || { knn: [] }
-    );
-    similarityResultState = similarityResultState[0];
+    this.setState({
+      showImages: true,
+    });
+    const { UINotificationService } = servicesManager.services;
 
-    for (let i = 0; i < similarityResultState.knn.length; i++) {
-      const imageElement = this.imageRefs[i];
-      promises.push(exportComponent(imageElement));
-    }
+    UINotificationService.show({
+      title: 'Generating Pdf',
+      type: 'info',
+      autoClose: true,
+    });
+
     // grpah
+    setTimeout(() => {
+      const similarityResultState = this.state.similarityResultState;
 
-    // const customScene = this.componentRef.current.graphRef.current.el.layout
-    //   .scene;
-
-    // const plotDiv = this.componentRef.current.graphRef.current.el;
-    // const { graphDiv } = plotDiv._fullLayout.scene._scene;
-    // console.log(this.componentRef.current.graphRef.current);
-    // const divToDownload = {
-    //   ...graphDiv,
-    //   layout: { ...graphDiv.layout, scene: customScene },
-    // };
-    // end of grah
-
-    Promise.all(promises)
-      .then(data => {
-        data.forEach(element => {
-          base64.push(element.toDataURL());
-        });
-
-        return Promise.all([
-          exportComponent(this.canvas),
-          //   Plotly.toImage(divToDownload, {
-          //     format: 'png',
-          //     width: 800,
-          //     height: 600,
-          //   }),
-        ]);
-      })
-      .then(data => {
-        const canvas = data[0];
-
-        // const gsdsad = data[1];
-        // ohif_image = 'data:image/png;base64,' + canvas.toDataURL();
-
-        const SimilarScans = JSON.parse(
-          localStorage.getItem('print-similarscans') || '{}'
-        );
-
-        const definition = generateTemplate(
-          SimilarScans[0],
-          canvas.toDataURL(),
-          base64
-          // gsdsad
-        );
-        pdfmake.createPdf(definition).download();
-      })
-      .catch(error => {
-        console.log(error);
+      console.log({
+        similarityResultState,
       });
+
+      if (!similarityResultState) {
+        return;
+      }
+      if (similarityResultState.knn.length < 1) {
+        return;
+      }
+
+      for (let i = 0; i < similarityResultState.knn.length; i++) {
+        const imageElement = this.imageRefs[i];
+        promises.push(exportComponent(imageElement));
+      }
+
+      Promise.all(promises)
+        .then(data => {
+          data.forEach(element => {
+            base64.push(element.toDataURL());
+          });
+
+          const fetchBase64Data = [exportComponent(this.canvas)];
+          try {
+            if (this.props.currentMode === BrainMode) {
+              // if (currentMode === BrainMode) {
+              const customScene = this.componentRef.current.el.layout.scene;
+
+              const plotDiv = this.componentRef.current.el;
+              const { graphDiv } = plotDiv._fullLayout.scene._scene;
+              console.log(this.componentRef.current);
+              // const divToDownload = {
+              //   ...graphDiv,
+              //   layout: { ...graphDiv.layout, scene: customScene },
+              // };
+
+              const scaleOffData = plotDiv.data.map(trace => {
+                return {
+                  ...trace,
+                  showScale: false,
+                };
+              });
+
+              const divToDownload = {
+                data: scaleOffData,
+                layout: { ...plotDiv.layout }, // Add Override Options Here if needed
+                config: plotDiv.config,
+              };
+
+              const toImageOpts = {
+                format: 'png',
+                width: 1000,
+                height: 600,
+              };
+
+              fetchBase64Data.push(Plotly.toImage(divToDownload, toImageOpts));
+            }
+          } catch (error) {
+            console.log(
+              'Error occurred while setting morphologyBase64:',
+              error
+            );
+          }
+          return Promise.all(fetchBase64Data);
+        })
+        .then(data => {
+          const collage = data[0];
+          let morphologyBase64 = null;
+          try {
+            if (this.props.currentMode === BrainMode)
+              morphologyBase64 = data[1];
+          } catch (error) {
+            console.log(
+              'Error occurred while setting morphologyBase64:',
+              error
+            );
+          }
+          const SimilarScans = JSON.parse(
+            localStorage.getItem('print-similarscans') || '{}'
+          );
+
+          const definition = PdfMaker(
+            SimilarScans[0],
+            collage.toDataURL(),
+            base64,
+            morphologyBase64
+          );
+          this.setState({
+            showImages: false,
+          });
+          pdfmake.createPdf(definition).download();
+
+          UINotificationService.show({
+            title: 'Pdf Generation Completed',
+            // message,
+            type: 'info',
+            autoClose: true,
+          });
+        })
+        .catch(error => {
+          console.log(error);
+          this.setState({
+            showImages: false,
+          });
+        });
+    }, 500);
+  };
+
+  getHelperText = () => {
+    const { job, isSimilarlookingScans } = this.state;
+
+    if (!job || !job.data) return 'Fetching data...';
+
+    switch (job.data.status) {
+      case 'RUNNING':
+        return `Running Collage Job ${job.data.job} - ${job.data.instances_done}/${job.instances}`;
+      case 'PENDING':
+        return 'Job pending...';
+      case 'ERROR':
+        return 'Error occurred...';
+      case 'DONE':
+        return isSimilarlookingScans
+          ? 'Job completed!'
+          : 'Getting similar looking scans...';
+      default:
+        return 'Fetching data...';
+    }
+  };
+
+  // Function to generate progress based on the status
+  getProgress = () => {
+    const { job } = this.state;
+
+    if (!job || !job.data || job.data.status !== 'RUNNING') return 0;
+
+    const progress = (job.data.instances_done / job.instances) * 100;
+    return Math.min(progress, 100);
   };
 
   render() {
-    // if (this.state.loading) {
-    //   return (
-    //     <div
-    //       style={{
-    //         width: '100vw',
-    //         height: '100vh',
-    //         display: 'flex',
-    //         justifyContent: 'center',
-    //         alignItems: 'center',
-    //       }}
-    //     >
-    //       <p style={{ color: 'white', fontSize: '40px' }}>Loading...</p>
-    //     </div>
-    //   );
-    // }
+    const { studies } = this.props;
+    const { isComplete, isSimilarlookingScans, job } = this.state;
+    const helperText = this.getHelperText();
+    const progress = this.getProgress();
+
+    if (this.state.loading) {
+      return (
+        <div
+          style={{
+            width: '100vw',
+            height: '100vh',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <p style={{ color: 'white', fontSize: '40px' }}>Loading...</p>
+        </div>
+      );
+    }
 
     let SimilarScans, CollageView, extraPanel;
     const panelExtensions = extensionManager.modules[MODULE_TYPES.PANEL];
@@ -839,44 +721,152 @@ class Radiomics extends Component {
     });
 
     const text = '';
-    let similarityResultState = JSON.parse(
-      localStorage.getItem('print-similarscans') || { knn: [] }
-    );
-
-    similarityResultState = similarityResultState[0];
-
-    if (similarityResultState && similarityResultState.knn) {
-    } else similarityResultState = { knn: [] };
-
-    // const imageRefs = [];
 
     return (
-      <div style={{}}>
+      <div
+        style={{
+          position: 'relative',
+        }}
+      >
         <JobsContextUtil
           series={
             this.props.studies && this.props.studies.length > 0
               ? this.props.studies[0].series
-              : { k: [] }
+              : []
           }
           overlay={false}
           instance={text}
         />
-        {/* <div
+        <div
           style={{
-            width: '100vw',
-            height: '100vh',
-            display: 'flex',
-            display: this.state.isComplete ? 'none' : 'flex',
+            // width: '100vw',
+            // height: '100vh',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            background: 'rgba(23,28,33,0.99)',
+            // display: 'flex',
+            flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
+            zIndex: 8,
+            // display: 'none',
+            display: isComplete && isSimilarlookingScans ? 'none' : 'flex',
           }}
         >
-          <p style={{ color: 'white', fontSize: '40px' }}>Loading...</p>
-        </div> */}
+          {this.state.job && this.state.job.data ? (
+            <div
+              style={{
+                color: 'white',
+                fontSize: '40px',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '40px',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  className="accordion-title"
+                  style={{
+                    background: 'transparent',
+                  }}
+                >
+                  {this.state.job.data.status != 'DONE' ? (
+                    <div>
+                      <b>Running Collage Job {this.state.job.data.job}</b>
+                    </div>
+                  ) : (
+                    <div>
+                      <b>Getting Similar looking Scans </b>
+                    </div>
+                  )}
+                  {/* Not the best way to go about this */}
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  <div>
+                    {this.state.job.data.status === 'RUNNING' && (
+                      <div>
+                        <FontAwesomeIcon icon={faRunning} />
+                        &nbsp; {this.state.job.data.instances_done}/
+                        {this.state.job.instances}
+                      </div>
+                    )}
+                    {this.state.job.data.status === 'PENDING' && (
+                      <FontAwesomeIcon icon={faSpinner} />
+                    )}
+                    {this.state.job.data.status === 'ERROR' && (
+                      <FontAwesomeIcon icon={faExclamationTriangle} />
+                    )}
+
+                    {this.state.job.data.status === 'DONE' &&
+                      !this.state.isSimilarlookingScans && (
+                        <div>
+                          <FontAwesomeIcon icon={faRunning} />
+                        </div>
+                      )}
+
+                    {this.state.job.data.status === 'DONE' &&
+                      this.state.isSimilarlookingScans && (
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                      )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                color: 'white',
+                fontSize: '40px',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '40px',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  className="accordion-title"
+                  style={{
+                    background: 'transparent',
+                  }}
+                >
+                  <div>
+                    <b>Fetching Data </b>
+                  </div>
+                  {/* Not the best way to go about this */}
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                  <div>
+                    <div>
+                      <FontAwesomeIcon icon={faSpinner} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div
           className="printView"
-          // ref={canvas => (this.canvas = canvas)}
-          // ref={el => (this.componentRefNode = el)}
           style={{
             paddingBottom: 140,
             // display: this.state.isComplete ? 'block' : 'none',
@@ -891,7 +881,10 @@ class Radiomics extends Component {
           </div>
           <div className="container">
             <div className="container-item">
-              <RadiomicSummary triggerDownload={this.downloadReportAsPdf} />
+              <Summary
+                similarityResultState={this.state.similarityResultState}
+                triggerDownload={this.downloadReportAsPdf}
+              />
               {/* RIGHT */}
               <div
                 style={{
@@ -909,7 +902,7 @@ class Radiomics extends Component {
                       margin: 0,
                     }}
                   >
-                    Similarity Looking Scans
+                    Similar Looking Scans
                   </h1>
                 </div>
 
@@ -973,7 +966,12 @@ class Radiomics extends Component {
                     </div>
                   </div>
 
-                  <div className="container-item">
+                  <div
+                    className=" remove-padding"
+                    style={{
+                      width: '300px',
+                    }}
+                  >
                     <ErrorBoundaryDialog context="RightSidePanel">
                       <div>
                         {CollageView && (
@@ -993,31 +991,44 @@ class Radiomics extends Component {
                       </div>
                     </ErrorBoundaryDialog>{' '}
                   </div>
+
+                  <ErrorBoundaryDialog context="LeftSidePanel">
+                    <div>
+                      <ConnectedStudyBrowser
+                        studies={this.state.thumbnails}
+                        studyMetadata={this.props.studies}
+                      />
+                    </div>
+                  </ErrorBoundaryDialog>
                 </div>
               </div>
             </div>
           </div>
-          <div className="container">
-            <div className="container-item">
-              <Morphology3DComponent
-                chartRef={this.chartRef}
-                ref={this.componentRef}
-              />
+
+          {this.props.currentMode === BrainMode && (
+            <div className="container">
+              <div className="container-item">
+                <Morphology3DComponent
+                  // ref={childRef}
+                  chartRef={this.chartRef}
+                  ref={this.componentRef}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="container">
             <div
               id="resetrow"
               style={{
                 width: '100%',
-                display: 'flex',
-                // flexDirection: 'column',
+                flexDirection: 'row',
                 flexWrap: 'wrap',
-                marginTop: '700',
+                marginTop: '700px',
+                display: this.state.showImages ? 'flex' : 'none',
               }}
             >
-              {similarityResultState.knn.map((data, index) => {
+              {this.state.similarityResultState.knn.map((data, index) => {
                 this.imageRefs[index] = React.createRef();
                 return (
                   <>
@@ -1049,7 +1060,7 @@ class Radiomics extends Component {
                           }}
                         />
                         <img
-                          crossOrigin="anonymous"
+                          crossOrigin=""
                           src={data.image_url}
                           style={{
                             flex: 1,
@@ -1064,10 +1075,8 @@ class Radiomics extends Component {
             </div>
           </div>
         </div>
-
         {/*<ConnectedStudyLoadingMonitor studies={this.props.studies} />*/}
         {/*<StudyPrefetcher studies={this.props.studies} />*/}
-
         {/* VIEWPORTS + SIDEPANELS */}
         <div className="FlexboxLayout">{/* LEFT */}</div>
       </div>

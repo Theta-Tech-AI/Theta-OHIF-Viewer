@@ -593,11 +593,11 @@ const SearchDetails = props => {
                       crossOrigin="anonymous"
                       src={res.region_thumbnail_url}
                       style={{
-                        position: 'absolute', // Positions the image within the div
-                        top: 0,
-                        left: 0,
-                        width: '100%', // Sets image width to full size of parent div
-                        height: '100%', // Sets image height to full size of parent div
+                        // position: 'absolute', // Positions the image within the div
+                        left: res.region_rectangle.x,
+                        top: res.region_rectangle.y,
+                        width: res.region_rectangle.w,
+                        height: res.region_rectangle.h,
                         border: '2.55px solid blue',
                         borderColor: res.malignant ? 'red' : 'blue',
                       }}

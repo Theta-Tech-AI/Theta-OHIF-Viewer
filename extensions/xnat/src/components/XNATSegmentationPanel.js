@@ -227,44 +227,49 @@ class XNATSegmentationPanel extends React.Component {
   }
 
   refreshSegmentList(firstImageId) {
-    let segments = [];
-    let activeSegmentIndex = 1;
-    let labelmap3D;
-    const importMetadata = this.constructor._importMetadata(firstImageId);
-
-    if (firstImageId) {
-      const segmentList = this.getSegmentList(firstImageId);
-
-      segments = segmentList.segments;
-      activeSegmentIndex = segmentList.activeSegmentIndex;
-      labelmap3D = segmentList.labelmap3D;
-
-      const slicexsegments = new Set();
-      labelmap3D.labelmaps2D.forEach((labelmap, index) => {
-        // console.log('index', index);
-        for (let i = 0; i < labelmap.pixelData.length; i++) {
-          if (labelmap.pixelData[i] === 1) {
-            slicexsegments.add(index);
-          }
+    try {
+      let segments = [];
+      let activeSegmentIndex = 1;
+      let labelmap3D;
+      const importMetadata = this.constructor._importMetadata(firstImageId);
+  
+      if (firstImageId) {
+        const segmentList = this.getSegmentList(firstImageId);
+  
+        segments = segmentList.segments;
+        activeSegmentIndex = segmentList.activeSegmentIndex;
+        labelmap3D = segmentList.labelmap3D;
+  
+        if (labelmap3D && labelmap3D.labelmaps2D) {
+          const slicexsegments = new Set();
+          labelmap3D.labelmaps2D.forEach((labelmap, index) => {
+            for (let i = 0; i < labelmap.pixelData.length; i++) {
+              if (labelmap.pixelData[i] === 1) {
+                slicexsegments.add(index);
+              }
+            }
+          });
+  
+          const slicexsegmentsArray = Array.from(slicexsegments);
+          console.log('-------------------', slicexsegmentsArray);
         }
+      }
+  
+      this.setState({
+        importMetadata,
+        segments,
+        firstImageId,
+        activeSegmentIndex,
+        importing: false,
+        exporting: false,
+        labelmap3D,
       });
-
-      const slicexsegmentsArray = Array.from(slicexsegments);
-
-      console.log('-------------------', slicexsegmentsArray);
+    } catch (error) {
+      console.error('An error occurred while refreshing segment list:', error);
+      // Handle the error as appropriate for your application.
     }
-
-    this.setState({
-      importMetadata,
-      segments,
-      firstImageId,
-      activeSegmentIndex,
-      importing: false,
-      exporting: false,
-      labelmap3D,
-    });
   }
-
+  
   componentDidUpdate() {
     // const appContext = this.context;
     const { viewports, activeIndex } = this.props;

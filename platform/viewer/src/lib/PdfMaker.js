@@ -9,6 +9,129 @@ function getMalignantScore(data) {
   return malignantCount + '/' + knnLength;
 }
 
+function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
+  return {
+    columns: [
+      {
+        width: 'auto',
+        style: 'smallImg',
+        margin: [0, 5, 0, 0],
+        stack: [
+          {
+            stack: [
+              {
+                canvas: [
+                  {
+                    type: 'rect',
+                    x: 0,
+                    y: 0,
+                    w: 100,
+                    h: 120,
+                    lineWidth: 1,
+                    lineColor: 'white',
+                  },
+                ],
+              },
+              {
+                image: imageDataUrl3,
+                width: 98,
+                height: 70,
+                margin: [1, -119, 0, 20],
+              },
+              {
+                margin: [10, -13, 0, 20],
+                stack: [
+                  {
+                    columnGap: 0,
+                    columns: [
+                      {
+                        margin: [-5, 0, 0, 0],
+                        stack: [
+                          {
+                            columns: [
+                              {
+                                text: 'Zoom:',
+                                bold: true,
+                                fontSize: 8,
+                              },
+                              {
+                                text: `${zoom}%`,
+                                fontSize: 8,
+                                margin: [0, 0, 0, 0],
+                              },
+                            ],
+                          },
+                          {
+                            columns: [
+                              {
+                                text: 'W:',
+                                fontSize: 8,
+                                bold: true,
+                              },
+                              {
+                                text: `${w}`,
+                                fontSize: 8,
+                                margin: [0, 0, 0, 0],
+                              },
+                            ],
+                          },
+                          {
+                            columnGap: 3,
+                            columns: [
+                              {
+                                text: 'date',
+                                fontSize: 8,
+                                bold: true,
+                                margin: [-1, 0, 0, 0],
+                              },
+                              {
+                                text: `${date}`,
+                                fontSize: 8,
+                                margin: [0, 0, 0, 0],
+                              },
+                            ],
+                          },
+                          {
+                            columnGap: 3,
+                            columns: [
+                              {
+                                text: 'time',
+                                fontSize: 8,
+                                bold: true,
+                                margin: [-1, 0, 0, 0],
+                              },
+                              {
+                                text: `${time}`,
+                                fontSize: 8,
+                                margin: [0, 0, 0, 0],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        stack: [
+          {
+            image: imageDataUrl8,
+            width: 130,
+            height: 120,
+            margin: [-10, 5, 0, 0],
+          },
+        ],
+        margin: [20, 0, 0, 0],
+      },
+    ],
+  };
+}
+
 function createPdfStructure(
   similarity,
   dataset,
@@ -63,7 +186,7 @@ function createPdfStructure(
                                 fontSize: 8,
                               },
                               {
-                                text: `${similarity}%`,
+                                text: `${similarity}`,
                                 fontSize: 8,
                                 margin: [0, 0, 0, 0],
                               },
@@ -706,93 +829,32 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
   };
 
   if (ohif_image) {
-    // documentDefinition.content.push(createCollageRadiomicsHeader());
+    const imageDataUrl3 = "query"
+    const date = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    });
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    });
+    const zoom = '138';
+    const w = '1500';
 
+    const collage = createCollage(
+      zoom,
+      w,
+      date,
+      time,
+      imageDataUrl3,
+      ohif_image
+    );
     documentDefinition.content.push({
       columns: [
         {
-          table: {
-            widths: ['25%', '72%'], // specify widths for both columns
-            body: [
-              [
-                {
-                  image: ohif_image,
-                  width: 140,
-                  height: 120,
-                  margin: [5, 5, 5, 5],
-                },
-                {
-                  stack: [
-                    {
-                      columnGap: 0,
-                      columns: [
-                        {
-                          text: 'Zoom:',
-                          bold: true,
-                          fontSize: 8,
-                          margin: [87, 5, 0, 0],
-                        },
-                        {
-                          text: '138%',
-                          fontSize: 8,
-                          margin: [3, 5, 0, 0],
-                        },
-                      ],
-                    },
-                    {
-                      columns: [
-                        {
-                          text: 'W:',
-                          bold: true,
-                          fontSize: 8,
-                          margin: [87, 0, 0, 0],
-                        },
-                        {
-                          text: '1500',
-                          fontSize: 8,
-                          margin: [3, 0, 0, 0],
-                        },
-                      ],
-                    },
-                    {
-                      // columns: [
-                      // {
-                      text: 'Loseless/',
-                      // bold: true,
-                      fontSize: 8,
-                      margin: [87, 0, 0, 0],
-                      // },
-
-                      // ],
-                    },
-                    {
-                      text: 'Uncompressed',
-                      fontSize: 8,
-                      margin: [87, 0, 0, 0],
-                    },
-                    {
-                      text: 'May 21, 2010',
-                      fontSize: 8,
-                      margin: [87, 66, 0, 0],
-                    },
-                    {
-                      text: '09: 12: 52',
-                      fontSize: 8,
-                      margin: [87, 0, 0, 0],
-                    },
-                  ],
-                },
-              ],
-            ],
-          },
-          layout: {
-            hLineWidth: () => 0,
-            vLineWidth: () => 0,
-            paddingLeft: () => 0,
-            paddingRight: () => 0,
-          }, // this layout has no borders and no padding
-          style: 'jumbotronDark',
-          margin: [0, 0, 0, 20],
+          ...collage,
         },
         {
           ...contents3,
