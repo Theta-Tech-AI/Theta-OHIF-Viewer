@@ -152,6 +152,8 @@ const SearchDetails = props => {
   const heightRef = React.useRef();
   const [width, setWidth] = React.useState();
   const [height, setHeight] = React.useState();
+
+  const [scalingFactor, setScalingFactor] = React.useState(1);
   const [element, setElement] = React.useState();
   const [showListState, setShowListState] = React.useState(false);
   const [loadingState, setLoadingState] = React.useState(false);
@@ -231,6 +233,17 @@ const SearchDetails = props => {
       setY(y_min);
       setHeight(height);
       setWidth(width);
+
+      const minDimension = 100;
+
+      if (width < minDimension || height < minDimension) {
+        const scalingFactor = Math.max(
+          minDimension / width,
+          minDimension / height
+        );
+        setScalingFactor(scalingFactor);
+      }
+
       xRef.current = x_min;
       yRef.current = y_min;
       heightRef.current = height;
@@ -536,8 +549,8 @@ const SearchDetails = props => {
             crossOrigin="anonymous"
             src={similarityResultState.query}
             style={{
-              width: 100,
-              height: 100,
+              height: height * scalingFactor,
+              width: width * scalingFactor,
               marginBottom: 20,
               border: '2.55px solid green',
             }}
@@ -553,6 +566,28 @@ const SearchDetails = props => {
             }}
           >
             {similarityResultState.knn.map((res, index) => {
+              const region_rectangle = res.region_rectangle;
+              const aspectRatio = region_rectangle.w / region_rectangle.h;
+              let imgWidth, imgHeight;
+
+              if (region_rectangle.w > region_rectangle.h) {
+                imgWidth = 98;
+                imgHeight = 98 / aspectRatio;
+                if (imgHeight > 72) {
+                  imgHeight = 72;
+                  imgWidth = 72 * aspectRatio;
+                }
+              } else {
+                imgHeight = 72;
+                imgWidth = 72 * aspectRatio;
+                if (imgWidth < 32.67) {
+                  imgWidth = 32.67;
+                  imgHeight = imgWidth / aspectRatio;
+                } else if (imgWidth > 98) {
+                  imgWidth = 98;
+                  imgHeight = 98 / aspectRatio;
+                }
+              }
               return (
                 // <>
                 <div
@@ -584,8 +619,8 @@ const SearchDetails = props => {
                 >
                   <div
                     style={{
-                      width: '90%',
-                      paddingBottom: '90%', // This maintains the 1:1 aspect ratio
+                      width: 100,
+                      height: 100,
                       position: 'relative', // Enables positioning of child elements
                     }}
                   >
@@ -596,8 +631,8 @@ const SearchDetails = props => {
                         // position: 'absolute', // Positions the image within the div
                         left: res.region_rectangle.x,
                         top: res.region_rectangle.y,
-                        width: res.region_rectangle.w,
-                        height: res.region_rectangle.h,
+                        width: imgWidth, // Updated width
+                        height: imgHeight, // Updated height
                         border: '2.55px solid blue',
                         borderColor: res.malignant ? 'red' : 'blue',
                       }}
