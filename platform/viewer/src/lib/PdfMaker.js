@@ -55,7 +55,7 @@ function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
                                 fontSize: 8,
                               },
                               {
-                                text: `${zoom}%`,
+                                text: `${zoom}`,
                                 fontSize: 8,
                                 margin: [0, 0, 0, 0],
                               },
@@ -138,8 +138,31 @@ function createPdfStructure(
   datasetId,
   malignant,
   imageDataUrl3,
-  imageDataUrl8
+  imageDataUrl8,
+  data
 ) {
+  const region_rectangle = data.region_rectangle;
+  const aspectRatio = region_rectangle.w / region_rectangle.h;
+
+  let imgWidth, imgHeight;
+
+  if (region_rectangle.w > region_rectangle.h) {
+    // If width is greater than height
+    imgWidth = 98; // Max width
+    imgHeight = 98 / aspectRatio;
+    if (imgHeight > 72) {
+      imgHeight = 72; // Constraint height
+      imgWidth = 72 * aspectRatio;
+    }
+  } else {
+    // If height is greater than width
+    imgHeight = 72; // Max height
+    imgWidth = 72 * aspectRatio;
+    if (imgWidth > 98) {
+      imgWidth = 98; // Constraint width
+      imgHeight = 98 / aspectRatio;
+    }
+  }
   return {
     columns: [
       {
@@ -155,8 +178,8 @@ function createPdfStructure(
                     type: 'rect',
                     x: 0,
                     y: 0,
-                    w: 100,
-                    h: 120,
+                    w: imgWidth + 2,
+                    h: imgHeight + 2,
                     lineWidth: 1,
                     lineColor: malignant ? 'red' : 'blue',
                   },
@@ -164,8 +187,9 @@ function createPdfStructure(
               },
               {
                 image: imageDataUrl3,
-                width: 98,
-                height: 70,
+                width: imgWidth,
+                height: imgHeight,
+                margin: [1, -(imgHeight + 1), 0, 20],
                 margin: [1, -119, 0, 20],
               },
               {
@@ -268,8 +292,32 @@ function createSimilarScansSection(
   datasetId,
   malignant,
   imageDataUrl3,
-  imageDataUrl8
+  imageDataUrl8,
+  data
 ) {
+  const region_rectangle = data.region_rectangle;
+  const aspectRatio = region_rectangle.w / region_rectangle.h;
+
+  let imgWidth, imgHeight;
+
+  if (region_rectangle.w > region_rectangle.h) {
+    // If width is greater than height
+    imgWidth = 98; // Max width
+    imgHeight = 98 / aspectRatio;
+    if (imgHeight > 72) {
+      imgHeight = 72; // Constraint height
+      imgWidth = 72 * aspectRatio;
+    }
+  } else {
+    // If height is greater than width
+    imgHeight = 72; // Max height
+    imgWidth = 72 * aspectRatio;
+    if (imgWidth > 98) {
+      imgWidth = 98; // Constraint width
+      imgHeight = 98 / aspectRatio;
+    }
+  }
+
   return {
     columns: [
       {
@@ -284,8 +332,8 @@ function createSimilarScansSection(
                     type: 'rect',
                     x: 0,
                     y: 0,
-                    w: 100,
-                    h: 120,
+                    w: imgWidth + 2,
+                    h: imgHeight + 2,
                     lineWidth: 1,
                     lineColor: malignant ? 'red' : 'blue',
                   },
@@ -293,9 +341,9 @@ function createSimilarScansSection(
               },
               {
                 image: imageDataUrl3,
-                width: 98,
-                height: 72,
-                margin: [1, -119, 0, 20],
+                width: imgWidth,
+                height: imgHeight,
+                margin: [1, -(imgHeight + 1), 0, 20],
               },
               {
                 margin: [10, -13, 0, 20],
@@ -568,14 +616,15 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
     images[imageIndex] = data.image_url;
 
     if (index === 0) {
-      contents3 = createPdfStructure(
+      contents3 = createSimilarScansSection(
         data.similarity_score,
         index + 1,
         data.data_id,
         data.malignant,
         // 'query',
         imageIndex + 'thumb',
-        chart[index]
+        chart[index],
+        data
       );
       // Skip the first iteration
       return;
@@ -592,7 +641,8 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
           data.malignant,
           // 'query',
           imageIndex + 'thumb',
-          chart[index]
+          chart[index],
+          data
         )
       );
     } else {
@@ -604,7 +654,8 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
           data.malignant,
           // 'query',
           imageIndex + 'thumb',
-          chart[index]
+          chart[index],
+          data
         )
       );
     }
@@ -829,16 +880,16 @@ const PdfMaker = (SimilarScans, ohif_image, chart, morphologyBase64) => {
   };
 
   if (ohif_image) {
-    const imageDataUrl3 = "query"
+    const imageDataUrl3 = 'query';
     const date = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'numeric',
-      day: 'numeric'
+      day: 'numeric',
     });
     const time = new Date().toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: 'numeric',
-      hour12: true
+      hour12: true,
     });
     const zoom = '138';
     const w = '1500';
