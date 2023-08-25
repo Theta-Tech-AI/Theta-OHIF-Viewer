@@ -114,35 +114,37 @@ const ViewportGrid = function(props) {
   const [fetchedSegmentations, setFetchedSegmentations] = useState('idle');
 
   const removeSegments = () => {
-    const view_ports = cornerstone.getEnabledElements();
-    const viewports = view_ports[0];
+    try {
+      const view_ports = cornerstone.getEnabledElements();
+      const viewports = view_ports[0];
 
-    const element = getEnabledElement(view_ports.indexOf(viewports));
+      const element = getEnabledElement(view_ports.indexOf(viewports));
 
-    const segmentationState = segmentationModule.state;
-    let firstImageId = _getFirstImageId(props.viewportData[0]);
-    const brushStackState = segmentationState.series[firstImageId];
+      const segmentationState = segmentationModule.state;
+      let firstImageId = _getFirstImageId(props.viewportData[0]);
+      const brushStackState = segmentationState.series[firstImageId];
 
-    if (!brushStackState) {
-      return [];
-    }
+      if (!brushStackState) {
+        return [];
+      }
 
-    const labelmap3D =
-      brushStackState.labelmaps3D[brushStackState.activeLabelmapIndex];
+      const labelmap3D =
+        brushStackState.labelmaps3D[brushStackState.activeLabelmapIndex];
 
-    if (!labelmap3D) {
-      return [];
-    }
+      if (!labelmap3D) {
+        return [];
+      }
 
-    const metadata = labelmap3D.metadata;
+      const metadata = labelmap3D.metadata;
 
-    if (!metadata) {
-      return [];
-    }
+      if (!metadata) {
+        return [];
+      }
 
-    for (let i = 0; i < metadata.length; i++) {
-      segmentationModule.setters.deleteSegment(element, i);
-    }
+      for (let i = 0; i < metadata.length; i++) {
+        segmentationModule.setters.deleteSegment(element, i);
+      }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -150,9 +152,15 @@ const ViewportGrid = function(props) {
     eventBus.on('completeLoadingState', data => {
       setLoadingState(false);
     });
+    
+    eventBus.on('handleThumbnailClick', data => {
+      removeSegments();
+      localStorage.setItem('fetchsegments', JSON.stringify(0));
+    });
 
     return () => {
       removeSegments();
+      eventBus.remove('handleThumbnailClick');
       eventBus.remove('completeLoadingState');
     };
   }, []);
