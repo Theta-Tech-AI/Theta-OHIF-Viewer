@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { hot } from 'react-hot-loader/root';
+import * as Sentry from '@sentry/react';
 
 import OHIFCornerstoneExtension from '@ohif/extension-cornerstone';
 
@@ -58,7 +59,28 @@ import WhiteLabelingContext from './context/WhiteLabelingContext';
 import UserManagerContext from './context/UserManagerContext';
 import { AppProvider, useAppContext, CONTEXTS } from './context/AppContext';
 import JobsContextProvider from './context/JobsContext';
-import { radcadapi } from './utils/constants';
+
+Sentry.init({
+  dsn:
+    'https://7b49f922b50c749bb7a6b72ae4c46334@o4505742995030016.ingest.sentry.io/4505743004073984',
+  integrations: [
+    new Sentry.BrowserTracing({
+      // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+      tracePropagationTargets: [
+        'localhost',
+        'http://localhost:3000',
+        'https://dev.ohif.thetatech.ai',
+      ],
+    }),
+    new Sentry.Replay(),
+  ],
+  
+  // Performance Monitoring
+  tracesSampleRate: 1.0, // Capture 100% of the transactions, reduce in production!
+  // Session Replay
+  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+});
 
 /** ~~~~~~~~~~~~~ Application Setup */
 const commandsManagerConfig = {
