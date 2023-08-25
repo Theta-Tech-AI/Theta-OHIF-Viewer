@@ -439,30 +439,40 @@ class Viewer extends Component {
   }
 
   async handleFetchAndSetSeries(studyInstanceUID) {
-    const fetchedSeries = await (async () => {
-      try {
-        var requestOptions = {
+    try {
+      const state = window.store.getState();
+
+      const response = await fetch(
+        `${radcadapi}/series?study=${studyInstanceUID}`,
+        {
           method: 'GET',
           redirect: 'follow',
-        };
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + state.oidc.user.id_token,
+          },
+        }
+      );
 
-        const response = await fetch(
-          `${radcadapi}/series?study=${studyInstanceUID}`,
-          requestOptions
-        );
-        const result = await response.json();
-        return result.series;
-      } catch (error) {
-        console.log('fetcheSeries caught', { error });
-        return [];
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    })();
-    this.fetchSeriesRef = false;
-    this.source_series_ref = fetchedSeries;
-    this.setState({
-      loading: false,
-      series: fetchedSeries,
-    });
+      const result = await response.json();
+      const fetchedSeries = result.series || [];
+
+      this.fetchSeriesRef = false;
+      this.source_series_ref = fetchedSeries;
+      this.setState({
+        loading: false,
+        series: fetchedSeries,
+      });
+    } catch (error) {
+      console.log('fetchSeries error:', error);
+      this.setState({
+        loading: false,
+        series: [],
+      });
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
