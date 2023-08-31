@@ -396,7 +396,7 @@ async function getStudyList(
     studyDateTo: filters.studyDateTo,
     limit: rowsPerPage,
     offset: pageNumber * rowsPerPage,
-    fuzzymatching: server.supportsFuzzyMatching === true,
+    fuzzymatching: true,
   };
 
   const studies = await _fetchStudies(server, mappedFilters, displaySize, {
