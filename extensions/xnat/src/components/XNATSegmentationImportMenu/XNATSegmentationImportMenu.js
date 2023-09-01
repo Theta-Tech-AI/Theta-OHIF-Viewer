@@ -8,13 +8,13 @@ import { triggerEvent } from 'cornerstone-core';
 import refreshViewports from '../../../../dicom-segmentation/src/utils/refreshViewports';
 import { connect } from 'react-redux';
 import {
-  client,
   getUpdatedSegments,
   uncompress,
 } from '../../../../../platform/viewer/src/appExtensions/LungModuleSimilarityPanel/utils';
 import List, {
   ListItem,
 } from '../../../../../platform/viewer/src/appExtensions/LungModuleSimilarityPanel/components/list';
+import { radcadapi } from '@ohif/viewer/src/utils/constants';
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
@@ -195,15 +195,16 @@ class XNATSegmentationImportMenu extends React.Component {
 
         console.log({ series_uid });
 
-        const body = {
-          email,
-          // email: 'bimpongamoako@gmail.com', //'nick.fragakis@thetatech.ai',
+        var requestOptions = {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
         };
 
-        console.log({ payload: body });
-
-        await client
-          .get(`/segmentations?series=${series_uid}&email=${email}`, body)
+        await fetch(
+          `${radcadapi}/segmentations?series=${series_uid}&email=${email}`,
+          requestOptions
+        )
+          .then(r => r.json().then(data => ({ status: r.status, data: data })))
           .then(async response => {
             console.log({ response });
             res(response.data);
