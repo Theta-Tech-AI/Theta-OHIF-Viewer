@@ -1,11 +1,8 @@
 import OHIF from '@ohif/core';
 import { connect } from 'react-redux';
-import { StudyBrowser } from '@ohif/ui';
-import cloneDeep from 'lodash.clonedeep';
 import findDisplaySetByUID from './findDisplaySetByUID';
 import { servicesManager } from './../App.js';
-
-const { studyMetadataManager } = OHIF.utils;
+import { StudyBrowser } from '../../../ui/src/components/studyBrowser/StudyBrowser';
 
 const { setActiveViewportSpecificData } = OHIF.redux.actions;
 
@@ -79,6 +76,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         displaySetInstanceUID
       );
 
+      const { LoggerService, UINotificationService } = servicesManager.services;
+
       if (displaySet.isDerived) {
         const { Modality } = displaySet;
         if (Modality === 'SEG' && servicesManager) {
@@ -87,12 +86,20 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             UINotificationService,
           } = servicesManager.services;
           const onDisplaySetLoadFailureHandler = error => {
-            LoggerService.error({ error, message: error.message });
+            const message =
+              error.message.includes('orthogonal') ||
+              error.message.includes('oblique')
+                ? 'The segmentation has been detected as non coplanar,\
+                If you really think it is coplanar,\
+                please adjust the tolerance in the segmentation panel settings (at your own peril!)'
+                : error.message;
+
+            LoggerService.error({ error, message });
             UINotificationService.show({
               title: 'DICOM Segmentation Loader',
-              message: error.message,
+              message,
               type: 'error',
-              autoClose: true,
+              autoClose: false,
             });
           };
 
@@ -114,20 +121,51 @@ const mapDispatchToProps = (dispatch, ownProps) => {
               }
             );
             document.dispatchEvent(selectionFired);
+            document.dispatchEvent(segThumbnailSelected);
           });
         } else {
+        // } else if (Modality !== 'SR') {
+
           displaySet = displaySet.getSourceDisplaySet(ownProps.studyMetadata);
         }
 
         if (!displaySet) {
-          throw new Error(
+          const error = new Error(
             `Referenced series for ${Modality} dataset not present.`
           );
+          const message = `Referenced series for ${Modality} dataset not present.`;
+          LoggerService.error({ error, message });
+          UINotificationService.show({
+            autoClose: false,
+            title: 'Fail to load series',
+            message,
+            type: 'error',
+          });
         }
+      }
 
-        if (!displaySet) {
-          throw new Error('Source data not present');
-        }
+      if (!displaySet) {
+        const error = new Error('Source data not present');
+        const message = 'Source data not present';
+        LoggerService.error({ error, message });
+        UINotificationService.show({
+          autoClose: false,
+          title: 'Fail to load series',
+          message,
+          type: 'error',
+        });
+      }
+
+      if (displaySet.isSOPClassUIDSupported === false) {
+        const error = new Error('Modality not supported');
+        const message = 'Modality not supported';
+        LoggerService.error({ error, message });
+        UINotificationService.show({
+          autoClose: false,
+          title: 'Fail to load series',
+          message,
+          type: 'error',
+        });
       }
 
       dispatch(setActiveViewportSpecificData(displaySet));
@@ -136,7 +174,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 };
 
 const ConnectedStudyBrowser = connect(
-  mapStateToProps,
+  null,
   mapDispatchToProps
 )(StudyBrowser);
 

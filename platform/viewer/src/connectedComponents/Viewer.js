@@ -12,7 +12,7 @@ import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
 import SidePanel from './../components/SidePanel.js';
 import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
-import { extensionManager } from './../App.js';
+import { extensionManager, servicesManager } from './../App.js';
 import { ReconstructionIssues } from './../../../core/src/enums.js';
 import circularLoading from '../appExtensions/ThetaDetailsPanel/TextureFeatures/utils/circular-loading.json';
 import '../googleCloud/googleCloud.css';
@@ -78,9 +78,11 @@ class Viewer extends Component {
     const { activeServer } = this.props;
     const server = Object.assign({}, activeServer);
 
+    const external = { servicesManager };
+
     OHIF.measurements.MeasurementApi.setConfiguration({
       dataExchange: {
-        retrieve: DICOMSR.retrieveMeasurements,
+        retrieve: server => DICOMSR.retrieveMeasurements(server, external),
         store: DICOMSR.storeMeasurements,
       },
       server,
@@ -473,6 +475,12 @@ class Viewer extends Component {
         series: [],
       });
     }
+
+    document.addEventListener(
+      'segmentationLoadingError',
+      this._updateThumbnails.bind(this),
+      false
+    );
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -513,8 +521,26 @@ class Viewer extends Component {
       const { currentTimepointId } = this;
 
       this.timepointApi.retrieveTimepoints({ PatientID });
-      this.measurementApi.retrieveMeasurements(PatientID, [currentTimepointId]);
+      this.measurementApi
+        .retrieveMeasurements(PatientID, [currentTimepointId])
+        .then(() => {
+          this._updateThumbnails();
+        });
     }
+  }
+
+  _updateThumbnails() {
+    const { studies, activeViewportIndex, viewports } = this.props;
+
+    const activeViewport = viewports[activeViewportIndex];
+    const activeDisplaySetInstanceUID = activeViewport
+      ? activeViewport.displaySetInstanceUID
+      : undefined;
+
+    this.setState({
+      thumbnails: _mapStudiesToThumbnails(studies, activeDisplaySetInstanceUID),
+      activeDisplaySetInstanceUID,
+    });
   }
 
   _getActiveViewport() {
@@ -610,10 +636,9 @@ class Viewer extends Component {
             studies={this.props.studies}
           />
         </ErrorBoundaryDialog>
-
-        {/*<ConnectedStudyLoadingMonitor studies={this.props.studies} />*/}
-        {/*<StudyPrefetcher studies={this.props.studies} />*/}
-
+        <AppContext.Consumer>
+          {appContext => <StudyLoadingMonitor studies={this.props.studies} />}
+        </AppContext.Consumer>
         {/* VIEWPORTS + SIDEPANELS */}
         <div className="FlexboxLayout">
           {/* LEFT */}
@@ -626,10 +651,24 @@ class Viewer extends Component {
                   activeIndex={this.props.activeViewportIndex}
                 />
               ) : (
-                <ConnectedStudyBrowser
-                  studies={this.state.thumbnails}
-                  studyMetadata={this.props.studies}
-                />
+                <AppContext.Consumer>
+                  {appContext => {
+                    const { appConfig } = appContext;
+                    const { studyPrefetcher } = appConfig;
+                    const { thumbnails } = this.state;
+                    return (
+                      <ConnectedStudyBrowser
+                        studies={thumbnails}
+                        studyMetadata={this.props.studies}
+                        showThumbnailProgressBar={
+                          studyPrefetcher &&
+                          studyPrefetcher.enabled &&
+                          studyPrefetcher.displayProgress
+                        }
+                      />
+                    );
+                  }}
+                </AppContext.Consumer>
               )}
             </SidePanel>
           </ErrorBoundaryDialog>
@@ -637,6 +676,22 @@ class Viewer extends Component {
           {/* MAIN */}
           <div className={classNames('main-content')}>
             <ErrorBoundaryDialog context="ViewerMain">
+              <AppContext.Consumer>
+                {appContext => {
+                  const { appConfig } = appContext;
+                  const { studyPrefetcher } = appConfig;
+                  const { studies } = this.props;
+                  return (
+                    studyPrefetcher &&
+                    studyPrefetcher.enabled && (
+                      <StudyPrefetcher
+                        studies={studies}
+                        options={studyPrefetcher}
+                      />
+                    )
+                  );
+                }}
+              </AppContext.Consumer>
               <ConnectedViewerMain
                 studies={_removeUnwantedSeries(
                   this.props.studies,
@@ -673,11 +728,34 @@ class Viewer extends Component {
 export default withRouter(withDialog(Viewer));
 
 /**
+ * Async function to check if the displaySet has any derived one
+ *
+ * @param {*object} displaySet
+ * @param {*object} study
+ * @returns {bool}
+ */
+const _checkForDerivedDisplaySets = async function(displaySet, study) {
+  let derivedDisplaySetsNumber = 0;
+  if (
+    displaySet.Modality &&
+    !['SEG', 'SR', 'RTSTRUCT'].includes(displaySet.Modality)
+  ) {
+    const studyMetadata = studyMetadataManager.get(study.StudyInstanceUID);
+
+    const derivedDisplaySets = studyMetadata.getDerivedDatasets({
+      referencedSeriesInstanceUID: displaySet.SeriesInstanceUID,
+    });
+
+    derivedDisplaySetsNumber = derivedDisplaySets.length;
+  }
+
+  return derivedDisplaySetsNumber > 0;
+};
+
+/**
  * Async function to check if there are any inconsistences in the series.
  *
- * For segmentation checks that the geometry is consistent with the source images:
- * 1) no frames out of plane;
- * 2) have the same width and height.
+ * For segmentation returns any error during loading.
  *
  * For reconstructable 3D volume:
  * 1) Is series multiframe?
@@ -848,8 +926,6 @@ const _checkForSeriesInconsistencesWarnings = async function(
     }
   }
 
-  // cache the warnings
-  displaySet.inconsistencyWarnings = inconsistencyWarnings;
   return inconsistencyWarnings;
 };
 
@@ -929,7 +1005,6 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
       const {
         displaySetInstanceUID,
         SeriesDescription,
-        InstanceNumber,
         numImageFrames,
         SeriesNumber,
       } = displaySet;
@@ -938,13 +1013,14 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
       let altImageText;
 
       if (displaySet.Modality && displaySet.Modality === 'SEG') {
-        // TODO: We want to replace this with a thumbnail showing
-        // the segmentation map on the image, but this is easier
-        // and better than what we have right now.
         altImageText = 'SEG';
+      } else if (displaySet.Modality && displaySet.Modality === 'SR') {
+        altImageText = 'SR';
       } else if (displaySet.images && displaySet.images.length) {
         const imageIndex = Math.floor(displaySet.images.length / 2);
         imageId = displaySet.images[imageIndex].getImageId();
+      } else if (displaySet.isSOPClassUIDSupported === false) {
+        altImageText = displaySet.SOPClassUIDNaturalized;
       } else {
         altImageText = displaySet.Modality ? displaySet.Modality : 'UN';
       }
@@ -961,15 +1037,19 @@ const _mapStudiesToThumbnails = function(studies, activeDisplaySetInstanceUID) {
       );
 
       return {
-        active,
+        active: _isDisplaySetActive(
+          displaySet,
+          studies,
+          activeDisplaySetInstanceUID
+        ),
         imageId,
         altImageText,
         displaySetInstanceUID,
         SeriesDescription,
-        InstanceNumber,
         numImageFrames,
         SeriesNumber,
         hasWarnings,
+        hasDerivedDisplaySets,
       };
     });
 

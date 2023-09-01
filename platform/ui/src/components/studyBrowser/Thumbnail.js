@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import throttle from 'lodash.throttle';
 import { useDrag } from 'react-dnd';
+import { classes } from '@ohif/core';
 import ImageThumbnail from './ImageThumbnail';
 import classNames from 'classnames';
 import { Icon } from './../../elements/Icon';
 import { Tooltip } from './../tooltip';
 import { OverlayTrigger } from './../overlayTrigger';
-
 import './Thumbnail.styl';
+
+const StudyLoadingListener = classes.StudyLoadingListener;
 
 function ThumbnailFooter({
   SeriesDescription,
   SeriesNumber,
-  InstanceNumber,
   numImageFrames,
   hasWarnings,
 }) {
   const [inconsistencyWarnings, inconsistencyWarningsSet] = useState([]);
+  const [derivedDisplaySetsActive, derivedDisplaySetsActiveSet] = useState([]);
 
   useEffect(() => {
     let unmounted = false;
@@ -85,20 +88,47 @@ function ThumbnailFooter({
       </React.Fragment>
     );
   };
+
+  const getDerivedInfo = derivedDisplaySetsActive => {
+    return (
+      <React.Fragment>
+        {derivedDisplaySetsActive ? (
+          <div className="derived">
+            <Icon name="link" />
+          </div>
+        ) : (
+          <React.Fragment></React.Fragment>
+        )}
+      </React.Fragment>
+    );
+  };
+
   const getSeriesInformation = (
     SeriesNumber,
-    InstanceNumber,
     numImageFrames,
-    inconsistencyWarnings
+    inconsistencyWarnings,
+    derivedDisplaySetsActive
   ) => {
-    if (!SeriesNumber && !InstanceNumber && !numImageFrames) {
+    if (!SeriesNumber && !numImageFrames) {
       return;
     }
     const seriesInformation = (
       <div className="series-information">
-        {getInfo(SeriesNumber, 'S:')}
-        {getInfo(InstanceNumber, 'I:')}
-        {getInfo(numImageFrames, '', 'image-frames')}
+        <React.Fragment>
+          {SeriesNumber !== undefined ? (
+            getInfo(SeriesNumber, 'S:')
+          ) : (
+            <React.Fragment></React.Fragment>
+          )}
+        </React.Fragment>
+        <React.Fragment>
+          {numImageFrames !== undefined ? (
+            getInfo(numImageFrames, '', 'image-frames')
+          ) : (
+            <React.Fragment></React.Fragment>
+          )}
+        </React.Fragment>
+        {getDerivedInfo(derivedDisplaySetsActive)}
         {getWarningInfo(SeriesNumber, inconsistencyWarnings)}
       </div>
     );
@@ -127,17 +157,12 @@ function Thumbnail(props) {
     displaySetInstanceUID,
     imageId,
     imageSrc,
-    InstanceNumber,
-    numImageFrames,
-    SeriesDescription,
-    SeriesNumber,
-    hasWarnings,
-    stackPercentComplete,
     StudyInstanceUID,
     onClick,
     onDoubleClick,
     onMouseDown,
     supportsDrag,
+    showProgressBar,
   } = props;
 
   // console.log({ props });
@@ -177,6 +202,7 @@ function Thumbnail(props) {
           imageId={imageId}
           error={error}
           stackPercentComplete={stackPercentComplete}
+          showProgressBar={showProgressBar}
         />
       )}
       {/* SHOW TEXT ALTERNATIVE */}
@@ -210,12 +236,13 @@ Thumbnail.propTypes = {
   altImageText: PropTypes.string,
   SeriesDescription: PropTypes.string,
   SeriesNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  InstanceNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   hasWarnings: PropTypes.instanceOf(Promise),
+  hasDerivedDisplaySets: PropTypes.instanceOf(Promise),
   numImageFrames: PropTypes.number,
   onDoubleClick: PropTypes.func,
   onClick: PropTypes.func,
   onMouseDown: PropTypes.func,
+  showProgressBar: PropTypes.bool,
 };
 
 Thumbnail.defaultProps = {

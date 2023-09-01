@@ -15,6 +15,7 @@ function StudyBrowser(props) {
     onThumbnailClick,
     onThumbnailDoubleClick,
     supportsDrag,
+    showThumbnailProgressBar,
   } = props;
   const location = useLocation();
 
@@ -178,7 +179,7 @@ StudyBrowser.propTypes = {
           altImageText: PropTypes.string,
           displaySetInstanceUID: PropTypes.string.isRequired,
           imageId: PropTypes.string,
-          InstanceNumber: PropTypes.number,
+          derivedDisplaySetsNumber: PropTypes.number,
           numImageFrames: PropTypes.number,
           SeriesDescription: PropTypes.string,
           SeriesNumber: PropTypes.number,
@@ -190,6 +191,7 @@ StudyBrowser.propTypes = {
   supportsDrag: PropTypes.bool,
   onThumbnailClick: PropTypes.func,
   onThumbnailDoubleClick: PropTypes.func,
+  showThumbnailProgressBar: PropTypes.bool,
 };
 
 StudyBrowser.defaultProps = {
@@ -197,6 +199,7 @@ StudyBrowser.defaultProps = {
   supportsDrag: true,
   onThumbnailClick: noop,
   onThumbnailDoubleClick: noop,
+  showThumbnailProgressBar: true,
 };
 
 export { StudyBrowser };
