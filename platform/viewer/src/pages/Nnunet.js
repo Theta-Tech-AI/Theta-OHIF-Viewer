@@ -88,19 +88,19 @@ export const startNnunetProcess = async (
 };
 
 export const checkJobStatus = async user => {
-  const maxAttempts = 1;
+  const maxAttempts = 4;
   let attempts = 0;
-
+  
   while (attempts < maxAttempts) {
     try {
       const url =
         radcadapi +
-        `/nnunet/job-status?user_email=${user.profile.email}&job_type=NNUNET_BRAIN`;
+        `/job-status?email=${user.profile.email}&job_type=NNUNET_BRAIN`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.access_token}`,
+          // Authorization: `Bearer ${user.id_token}`,
         },
       });
       const data = await response.json();
@@ -224,13 +224,12 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
         handleOnSuccess();
         setStatus('success');
         setHelperText('Done!');
-      } else if (status === 'RUNNING') {
+      } else if (status === 'RUNNING'|| status === 'PENDING') {
         setStatus('active');
         setHelperText('nnunet job is running...');
       } else if (status === 'ERROR') {
-        handleOnSuccess();
-        setStatus('success');
-        setHelperText('Done!');
+        setStatus('error');
+        setHelperText('An error occurred!');
       }
     }
   }, 16000);
