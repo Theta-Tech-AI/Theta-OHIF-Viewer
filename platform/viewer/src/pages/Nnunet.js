@@ -227,10 +227,13 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       } else if (status === 'RUNNING') {
         setStatus('active');
         setHelperText('nnunet job is running...');
-      } else if (status === 'ERROR') {
-        setStatus('error');
-        setHelperText('An error occurred!');
+      } else {
+        handleOnSuccess();
       }
+      // } else if (status === 'ERROR') {
+      //   setStatus('error');
+      //   setHelperText('An error occurred!');
+      // }
     }
   }, 16000);
 
