@@ -143,9 +143,8 @@ class XNATSegmentationPanel extends React.Component {
 
   componentDidMount() {
     // const appContext = this.context;
-
     console.log('segpanel mounted', { props: this.props });
-    // this.onImportButtonClick();
+    this.onImportButtonClick();
   }
 
   addEventListeners() {
@@ -218,10 +217,10 @@ class XNATSegmentationPanel extends React.Component {
     if (tool_to_avoid.includes(last_active_tool)) return;
 
     this.timeout && clearTimeout(this.timeout);
-    // this.timeout = setTimeout(
-    //   () => document.getElementById('triggerExportSegmentations').click(),
-    //   2000
-    // );
+    this.timeout = setTimeout(
+      () => document.getElementById('triggerExportSegmentations').click(),
+      2000
+    );
   }
 
   cornerstoneEventListenerHandler() {
@@ -294,7 +293,9 @@ class XNATSegmentationPanel extends React.Component {
     const firstImageId = _getFirstImageId(viewports[activeIndex]);
 
     if (firstImageId !== this.state.firstImageId) {
+      this.onClearButtonClick();
       this.refreshSegmentList(firstImageId);
+      this.onImportButtonClick()
     }
   }
 
@@ -516,7 +517,8 @@ class XNATSegmentationPanel extends React.Component {
       segments.forEach(segment => {
         this.onDeleteClick(segment.index);
       });
-      // refreshViewports();
+      // added by razak
+      refreshViewports();
     } catch (error) {}
 
     // this.setState({ importing: true });
@@ -928,8 +930,8 @@ class XNATSegmentationPanel extends React.Component {
               ExportCallbackOrComponent={XNATSegmentationExportMenu}
               // onImportButtonClick={() => this.setState({ importing: true })}
               onImportButtonClick={this.onImportButtonClick}
-              onExportButtonClick={this.onClearButtonClick}
-              // onExportButtonClick={() => this.setState({ exporting: true })}
+              // onExportButtonClick={this.onClearButtonClick}
+              onExportButtonClick={() => this.setState({ exporting: true })}
               exportDisabledMessage={exportDisabledMessage}
             />
           </div>

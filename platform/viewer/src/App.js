@@ -67,9 +67,10 @@ Sentry.init({
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
       tracePropagationTargets: [
-        'localhost',
-        'http://localhost:3000',
+        // 'localhost',
+        // 'http://localhost:3000',
         'https://dev.ohif.thetatech.ai',
+        'https://ohif.thetatech.ai',
       ],
     }),
     new Sentry.Replay(),

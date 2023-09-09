@@ -122,6 +122,20 @@ class XNATSegmentationExportMenu extends React.Component {
   //   });
   // }
 
+  fetchSegmentationsFromLocalStorage() {
+    try {
+      const segmentationsJson = localStorage.getItem('segmentation');
+      console.log({ segmentationsJson });
+      const segmentations =
+        segmentationsJson && segmentationsJson !== 'undefined'
+          ? JSON.parse(segmentationsJson)
+          : {};
+      return segmentations;
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+
   updateAndSaveLocalSegmentations(b) {
     console.log({ b });
     const fetchedSegmentationsList = localStorage.getItem('segmentation');
@@ -196,7 +210,10 @@ class XNATSegmentationExportMenu extends React.Component {
       rows: rows,
       cols: columns,
     };
-
+    // this.setState({
+    //   exporting: false,
+    // });
+    // this.props.onExportCancel();
     this.worker.postMessage({
       segList: segList,
       labelmap2D: labelmap2D,
@@ -264,6 +281,12 @@ class XNATSegmentationExportMenu extends React.Component {
       segmentationModule,
     });
 
+    // Store RecommendedDisplayCIELabValue to localStorage just before exporting
+    for (const item of segList) {
+      const labelKey = `segmentColor_${item.metadata.SegmentLabel}`;
+      setItem(labelKey, item.metadata.RecommendedDisplayCIELabValue);
+    }
+
     const {
       labelmap3D,
       currentImageIdIndex,
@@ -293,11 +316,6 @@ class XNATSegmentationExportMenu extends React.Component {
       console.warn({ response });
     } catch (error) {}
     setItem('hasUnsavedChanges', false);
-
-    // this.setState({
-    //   exporting: false,
-    // });
-    // this.props.onExportCancel();
 
     return;
   }
