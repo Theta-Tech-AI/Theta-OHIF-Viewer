@@ -44,7 +44,13 @@ export default class MenuIOButtons extends React.Component {
     return (
       <div>
         {ImportCallbackOrComponent && (
-          <button onClick={onImportButtonClick}>Import</button>
+          <button
+            id="triggerImportSegmentations"
+            style={{ display: 'none' }}
+            onClick={onImportButtonClick}
+          >
+            Import
+          </button>
         )}
         {ExportCallbackOrComponent && exportButton}
       </div>

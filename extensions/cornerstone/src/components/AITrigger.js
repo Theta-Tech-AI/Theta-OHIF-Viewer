@@ -1,3 +1,4 @@
+import { setItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import { getEnabledElement } from '../state';
 import cornerstone from 'cornerstone-core';
 import cornerstoneTools from 'cornerstone-tools';
@@ -76,6 +77,11 @@ const TriggerAlgorithm = ({ viewports, servicesManager }) => {
         'mask',
         JSON.stringify(event_data.measurementData || {})
       );
+
+      const image = cornerstone.getImage(element);
+      // extract instance uid from the derived image data
+      const instance_uid = image.imageId.split('/')[18];
+      setItem('instance_uid', instance_uid);
 
       cornerstone.updateImage(element);
       cornerstoneTools.addToolState(

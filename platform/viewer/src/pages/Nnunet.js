@@ -230,6 +230,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       } else if (status === 'ERROR') {
         setStatus('error');
         setHelperText('An error occurred!');
+        handleOnSuccess();
       }
     }
   }, 16000);
