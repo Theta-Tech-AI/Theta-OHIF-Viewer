@@ -32,14 +32,15 @@ import JobsContextUtil from './JobsContextUtil.js';
 import { getEnabledElement } from '../../../../extensions/cornerstone/src/state';
 import eventBus from '../lib/eventBus';
 import { Icon } from '../../../ui/src/elements/Icon';
-import { BrainMode, radcadapi } from '../utils/constants';
+import { BrainMode, lungMode, radcadapi } from '../utils/constants';
 import { Morphology3DComponent } from '../components/3DSegmentation/3D';
 // import { Morphology3DComponent } from '../components/3DSegmentation/3D_old';
 import pdfmake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import exportComponent from '../lib/ExportComponent';
 import Summary from '../components/Summary';
-import PdfMaker from '../lib/PdfMaker';
+import LungPdfMaker from '../lib/LungPdfMaker';
+import BrainPdfMaker from '../lib/BrainPdfMaker';
 import handleScrolltoIndex from '../utils/handleScrolltoIndex';
 import { handleRestoreToolState } from '../utils/syncrhonizeToolState';
 import ConnectedStudyBrowser from './ConnectedStudyBrowser';
@@ -647,17 +648,39 @@ class Radiomics extends Component {
           const SimilarScans = JSON.parse(
             localStorage.getItem('print-similarscans') || '{}'
           );
-
-          const definition = PdfMaker(
-            SimilarScans[0],
-            collage.toDataURL(),
-            base64,
-            morphologyBase64
-          );
-          this.setState({
-            showImages: false,
-          });
-          pdfmake.createPdf(definition).download();
+          if (this.props.currentMode === lungMode) {
+            const definition = LungPdfMaker(
+              SimilarScans[0],
+              collage.toDataURL(),
+              base64,
+              morphologyBase64
+            );
+            this.setState({
+              showImages: false,
+            });
+            pdfmake.createPdf(definition).download();
+          } else {
+            const definition = BrainPdfMaker(
+              // SimilarScans[0],
+              collage.toDataURL(),
+              base64,
+              morphologyBase64
+            );
+            this.setState({
+              showImages: false,
+            });
+            pdfmake.createPdf(definition).download();
+          }
+          // const definition = LungPdfMaker(
+          //   SimilarScans[0],
+          //   collage.toDataURL(),
+          //   base64,
+          //   morphologyBase64
+          // );
+          // this.setState({
+          //   showImages: false,
+          // });
+          // pdfmake.createPdf(definition).download();
 
           UINotificationService.show({
             title: 'Pdf Generation Completed',
