@@ -20,7 +20,7 @@ export default function JobsContextUtil({
 
     try {
       let modalities = {};
-      let requiredModalities = ['FLAIR', 'T1CE', 'T2'];
+      let requiredModalities = ['FLAIR', 'T1CE', 'T2',"T1"];
 
       let modalityMapping = {
         T1CE: 'T1-Contrast',
