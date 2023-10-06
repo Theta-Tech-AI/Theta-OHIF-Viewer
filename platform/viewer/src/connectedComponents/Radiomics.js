@@ -605,143 +605,108 @@ class Radiomics extends Component {
     }, 500);
   };
 
+  downloadBrainModePdf = () => {
+    // this.setState({
+    //   showImages: true,
+    // });
+
+    setTimeout(() => {
+      const fetchBase64Data = [exportComponent(this.canvas)];
+
+      const customScene = this.componentRef.current.el.layout.scene;
+      const plotDiv = this.componentRef.current.el;
+      const { graphDiv } = plotDiv._fullLayout.scene._scene;
+      const divToDownload = {
+        ...graphDiv,
+        layout: { ...graphDiv.layout, scene: customScene },
+      };
+
+      fetchBase64Data.push(
+        Plotly.toImage(divToDownload, {
+          format: 'png',
+          width: 800,
+          height: 600,
+        })
+      );
+
+      Promise.all(fetchBase64Data)
+        .then(data => {
+          const collage = data[0];
+          const morphologyBase64 = data[1];
+          const definition = BrainPdfMaker(
+            collage.toDataURL(),
+            morphologyBase64
+          );
+          // this.setState({
+          //   showImages: false,
+          // });
+          pdfmake.createPdf(definition).download();
+        })
+        .catch(error => {
+          // this.setState({
+          //   showImages: false,
+          // });
+        });
+    }, 500);
+  };
+
   downloadReportAsPdf = () => {
+    if (this.props.currentMode === BrainMode) {
+      this.downloadBrainModePdf();
+    } else if (this.props.currentMode === lungMode) {
+      this.downloadLungModePdf();
+    }
+  };
+
+  downloadLungModePdf = () => {
     const base64 = [];
     const promises = [];
-    let chart = null;
-    let ohif_image = null;
-
     this.setState({
       showImages: true,
     });
-    const { UINotificationService } = servicesManager.services;
-
-    UINotificationService.show({
-      title: 'Generating Pdf',
-      type: 'info',
-      autoClose: true,
-    });
-
-    // grpah
+  
     setTimeout(() => {
       const similarityResultState = this.state.similarityResultState;
-
-      console.log({
-        similarityResultState,
-      });
-
-      if (!similarityResultState) {
+  
+      if (!similarityResultState || similarityResultState.knn.length < 1) {
         return;
       }
-      if (similarityResultState.knn.length < 1) {
-        return;
-      }
-
+  
       for (let i = 0; i < similarityResultState.knn.length; i++) {
         const imageElement = this.imageRefs[i];
         promises.push(exportComponent(imageElement));
       }
-
+  
       Promise.all(promises)
-        .then(data => {
-          data.forEach(element => {
+        .then((data) => {
+          data.forEach((element) => {
             base64.push(element.toDataURL());
           });
-
-          const fetchBase64Data = [exportComponent(this.canvas)];
-          try {
-            if (this.props.currentMode === BrainMode) {
-              // if (currentMode === BrainMode) {
-              const customScene = this.componentRef.current.el.layout.scene;
-
-              const plotDiv = this.componentRef.current.el;
-              const { graphDiv } = plotDiv._fullLayout.scene._scene;
-              console.log(this.componentRef.current);
-              const divToDownload = {
-                ...graphDiv,
-                layout: { ...graphDiv.layout, scene: customScene },
-              };
-
-              fetchBase64Data.push(
-                Plotly.toImage(divToDownload, {
-                  format: 'png',
-                  width: 800,
-                  height: 600,
-                })
-              );
-            }
-          } catch (error) {
-            console.log(
-              'Error occurred while setting morphologyBase64:',
-              error
-            );
-          }
-          return Promise.all(fetchBase64Data);
+  
+          return exportComponent(this.canvas);
         })
-        .then(data => {
-          const collage = data[0];
-          let morphologyBase64 = null;
-          try {
-            if (this.props.currentMode === BrainMode)
-              morphologyBase64 = data[1];
-          } catch (error) {
-            console.log(
-              'Error occurred while setting morphologyBase64:',
-              error
-            );
-          }
+        .then((collage) => {
           const SimilarScans = JSON.parse(
-            localStorage.getItem('print-similarscans') || '{}'
+            localStorage.getItem("print-similarscans") || "{}"
           );
-          if (this.props.currentMode === lungMode) {
-            const definition = LungPdfMaker(
-              SimilarScans[0],
-              collage.toDataURL(),
-              base64,
-              morphologyBase64
-            );
-            this.setState({
-              showImages: false,
-            });
-            pdfmake.createPdf(definition).download();
-          } else {
-            const definition = BrainPdfMaker(
-              // SimilarScans[0],
-              collage.toDataURL(),
-              base64,
-              morphologyBase64
-            );
-            this.setState({
-              showImages: false,
-            });
-            pdfmake.createPdf(definition).download();
-          }
-          // const definition = LungPdfMaker(
-          //   SimilarScans[0],
-          //   collage.toDataURL(),
-          //   base64,
-          //   morphologyBase64
-          // );
-          // this.setState({
-          //   showImages: false,
-          // });
-          // pdfmake.createPdf(definition).download();
-
-          UINotificationService.show({
-            title: 'Pdf Generation Completed',
-            // message,
-            type: 'info',
-            autoClose: true,
+          const definition = LungPdfMaker(
+            SimilarScans[0],
+            collage.toDataURL(),
+            base64
+          );
+          this.setState({
+            showImages: false,
           });
+          pdfmake.createPdf(definition).download();
         })
-        .catch(error => {
-          console.log(error);
+        .catch((error) => {
           this.setState({
             showImages: false,
           });
         });
     }, 500);
   };
+  
 
   getHelperText = () => {
     const { job, isSimilarlookingScans, isComplete } = this.state;

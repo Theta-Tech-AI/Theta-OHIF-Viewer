@@ -195,30 +195,28 @@ function createReportSummaryTable(
 
 function createMorphologyHeader() {
   return {
-    table: {
-      widths: ['25%', '72%'],
-      body: [
-        [
-          {
-            text: 'Morphology',
-            colSpan: 2,
-            margin: [20, 5, 0, 5],
-            bold: true,
-            fontSize: 18,
-          },
-          {},
-        ],
-      ],
-    },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    },
-    style: 'jumbotron',
-    margin: [0, 20, 0, 0],
-    // pageBreak: 'before',
+    style: 'headercol',
+    pageBreak: 'before',
+    stack: [
+      {
+        table: {
+          widths: ['22%', '72%'],
+          body: [
+            [
+              {
+                text: 'MORPHOLOGY',
+                style: 'jumbotronHeader',
+                colSpan: 2,
+              },
+              {},
+            ],
+          ],
+        },
+        layout: {},
+        style: 'jumbotronLBlue2',
+        margin: [0, 20, -10, 5],
+      },
+    ],
   };
 }
 
@@ -235,7 +233,7 @@ function createMorphologyBody(image) {
   };
 }
 
-const PdfMaker = (ohif_image, chart, morphologyBase64) => {
+const PdfMaker = (ohif_image, morphologyBase64) => {
   let contents = [];
   let contents2 = [];
   let contents3 = null;
@@ -441,6 +439,7 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
     const morphologyHeader = createMorphologyHeader();
     documentDefinition.content.push(morphologyHeader);
     documentDefinition.content.push(morphologyImage);
+
   }
 
   return documentDefinition;
