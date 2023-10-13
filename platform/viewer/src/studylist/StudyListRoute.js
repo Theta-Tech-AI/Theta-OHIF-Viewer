@@ -23,6 +23,7 @@ import cornerstone from 'cornerstone-core';
 import AppContext from '../context/AppContext';
 import PreferenceButton from '../components/Header/PreferenceButton';
 import { getItem, setItem } from '../lib/localStorageUtils';
+import WalkthroughModal from '../importIdc/WalkthroughModal';
 
 const { urlUtil: UrlUtil } = OHIF.utils;
 
@@ -61,6 +62,7 @@ function StudyListRoute(props) {
     error: null,
   });
   const [showImportIdcModal, setShowImportIdcModal] = useState(false);
+  const [showHowtoGuide, setShowHowtoGuide] = useState(false);
   const [activeModalId, setActiveModalId] = useState(null);
   const [rowsPerPage, setRowsPerPage] = useState(getItem('rowsPerPage', 5));
   const [pageNumber, setPageNumber] = useState(0);
@@ -215,6 +217,15 @@ function StudyListRoute(props) {
     setShowImportIdcModal(false);
   };
 
+  const handleGuideClose = async () => {
+    // if (UIModalService) UIModalService.hide();
+    setShowHowtoGuide(false);
+  };
+  const handleGuideClose2 = async UIModalService => {
+    // if (UIModalService) UIModalService.hide();
+    setShowHowtoGuide(false);
+  };
+
   const handleImportSuccessful = async UIModalService => {
     await fetchStudies();
     // if (UIModalService) UIModalService.hide();
@@ -241,6 +252,12 @@ function StudyListRoute(props) {
         onSuccess={handleImportSuccessful}
       />
 
+      <WalkthroughModal
+        isOpen={showHowtoGuide}
+        onClose={handleGuideClose}
+        onSuccess={handleGuideClose2}
+      />
+
       <div className="study-list-header print">
         <div className="header">
           <h1 style={{ fontWeight: 700, fontSize: '24px' }}>
@@ -248,14 +265,14 @@ function StudyListRoute(props) {
           </h1>
         </div>
         <div className="actions">
-          {/* <div className="form-inline btn-group pull-right">
+          <div className="form-inline btn-group pull-right">
             <button
               className="btn btn-outline"
-              onClick={() => setShowImportIdcModal(true)}
+              onClick={() => setShowHowtoGuide(true)}
             >
-              {t('Import IDC')}
+              {t('How to use')}
             </button>
-          </div> */}
+          </div>
           <PreferenceButton />
 
           {studyListFunctionsEnabled && healthCareApiButtons}
