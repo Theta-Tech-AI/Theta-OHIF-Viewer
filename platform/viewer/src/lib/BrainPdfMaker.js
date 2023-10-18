@@ -11,80 +11,80 @@ function getMalignantScore(data) {
 
 function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
   return {
-    columns: [
+    stack: [
       {
         stack: [
           {
             image: imageDataUrl8,
-            width: 300,
-            height: 180,
+            width: 350,
+            height: 280,
             margin: [-10, 5, 0, 0],
           },
         ],
-        margin: [40, 0, 0, 0],
+        margin: [70, 0, 0, 0],
       },
-      {
-        margin: [20, 10, 0, 0],
-        stack: [
-          {
-            stack: [
-              {
-                columns: [
-                  {
-                    text: 'Zoom:',
-                    bold: true,
-                    fontSize: 8,
-                    margin: [60, 0, 0, 0],
-                  },
-                  {
-                    text: zoom,
-                    fontSize: 8,
-                    margin: [-70, 0, 0, 0],
-                  },
-                ],
-              },
-              {
-                columns: [
-                  {
-                    text: 'W:',
-                    fontSize: 8,
-                    bold: true,
-                    margin: [60, 0, 0, 0],
-                  },
-                  {
-                    text: w,
-                    fontSize: 8,
-                    margin: [-80, 0, 0, 0],
-                  },
-                ],
-              },
-              {
-                text: 'Loseless/',
-                fontSize: 8,
-                margin: [60, 0, 0, 0],
-              },
-              {
-                text: 'uncompressed',
-                fontSize: 8,
-                margin: [60, 0, 0, 0],
-              },
-            ],
-          },
-          {
-            margin: [60, 110, 0, 0],
-            stack: [
-              {
-                text: date,
-                fontSize: 8,
-              },
-              {
-                text: time,
-                fontSize: 8,
-              },
-            ],
-          },
-        ],
-      },
+      // {
+      //   margin: [20, 10, 0, 0],
+      //   stack: [
+      //     {
+      //       stack: [
+      //         {
+      //           columns: [
+      //             {
+      //               text: 'Zoom:',
+      //               bold: true,
+      //               fontSize: 8,
+      //               margin: [60, 0, 0, 0],
+      //             },
+      //             {
+      //               text: zoom,
+      //               fontSize: 8,
+      //               margin: [-70, 0, 0, 0],
+      //             },
+      //           ],
+      //         },
+      //         {
+      //           columns: [
+      //             {
+      //               text: 'W:',
+      //               fontSize: 8,
+      //               bold: true,
+      //               margin: [60, 0, 0, 0],
+      //             },
+      //             {
+      //               text: w,
+      //               fontSize: 8,
+      //               margin: [-80, 0, 0, 0],
+      //             },
+      //           ],
+      //         },
+      //         {
+      //           text: 'Loseless/',
+      //           fontSize: 8,
+      //           margin: [60, 0, 0, 0],
+      //         },
+      //         {
+      //           text: 'uncompressed',
+      //           fontSize: 8,
+      //           margin: [60, 0, 0, 0],
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       margin: [60, 110, 0, 0],
+      //       stack: [
+      //         {
+      //           text: date,
+      //           fontSize: 8,
+      //         },
+      //         {
+      //           text: time,
+      //           fontSize: 8,
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
     ],
   };
 }
@@ -226,7 +226,7 @@ function createMorphologyBody(image) {
       {
         image: image,
         width: 370,
-        height: 200,
+        height: 300,
         margin: [40, 10, 0, 0],
       },
     ],
