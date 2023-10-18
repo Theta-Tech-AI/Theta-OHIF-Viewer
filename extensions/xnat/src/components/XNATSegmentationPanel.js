@@ -95,6 +95,8 @@ class XNATSegmentationPanel extends React.Component {
     this.onEditClick = this.onEditClick.bind(this);
     this.onUpdateProperty = this.onUpdateProperty.bind(this);
     this.onDeleteClick = this.onDeleteClick.bind(this);
+    this.onClearButtonClick = this.onClearButtonClick.bind(this);
+    this.onImportButtonClick = this.onImportButtonClick.bind(this);
     this.onIOComplete = this.onIOComplete.bind(this);
     this.onNewSegment = this.onNewSegment.bind(this);
     this.onIOCancel = onIOCancel.bind(this);
@@ -141,9 +143,8 @@ class XNATSegmentationPanel extends React.Component {
 
   componentDidMount() {
     // const appContext = this.context;
-
     console.log('segpanel mounted', { props: this.props });
-    // this.onImportButtonClick();
+    this.onImportButtonClick();
   }
 
   addEventListeners() {
@@ -232,14 +233,14 @@ class XNATSegmentationPanel extends React.Component {
       let activeSegmentIndex = 1;
       let labelmap3D;
       const importMetadata = this.constructor._importMetadata(firstImageId);
-  
+
       if (firstImageId) {
         const segmentList = this.getSegmentList(firstImageId);
-  
+
         segments = segmentList.segments;
         activeSegmentIndex = segmentList.activeSegmentIndex;
         labelmap3D = segmentList.labelmap3D;
-  
+
         if (labelmap3D && labelmap3D.labelmaps2D) {
           const slicexsegments = new Set();
           labelmap3D.labelmaps2D.forEach((labelmap, index) => {
@@ -249,12 +250,12 @@ class XNATSegmentationPanel extends React.Component {
               }
             }
           });
-  
+
           const slicexsegmentsArray = Array.from(slicexsegments);
           console.log('-------------------', slicexsegmentsArray);
         }
       }
-  
+
       this.setState({
         importMetadata,
         segments,
@@ -269,7 +270,7 @@ class XNATSegmentationPanel extends React.Component {
       // Handle the error as appropriate for your application.
     }
   }
-  
+
   componentDidUpdate() {
     // const appContext = this.context;
     const { viewports, activeIndex } = this.props;
@@ -292,7 +293,9 @@ class XNATSegmentationPanel extends React.Component {
     const firstImageId = _getFirstImageId(viewports[activeIndex]);
 
     if (firstImageId !== this.state.firstImageId) {
+      this.onClearButtonClick();
       this.refreshSegmentList(firstImageId);
+      this.onImportButtonClick()
     }
   }
 
@@ -494,6 +497,32 @@ class XNATSegmentationPanel extends React.Component {
     });
   }
 
+  onImportButtonClick() {
+    try {
+      const { segments } = this.state;
+
+      segments.forEach(segment => {
+        this.onDeleteClick(segment.index);
+      });
+      // refreshViewports();
+    } catch (error) {}
+
+    this.setState({ importing: true });
+  }
+
+  onClearButtonClick() {
+    try {
+      const { segments } = this.state;
+
+      segments.forEach(segment => {
+        this.onDeleteClick(segment.index);
+      });
+      // added by razak
+      refreshViewports();
+    } catch (error) {}
+
+    // this.setState({ importing: true });
+  }
   /**
    * onDeleteClick - A callback that deletes a segment form the series.
    *
@@ -511,6 +540,16 @@ class XNATSegmentationPanel extends React.Component {
       const segmentUid = labelmap3D.metadata[segmentIndex].uid;
       aiaaModule.setters.removeAllPointsForSegment(segmentUid);
     }
+
+    // Clear the brush segment pixel data
+    for (let i = 0; i < labelmap3D.buffer.length; i++) {
+      if (labelmap3D.buffer[i] === segmentIndex) {
+        labelmap3D.buffer[i] = 0;
+      }
+    }
+
+    // Force the element to redraw to show the cleared segment
+    cornerstone.updateImage(element);
 
     segmentationModule.setters.deleteSegment(element, segmentIndex);
 
@@ -887,9 +926,11 @@ class XNATSegmentationPanel extends React.Component {
               />
             </div>
             <MenuIOButtons
-              // ImportCallbackOrComponent={XNATSegmentationImportMenu}
+              ImportCallbackOrComponent={XNATSegmentationImportMenu}
               ExportCallbackOrComponent={XNATSegmentationExportMenu}
               // onImportButtonClick={() => this.setState({ importing: true })}
+              onImportButtonClick={this.onImportButtonClick}
+              // onExportButtonClick={this.onClearButtonClick}
               onExportButtonClick={() => this.setState({ exporting: true })}
               exportDisabledMessage={exportDisabledMessage}
             />

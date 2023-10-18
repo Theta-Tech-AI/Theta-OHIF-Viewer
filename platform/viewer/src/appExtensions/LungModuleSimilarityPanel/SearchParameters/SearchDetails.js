@@ -129,7 +129,8 @@ const RenderSimilarityResultText = ({ content, res, title }) => (
   <p
     style={{
       color: 'white',
-      alignSelf: 'flex-start',
+      textAlign: 'center',
+      // alignSelf: 'flex-start',
       padding: 0,
       margin: 0,
       marginLeft: 20,
@@ -617,28 +618,6 @@ const SearchDetails = props => {
                     });
                   }}
                 >
-                  <div
-                    style={{
-                      width: 100,
-                      height: 100,
-                      position: 'relative', // Enables positioning of child elements
-                    }}
-                  >
-                    <img
-                      crossOrigin="anonymous"
-                      src={res.region_thumbnail_url}
-                      style={{
-                        // position: 'absolute', // Positions the image within the div
-                        left: res.region_rectangle.x,
-                        top: res.region_rectangle.y,
-                        width: imgWidth, // Updated width
-                        height: imgHeight, // Updated height
-                        border: '2.55px solid blue',
-                        borderColor: res.malignant ? 'red' : 'blue',
-                      }}
-                    />
-                  </div>
-
                   <RenderSimilarityResultText
                     content={`Similarity: ${res.similarity_score}`}
                     res={res}
@@ -656,6 +635,29 @@ const SearchDetails = props => {
                     res={res}
                     title={'Malignant'}
                   />
+
+                  <div
+                    style={{
+                      width: 100,
+                      height: 100,
+                      textAlign: 'center',
+                      position: 'relative', // Enables positioning of child elements
+                    }}
+                  >
+                    <img
+                      crossOrigin="anonymous"
+                      src={res.region_thumbnail_url}
+                      style={{
+                        // position: 'absolute', // Positions the image within the div
+                        left: res.region_rectangle.x,
+                        top: res.region_rectangle.y,
+                        width: imgWidth, // Updated width
+                        height: imgHeight, // Updated height
+                        border: '2.55px solid blue',
+                        borderColor: res.malignant ? 'red' : 'blue',
+                      }}
+                    />
+                  </div>
                 </div>
                 // </>
               );

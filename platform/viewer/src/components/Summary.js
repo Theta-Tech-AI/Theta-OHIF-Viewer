@@ -1,24 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { getItem } from '../lib/localStorageUtils';
+import { lungMode } from '../utils/constants';
 
 // ----------------------------------------------------------------------
 
 const Summary = props => {
-  const { similarityResultState } = props;
+  const { similarityResultState, currentMode } = props;
   const [patientData, setPatientData] = useState({});
 
   useEffect(() => {
-    localStorage.setItem(
-      'summary',
-      JSON.stringify({
-        name: 'sadsad',
-        name2: 'sadsad',
-        name3: 'sadsad',
-      })
-    );
     setPatientData(getItem('selectedStudy'));
   }, []);
+
+  const isInLungMode = currentMode === lungMode;
 
   return (
     <div
@@ -64,7 +59,7 @@ const Summary = props => {
               color: '#00c7ee',
             }}
           >
-            Patient ID : {' '}
+            Patient ID :{' '}
           </h2>
           <h2> {patientData.PatientID} </h2>
         </div>
@@ -84,7 +79,7 @@ const Summary = props => {
               color: '#00c7ee',
             }}
           >
-            Patient Name : {' '}
+            Patient Name :{' '}
           </h2>
           <h2> {patientData.PatientName} </h2>
         </div>
@@ -104,33 +99,35 @@ const Summary = props => {
               color: '#00c7ee',
             }}
           >
-            Classifier : {' '}
+            Classifier :{' '}
           </h2>
           <h2>Resnet-18 </h2>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            marginTop: 12,
-            justifyContent: 'flex-start',
-          }}
-        >
-          <h2
-            className="cad"
+        {isInLungMode && (
+          <div
             style={{
-              color: '#00c7ee',
+              display: 'flex',
+              flexDirection: 'row',
+              marginTop: 12,
+              justifyContent: 'flex-start',
             }}
           >
-            Malignant Score : {' '}
-          </h2>
-          <h2>
-            {similarityResultState.score
-              ? similarityResultState.score
-              : ' loading...'}
-          </h2>
-        </div>
+            <h2
+              className="cad"
+              style={{
+                color: '#00c7ee',
+              }}
+            >
+              Malignant Score :{' '}
+            </h2>
+            <h2>
+              {similarityResultState.score
+                ? similarityResultState.score
+                : ' loading...'}
+            </h2>
+          </div>
+        )}
 
         <div
           style={{
@@ -138,7 +135,7 @@ const Summary = props => {
           }}
         >
           <button
-            disabled={!similarityResultState.score}
+            disabled={isInLungMode && !similarityResultState.score}
             onClick={props.triggerDownload}
             className="btn btn-primary btn-large"
           >

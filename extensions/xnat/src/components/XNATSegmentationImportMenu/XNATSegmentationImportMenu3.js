@@ -16,7 +16,6 @@ import List, {
 } from '@ohif/viewer/src/appExtensions/LungModuleSimilarityPanel/components/list';
 import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
-import Worker from './segments.worker';
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
@@ -25,8 +24,6 @@ function getStoredRecommendedDisplayCIELabValueByLabel(label) {
 }
 
 class XNATSegmentationImportMenu extends React.Component {
-  worker = new Worker();
-
   constructor(props = {}) {
     super(props);
 
@@ -40,32 +37,11 @@ class XNATSegmentationImportMenu extends React.Component {
     };
   }
 
-  componentWillUnmount() {
-    this.worker.terminate();
-  }
-
   componentDidMount() {
     console.log('import onmount');
+
     //  this.fetchSegmentationsFromLocalStorage();
     this.onImportButtonClick();
-
-    this.worker.onmessage = event => {
-      const { status, data, message } = event.data;
-
-      if (status === 'success') {
-        // Call the method to add these segmentations to the canvas
-        this.addToCanvas({ processedSegmentations: data });
-      } else if (status === 'error') {
-        console.error('Error from segmentation worker:', message);
-        this.props.onImportCancel();
-        // Handle the error in your UI or logic here
-        // For example:
-        // this.setState({
-        //   error: true,
-        //   errorMessage: message,
-        // });
-      }
-    };
   }
 
   getSegmentationName(key) {
@@ -76,40 +52,10 @@ class XNATSegmentationImportMenu extends React.Component {
     this.props.onImportCancel();
   }
 
-  processSegmentations({ segmentations, labelmap3D }) {
-    const processedSegmentations = [];
+  addSegmentationToCanvas({ segmentation, label, element }) {
+    const startTime = performance.now();
 
-    Object.keys(segmentations).forEach((item, index) => {
-      const segDetails = segmentations[item];
-      const uncompressed = uncompress({
-        segmentation: segDetails.segmentation,
-        shape:
-          typeof segDetails.shape === 'string'
-            ? JSON.parse(segDetails.shape)
-            : segDetails.shape,
-      });
-
-      const updated2dMaps = getUpdatedSegments({
-        segmentation: uncompressed,
-        segmentIndex: labelmap3D.activeSegmentIndex,
-        currPixelData: labelmap3D.labelmaps2D,
-      });
-
-      processedSegmentations.push({
-        item,
-        uncompressed,
-        updated2dMaps,
-      });
-    });
-
-    return processedSegmentations;
-  }
-
-  addToCanvas({ processedSegmentations }) {
-    const view_ports = cornerstone.getEnabledElements();
-    const viewports = view_ports[0];
-    const element = getEnabledElement(view_ports.indexOf(viewports));
-
+    console.warn({ segmentation, label, element });
     const labelmap2D = segmentationModule.getters.labelmap2D(element);
     const {
       labelmap3D,
@@ -118,61 +64,141 @@ class XNATSegmentationImportMenu extends React.Component {
       ...rest
     } = segmentationModule.getters.labelmap2D(element);
 
-    processedSegmentations.forEach(({ item, uncompressed, updated2dMaps }) => {
+    let segmentIndex = labelmap3D.activeSegmentIndex;
+    let metadata = labelmap3D.metadata[segmentIndex];
+
+    console.log({
+      metadata,
+      segmentIndex,
+    });
+
+    if (!metadata) {
+      console.warn('layer not occupied');
+
+      metadata = generateSegmentationMetadata(label);
+      const storedColor = getStoredRecommendedDisplayCIELabValueByLabel(label);
+      if (storedColor) {
+        segmentation.RecommendedDisplayCIELabValue = storedColor;
+      }
+
+      const updated2dMaps = getUpdatedSegments({
+        segmentation,
+        segmentIndex,
+        currPixelData: labelmap3D.labelmaps2D,
+      });
+      console.log({
+        updated2dMaps,
+      });
+
+      labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
+      if (segmentIndex === 1) {
+        const mDataInit = Array(1);
+        mDataInit[1] = metadata;
+        labelmap2D.labelmap3D.metadata = mDataInit;
+      } else {
+        labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
+      }
+      labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
+
+      console.warn('updatedLabelmaps2s', {
+        labelmap2D,
+        segmentIndex,
+      });
+      segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
+
+      console.log({
+        updatedLm2d: segmentationModule.getters.labelmap2D(element),
+      });
+    } else {
+      //theres something on this layer so we need to find the last layer and work on the one after it
+      console.warn('layer occupied', labelmap3D);
+
+      metadata = generateSegmentationMetadata(label);
+      segmentIndex = labelmap3D.metadata.length;
+
+      const updated2dMaps = getUpdatedSegments({
+        segmentation,
+        segmentIndex,
+        currPixelData: labelmap3D.labelmaps2D,
+      });
+      console.log({
+        updated2dMaps,
+      });
+
+      labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
+      labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
+      labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
+
+      console.log({ labelmap2D, segmentIndex });
+      segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
+
+      console.log({
+        updatedLm2d: segmentationModule.getters.labelmap2D(element),
+      });
+    }
+
+    const endTime = performance.now();
+    console.log(
+      `Time taken by addSegmentationToCanvas: ${(endTime - startTime) / 1000}ms`
+    );
+  }
+
+  importSegmentationLayers({ segmentations }) {
+    const segmentationsList = Object.keys(segmentations);
+    console.log({ segmentationsList });
+
+    const view_ports = cornerstone.getEnabledElements();
+    const viewports = view_ports[0];
+
+    const element = getEnabledElement(view_ports.indexOf(viewports));
+
+    segmentationsList.forEach((item, index) => {
+      console.log({ item });
+      const segDetails = segmentations[item];
+
+      const uncompressed = uncompress({
+        segmentation: segDetails.segmentation,
+        shape:
+          typeof segDetails.shape === 'string'
+            ? JSON.parse(segDetails.shape)
+            : segDetails.shape,
+      });
+      console.log({ uncompressed });
+
       if (!element) {
         return;
       }
 
-      let segmentIndex = labelmap3D.activeSegmentIndex;
-      let metadata = labelmap3D.metadata[segmentIndex];
+      console.warn({
+        uncompressed,
+        item,
+      });
 
-      if (!metadata) {
-        metadata = generateSegmentationMetadata(item);
-        const storedColor = getStoredRecommendedDisplayCIELabValueByLabel(item);
-        if (storedColor) {
-          // uncompressed.RecommendedDisplayCIELabValue = storedColor;
-        }
-
-        labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
-        if (segmentIndex === 1) {
-          const mDataInit = Array(1);
-          mDataInit[1] = metadata;
-          labelmap2D.labelmap3D.metadata = mDataInit;
-        } else {
-          labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
-        }
-        labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
-
-        segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
-      } else {
-        metadata = generateSegmentationMetadata(item);
-        segmentIndex = labelmap3D.metadata.length;
-
-        labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
-        labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
-        labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
-
-        segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
-      }
-
-      refreshViewports();
-      triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
+      this.addSegmentationToCanvas({
+        segmentation: uncompressed,
+        label: item,
+        element,
+        // add metadata here
+      });
     });
+
+    console.log('refresh viewports', {});
+    refreshViewports();
+    triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
   }
 
-  processAndAddSegmentations({ segmentations }) {
-    const view_ports = cornerstone.getEnabledElements();
-    const viewports = view_ports[0];
-    const element = getEnabledElement(view_ports.indexOf(viewports));
-
-    const { labelmap3D } = segmentationModule.getters.labelmap2D(element);
-    this.worker.postMessage({ segmentations, labelmap3D });
-
-    // const processedSegmentations = this.processSegmentations({
-    //   segmentations,
-    //   labelmap3D,
-    // });
-    // this.addToCanvas({ processedSegmentations });
+  fetchSegmentationsFromLocalStorage() {
+    try {
+      const segmentationsJson = localStorage.getItem('segmentation');
+      console.log({ segmentationsJson });
+      const segmentations =
+        segmentationsJson && segmentationsJson !== 'undefined'
+          ? JSON.parse(segmentationsJson)
+          : {};
+      return segmentations;
+    } catch (error) {
+      console.log({ error });
+    }
   }
 
   fetchSegmentations() {
@@ -219,7 +245,7 @@ class XNATSegmentationImportMenu extends React.Component {
       `Time taken by fetchSegmentations: ${(endTime - startTime) / 1000}ms`
     );
     console.log({ segmentations });
-    this.processAndAddSegmentations({
+    this.importSegmentationLayers({
       segmentations,
     });
     return;

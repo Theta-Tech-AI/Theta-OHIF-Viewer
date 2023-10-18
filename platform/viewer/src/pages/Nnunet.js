@@ -64,7 +64,7 @@ export const startNnunetProcess = async (
     UIDialogService.dismiss({ id: 'ForceRerun' });
     const parameters = getItem('parameters');
 
-    const url = radcadapi + '/nnunet_brain';
+    const url = radcadapi + '/swin_unetr_brain';
     const body = JSON.stringify({
       study_uid: studyInstanceUID,
       series_uid: seriesInstanceUID,
@@ -230,6 +230,7 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       } else if (status === 'ERROR') {
         setStatus('error');
         setHelperText('An error occurred!');
+        handleOnSuccess();
       }
     }
   }, 16000);
