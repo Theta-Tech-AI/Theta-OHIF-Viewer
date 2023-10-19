@@ -121,11 +121,13 @@ const commandsModule = ({ servicesManager }) => {
         }
       }
     },
-    resetViewport: ({ viewports }) => {
+    resetViewport: ({ presetValue, viewports }) => {
       const enabledElement = getEnabledElement(viewports.activeViewportIndex);
 
       const state = store.getState();
-      const preset = state.mode.active === BrainMode ? 5 : 2;
+      // const preset = state.mode.active === BrainMode ? 5 : 2;
+      const preset = presetValue;
+      console.log(preset);
       const { preferences = {} } = state;
       const { window, level } =
         preferences.windowLevelData && preferences.windowLevelData[preset];
@@ -458,7 +460,7 @@ const commandsModule = ({ servicesManager }) => {
     resetViewport: {
       commandFn: actions.resetViewport,
       storeContexts: ['viewports'],
-      options: {},
+      options: { presetValue: 4 },
     },
     clearAnnotations: {
       commandFn: actions.clearAnnotations,
