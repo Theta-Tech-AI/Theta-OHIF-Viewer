@@ -18,6 +18,17 @@ import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
 
+import t1payload from './t1paylod.json';
+import t2payload from './t2paylod.json';
+import flairpaylod from './flairpaylod.json';
+
+const modalityToPayloadMapping = {
+  T1: t1payload,
+  T2: t2payload,
+  FLAIR: flairpaylod,
+  // Add more mappings as needed
+};
+
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
 function getStoredRecommendedDisplayCIELabValueByLabel(label) {
@@ -54,7 +65,14 @@ class XNATSegmentationImportMenu extends React.Component {
 
       if (status === 'success') {
         // Call the method to add these segmentations to the canvas
+
+        const view_ports = cornerstone.getEnabledElements();
+        const viewports = view_ports[0];
+        const element = getEnabledElement(view_ports.indexOf(viewports));
         this.addToCanvas({ processedSegmentations: data });
+
+        refreshViewports();
+        triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
       } else if (status === 'error') {
         console.error('Error from segmentation worker:', message);
         this.props.onImportCancel();
@@ -89,16 +107,16 @@ class XNATSegmentationImportMenu extends React.Component {
             : segDetails.shape,
       });
 
-      const updated2dMaps = getUpdatedSegments({
-        segmentation: uncompressed,
-        segmentIndex: labelmap3D.activeSegmentIndex,
-        currPixelData: labelmap3D.labelmaps2D,
-      });
+      // const updated2dMaps = getUpdatedSegments({
+      //   segmentation: uncompressed,
+      //   segmentIndex: labelmap3D.activeSegmentIndex,
+      //   currPixelData: labelmap3D.labelmaps2D,
+      // });
 
       processedSegmentations.push({
-        item,
+        label: item,
         uncompressed,
-        updated2dMaps,
+        // updated2dMaps,
       });
     });
 
@@ -110,28 +128,30 @@ class XNATSegmentationImportMenu extends React.Component {
     const viewports = view_ports[0];
     const element = getEnabledElement(view_ports.indexOf(viewports));
 
-    const labelmap2D = segmentationModule.getters.labelmap2D(element);
-    const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      ...rest
-    } = segmentationModule.getters.labelmap2D(element);
-
-    processedSegmentations.forEach(({ item, uncompressed, updated2dMaps }) => {
-      if (!element) {
-        return;
-      }
+    processedSegmentations.forEach(({ label, uncompressed }) => {
+      const labelmap2D = segmentationModule.getters.labelmap2D(element);
+      const segmentation = uncompressed;
+      const {
+        labelmap3D,
+        currentImageIdIndex,
+        activeLabelmapIndex,
+        ...rest
+      } = segmentationModule.getters.labelmap2D(element);
 
       let segmentIndex = labelmap3D.activeSegmentIndex;
       let metadata = labelmap3D.metadata[segmentIndex];
 
       if (!metadata) {
-        metadata = generateSegmentationMetadata(item);
-        const storedColor = getStoredRecommendedDisplayCIELabValueByLabel(item);
-        if (storedColor) {
-          // uncompressed.RecommendedDisplayCIELabValue = storedColor;
-        }
+        console.warn('layer not occupied');
+
+        metadata = generateSegmentationMetadata(label);
+        segmentIndex = labelmap3D.activeSegmentIndex;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         if (segmentIndex === 1) {
@@ -145,8 +165,17 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       } else {
-        metadata = generateSegmentationMetadata(item);
+        //theres something on this layer so we need to find the last layer and work on the one after it
+        console.warn('layer occupied', labelmap3D);
+
+        metadata = generateSegmentationMetadata(label);
         segmentIndex = labelmap3D.metadata.length;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
@@ -154,9 +183,6 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       }
-
-      refreshViewports();
-      triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
     });
   }
 
@@ -172,7 +198,10 @@ class XNATSegmentationImportMenu extends React.Component {
     //   segmentations,
     //   labelmap3D,
     // });
-    // this.addToCanvas({ processedSegmentations });
+    // this.addToCanvas({ processedSegmentations, element });
+
+    // refreshViewports();
+    // triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
   }
 
   fetchSegmentations() {
@@ -209,11 +238,46 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
 
+  getLocalsegmentsForSeries(modality) {
+    return new Promise((resolve, reject) => {
+      const payload = modalityToPayloadMapping[modality];
+
+      if (payload) {
+        resolve(payload);
+      } else {
+        console.error(`No payload found for modality: ${modality}`);
+        reject('err');
+      }
+    });
+  }
+
   async onImportButtonClick() {
-    //  const segmentations = this.fetchSegmentationsFromLocalStorage();
+    let series_uid = this.props.viewport.viewportSpecificData[0]
+      .SeriesInstanceUID;
+
+    // Check if series_uid is equal to the specified value
+    if (series_uid === '2.25.4245612297026806970528336476469769568') {
+      // Replace series_uid with the new value
+      series_uid =
+        '1.2.826.0.1.3680043.8.498.12751100443296877991445898901909856997';
+    }
+    console.log('Current series UID:-------------------', series_uid);
+
+    // Get parameters from local storage
+    const parameters = getItem('parameters');
+    // Find the modality that corresponds to the series_uid
+    const currentModality = Object.keys(parameters.modalities).find(
+      key => parameters.modalities[key] === series_uid
+    );
+    let segmentations = {};
+    try {
+      segmentations = await this.getLocalsegmentsForSeries(currentModality);
+    } catch (error) {}
+
+    // const segmentations = localseg;
     const startTime = performance.now();
 
-    const segmentations = await this.fetchSegmentations();
+    // const segmentations = await this.fetchSegmentations();
     const endTime = performance.now();
     console.log(
       `Time taken by fetchSegmentations: ${(endTime - startTime) / 1000}ms`

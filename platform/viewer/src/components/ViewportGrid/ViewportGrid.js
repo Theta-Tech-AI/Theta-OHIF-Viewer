@@ -172,7 +172,7 @@ const ViewportGrid = function(props) {
       ) {
         if (currentMode === BrainMode)
           setTimeout(() => {
-            onImportButtonClick();
+            // onImportButtonClick();
           }, 5000);
       }
       // }
