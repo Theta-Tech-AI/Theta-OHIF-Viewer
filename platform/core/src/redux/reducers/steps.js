@@ -13,12 +13,12 @@ export const BrainApplicationSteps = {
     href: '/view',
     icon: 'view',
   },
-  3: {
-    step: 3,
-    title: 'nnUnet',
-    href: '/nnunet',
-    icon: 'nnunet',
-  },
+  // 3: {
+  //   step: 3,
+  //   title: 'nnUnet',
+  //   href: '/nnunet',
+  //   icon: 'nnunet',
+  // },
   4: {
     step: 4,
     title: 'Segmentations',
