@@ -124,7 +124,7 @@ function createReportSummaryTable(
                   {
                     stack: [
                       {
-                        text: 'Tumor Specularity:',
+                        text: 'Tumor Spicularity:',
                         bold: true,
                         noWrap: true,
                         fontSize: 9,
@@ -150,7 +150,7 @@ function createReportSummaryTable(
                         fontSize: 9,
                       },
                       {
-                        text: '14',
+                        text: '12 to 14 months 70% ',
                         color: '#3d3d49',
                         fontStyle: 'thin',
                         fontSize: 10,
