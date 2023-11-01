@@ -23,9 +23,9 @@ import t2payload from './t2paylod.json';
 import flairpaylod from './flairpaylod.json';
 
 const modalityToPayloadMapping = {
-  T1: t1payload,
-  T2: t2payload,
-  FLAIR: flairpaylod,
+  '3': t1payload,
+  '4': t2payload,
+  '1': flairpaylod,
   // Add more mappings as needed
 };
 
@@ -256,22 +256,24 @@ class XNATSegmentationImportMenu extends React.Component {
       .SeriesInstanceUID;
 
     // Check if series_uid is equal to the specified value
-    if (series_uid === '2.25.4245612297026806970528336476469769568') {
-      // Replace series_uid with the new value
-      series_uid =
-        '1.2.826.0.1.3680043.8.498.12751100443296877991445898901909856997';
-    }
-    console.log('Current series UID:-------------------', series_uid);
+    // if (series_uid === '2.25.4245612297026806970528336476469769568') {
+    //   // Replace series_uid with the new value
+    //   series_uid =
+    //     '1.2.826.0.1.3680043.8.498.12751100443296877991445898901909856997';
+    // }
+    // console.log('Current series UID:-------------------', series_uid);
 
-    // Get parameters from local storage
-    const parameters = getItem('parameters');
-    // Find the modality that corresponds to the series_uid
-    const currentModality = Object.keys(parameters.modalities).find(
-      key => parameters.modalities[key] === series_uid
-    );
     let segmentations = {};
     try {
-      segmentations = await this.getLocalsegmentsForSeries(currentModality);
+      // Get parameters from local storage
+      let parameters = getItem('modalities');
+      parameters = parameters[0];
+      // Find the SeriesNumber that corresponds to the series_uid
+      const currentSeriesNumber = parameters.thumbnails.find(thumbnail =>
+        thumbnail.imageId.includes(series_uid)
+      ).SeriesNumber;
+
+      segmentations = await this.getLocalsegmentsForSeries(currentSeriesNumber);
     } catch (error) {}
 
     // const segmentations = localseg;
