@@ -18,14 +18,14 @@ import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
 
-import t1payload from './t1paylod.json';
-import t2payload from './t2paylod.json';
-import flairpaylod from './flairpaylod.json';
+// import t1payload from './t1paylod.json';
+// import t2payload from './t2paylod.json';
+// import flairpaylod from './flairpaylod.json';
 
 const modalityToPayloadMapping = {
-  '3': t1payload,
-  '4': t2payload,
-  '1': flairpaylod,
+  '1': 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
+  '3': 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  '4': 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
   // Add more mappings as needed
 };
 
@@ -240,17 +240,31 @@ class XNATSegmentationImportMenu extends React.Component {
 
   getLocalsegmentsForSeries(modality) {
     return new Promise((resolve, reject) => {
-      const payload = modalityToPayloadMapping[modality];
+      const url = modalityToPayloadMapping[modality];
 
-      if (payload) {
-        resolve(payload);
+      if (url) {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => resolve(data))
+          .catch(error => {
+            console.error(
+              `Error fetching data for modality: ${modality}`,
+              error
+            );
+            reject(error);
+          });
       } else {
-        console.error(`No payload found for modality: ${modality}`);
-        reject('err');
+        const error = `No URL found for modality: ${modality}`;
+        console.error(error);
+        reject(new Error(error));
       }
     });
   }
-
   async onImportButtonClick() {
     let series_uid = this.props.viewport.viewportSpecificData[0]
       .SeriesInstanceUID;
@@ -261,7 +275,7 @@ class XNATSegmentationImportMenu extends React.Component {
     //   series_uid =
     //     '1.2.826.0.1.3680043.8.498.12751100443296877991445898901909856997';
     // }
-    // console.log('Current series UID:-------------------', series_uid);
+    console.log('Current series UID:-------------------', series_uid);
 
     let segmentations = {};
     try {
@@ -273,7 +287,16 @@ class XNATSegmentationImportMenu extends React.Component {
         thumbnail.imageId.includes(series_uid)
       ).SeriesNumber;
 
+      console.log(
+        'currentSeriesNumber :-------------------',
+        currentSeriesNumber
+      );
+
       segmentations = await this.getLocalsegmentsForSeries(currentSeriesNumber);
+      console.log(
+        'segmentations :-------------------',
+        segmentations
+      );
     } catch (error) {}
 
     // const segmentations = localseg;
