@@ -23,9 +23,9 @@ import Worker from './segments.worker';
 // import flairpaylod from './flairpaylod.json';
 
 const modalityToPayloadMapping = {
-  '1': 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
-  '3': 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
-  '4': 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
+  FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
+  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
   // Add more mappings as needed
 };
 
@@ -268,6 +268,7 @@ class XNATSegmentationImportMenu extends React.Component {
   async onImportButtonClick() {
     let series_uid = this.props.viewport.viewportSpecificData[0]
       .SeriesInstanceUID;
+    const modality = this.props.viewport.viewportSpecificData[0].Modality;
 
     // Check if series_uid is equal to the specified value
     // if (series_uid === '2.25.4245612297026806970528336476469769568') {
@@ -280,23 +281,20 @@ class XNATSegmentationImportMenu extends React.Component {
     let segmentations = {};
     try {
       // Get parameters from local storage
-      let parameters = getItem('modalities');
-      parameters = parameters[0];
-      // Find the SeriesNumber that corresponds to the series_uid
-      const currentSeriesNumber = parameters.thumbnails.find(thumbnail =>
-        thumbnail.imageId.includes(series_uid)
-      ).SeriesNumber;
+      // let parameters = getItem('modalities');
+      // parameters = parameters[0];
+      // // Find the SeriesNumber that corresponds to the series_uid
+      // const currentSeriesNumber = parameters.thumbnails.find(thumbnail =>
+      //   thumbnail.imageId.includes(series_uid)
+      // ).SeriesNumber;
 
-      console.log(
-        'currentSeriesNumber :-------------------',
-        currentSeriesNumber
-      );
+      // console.log(
+      //   'currentSeriesNumber :-------------------',
+      //   currentSeriesNumber
+      // );
 
-      segmentations = await this.getLocalsegmentsForSeries(currentSeriesNumber);
-      console.log(
-        'segmentations :-------------------',
-        segmentations
-      );
+      segmentations = await this.getLocalsegmentsForSeries(modality);
+      console.log('segmentations :-------------------', segmentations);
     } catch (error) {}
 
     // const segmentations = localseg;
