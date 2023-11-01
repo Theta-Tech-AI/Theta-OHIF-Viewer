@@ -150,7 +150,7 @@ function createReportSummaryTable(
                         fontSize: 9,
                       },
                       {
-                        text: '12 to 14 months 70% ',
+                        text: '12 to 14 months,70% confidence',
                         color: '#3d3d49',
                         fontStyle: 'thin',
                         fontSize: 10,
