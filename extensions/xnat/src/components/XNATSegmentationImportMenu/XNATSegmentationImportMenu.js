@@ -25,9 +25,9 @@ import Worker from './segments.worker';
 
 const modalityToPayloadMapping = {
   FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
-  // T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
   T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
-  T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
+  // T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
   // Add more mappings as needed
 };
 
