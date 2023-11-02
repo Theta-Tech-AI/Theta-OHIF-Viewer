@@ -21,13 +21,23 @@ import Worker from './segments.worker';
 // import t1payload from './t1paylod.json';
 // import t2payload from './t2paylod.json';
 // import flairpaylod from './flairpaylod.json';
+// import ct1payload from './ct1payload.json';
 
 const modalityToPayloadMapping = {
   FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
-  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  // T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
   T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
+  T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
   // Add more mappings as needed
 };
+
+// const modalityToPayloadMapping2 = {
+//   T1: t1payload,
+//   T2: t2payload,
+//   FLAIR: flairpaylod,
+//   T1CE: ct1payload,
+//   // Add more mappings as needed
+// };
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
@@ -238,6 +248,19 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
 
+  // getLocalsegmentsForSeries2(modality) {
+  //   return new Promise((resolve, reject) => {
+  //     const payload = modalityToPayloadMapping2[modality];
+
+  //     if (payload) {
+  //       resolve(payload);
+  //     } else {
+  //       console.error(`No payload found for modality: ${modality}`);
+  //       reject('err');
+  //     }
+  //   });
+  // }
+
   getLocalsegmentsForSeries(modality) {
     return new Promise((resolve, reject) => {
       const url = modalityToPayloadMapping[modality];
@@ -266,45 +289,15 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
   async onImportButtonClick() {
-    let series_uid = this.props.viewport.viewportSpecificData[0]
-      .SeriesInstanceUID;
     const modality = this.props.viewport.viewportSpecificData[0].Modality;
-
-    // Check if series_uid is equal to the specified value
-    // if (series_uid === '2.25.4245612297026806970528336476469769568') {
-    //   // Replace series_uid with the new value
-    //   series_uid =
-    //     '1.2.826.0.1.3680043.8.498.12751100443296877991445898901909856997';
-    // }
-    console.log('Current series UID:-------------------', series_uid);
 
     let segmentations = {};
     try {
-      // Get parameters from local storage
-      // let parameters = getItem('modalities');
-      // parameters = parameters[0];
-      // // Find the SeriesNumber that corresponds to the series_uid
-      // const currentSeriesNumber = parameters.thumbnails.find(thumbnail =>
-      //   thumbnail.imageId.includes(series_uid)
-      // ).SeriesNumber;
-
-      // console.log(
-      //   'currentSeriesNumber :-------------------',
-      //   currentSeriesNumber
-      // );
-
+      console.log('modality :-------------------', modality);
       segmentations = await this.getLocalsegmentsForSeries(modality);
       console.log('segmentations :-------------------', segmentations);
     } catch (error) {}
 
-    // const segmentations = localseg;
-    const startTime = performance.now();
-
-    // const segmentations = await this.fetchSegmentations();
-    const endTime = performance.now();
-    console.log(
-      `Time taken by fetchSegmentations: ${(endTime - startTime) / 1000}ms`
-    );
     console.log({ segmentations });
     this.processAndAddSegmentations({
       segmentations,
