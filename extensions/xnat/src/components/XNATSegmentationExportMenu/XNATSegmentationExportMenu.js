@@ -16,15 +16,10 @@ import {
   getSegArray,
   getSplitSegArray,
 } from '../../../../../platform/viewer/src/appExtensions/LungModuleSimilarityPanel/utils';
-import { radcadapi } from '@ohif/viewer/src/utils/constants';
-import { setItem } from '@ohif/viewer/src/lib/localStorageUtils';
-import Worker from './segments.worker';
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
 class XNATSegmentationExportMenu extends React.Component {
-  worker = new Worker();
-
   constructor(props = {}) {
     super(props);
 
@@ -38,16 +33,6 @@ class XNATSegmentationExportMenu extends React.Component {
       dateTime,
       exporting: false,
     };
-    this.worker.onmessage = event => {
-      this.setState({
-        exporting: false,
-      });
-      this.props.onExportCancel();
-    };
-  }
-
-  componentWillUnmount() {
-    this.worker.terminate();
   }
 
   componentDidMount() {
@@ -122,20 +107,6 @@ class XNATSegmentationExportMenu extends React.Component {
   //   });
   // }
 
-  fetchSegmentationsFromLocalStorage() {
-    try {
-      const segmentationsJson = localStorage.getItem('segmentation');
-      console.log({ segmentationsJson });
-      const segmentations =
-        segmentationsJson && segmentationsJson !== 'undefined'
-          ? JSON.parse(segmentationsJson)
-          : {};
-      return segmentations;
-    } catch (error) {
-      console.log({ error });
-    }
-  }
-
   updateAndSaveLocalSegmentations(b) {
     console.log({ b });
     const fetchedSegmentationsList = localStorage.getItem('segmentation');
@@ -177,18 +148,25 @@ class XNATSegmentationExportMenu extends React.Component {
 
         console.log({ payload: body, str: JSON.stringify(body) });
 
-        var requestOptions = {
+        const url = 'https://dev-radcadapi.thetatech.ai/segmentations';
+
+        const requestOptions = {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            // Authorization: 'Bearer ' + state.oidc.user.access_token,
           },
           body: JSON.stringify(body),
         };
 
-        this.worker.postMessage(requestOptions);
-
-        res({});
+        await fetch(url, requestOptions)
+          .then(async response => {
+            console.log({ response });
+            this.updateAndSaveLocalSegmentations(body);
+            res({ response });
+          })
+          .catch(error => {
+            console.log(error);
+          });
       } catch (error) {
         console.log({ error });
       }
@@ -196,76 +174,81 @@ class XNATSegmentationExportMenu extends React.Component {
   }
 
   async saveExportations({ element, segList }) {
-    // return new Promise(async (res, rej) => {
-    console.log({ segList });
-    const imagePlaneModule =
-      cornerstone.metaData.get('imagePlaneModule', this.props.firstImageId) ||
-      {};
-    const { rows, columns } = imagePlaneModule;
-    const numSlices = this.props.viewport.viewportSpecificData['0']
-      .numImageFrames;
-    const labelmap2D = segmentationModule.getters.labelmap2D(element);
-    const shape = {
-      slices: numSlices,
-      rows: rows,
-      cols: columns,
-    };
-    // this.setState({
-    //   exporting: false,
-    // });
-    // this.props.onExportCancel();
-    this.worker.postMessage({
-      segList: segList,
-      labelmap2D: labelmap2D,
-      numSlices: numSlices,
-      rows: rows,
-      columns: columns,
-      shape,
-      series_uid: this.props.viewport.viewportSpecificData[0].SeriesInstanceUID,
-      email: this.props.user.profile.email,
+    return new Promise(async (res, rej) => {
+      console.log({ segList });
+      const imagePlaneModule =
+        cornerstone.metaData.get('imagePlaneModule', this.props.firstImageId) ||
+        {};
+      const { rows, columns } = imagePlaneModule;
+      const numSlices = this.props.viewport.viewportSpecificData['0']
+        .numImageFrames;
+      const labelmap2D = segmentationModule.getters.labelmap2D(element);
+      const shape = {
+        slices: numSlices,
+        rows: rows,
+        cols: columns,
+      };
+
+      //improvement: we dont need to flatten the data do we?
+      const segArray = getSegArray({
+        segmentations: labelmap2D.labelmap3D.labelmaps2D,
+        numSlices,
+        rows,
+        columns,
+      });
+      console.log({ segArray });
+
+      const segmentations = {};
+
+      const asyncSaveSegs = segList.map((item, index) => {
+        return () =>
+          new Promise(async (resolve, reject) => {
+            console.warn('asyncSaveSegs', { item, index });
+
+            const splitSegArray = getSplitSegArray({
+              flatSegmentationArray: segArray,
+              index: item.index,
+            });
+
+            console.log({
+              item,
+              index,
+              splitSegArray,
+            });
+
+            const compressedSeg = await compressSeg(splitSegArray);
+            console.log({
+              compressedSeg,
+            });
+
+            const response = await this.saveSegmentation({
+              segmentation: compressedSeg,
+              label: item.metadata.SegmentLabel,
+              shape,
+            });
+            console.log({
+              response,
+            });
+
+            resolve(response);
+          });
+      });
+
+      console.log({ asyncSaveSegs });
+      console.log({ segmentations });
+
+      const resList = [];
+
+      for (const fn of asyncSaveSegs) {
+        const response = await fn();
+        resList.push(response);
+      }
+
+      console.warn({ resList });
+      res({
+        ['exportation complete']: resList,
+      });
     });
-
-    // //improvement: we dont need to flatten the data do we?
-    // const segArray = getSegArray({
-    //   segmentations: labelmap2D.labelmap3D.labelmaps2D,
-    //   numSlices,
-    //   rows,
-    //   columns,
-    // });
-    // console.log({ segArray });
-
-    // const segmentations = {};
-
-    // const asyncSaveSegs = segList.map((item, index) => {
-    //   return () =>
-    //     new Promise(async (resolve, reject) => {
-    //       const splitSegArray = getSplitSegArray({
-    //         flatSegmentationArray: segArray,
-    //         index: item.index,
-    //       });
-
-    //       const compressedSeg = await compressSeg(splitSegArray);
-
-    //       const response = await this.saveSegmentation({
-    //         segmentation: compressedSeg,
-    //         label: item.metadata.SegmentLabel,
-    //         shape,
-    //       });
-    //       resolve(response);
-    //     });
-    // });
-
-    // const resList = [];
-
-    // for (const fn of asyncSaveSegs) {
-    //   const response = await fn();
-    //   resList.push(response);
-    // }
-
-    // res({
-    //   ['exportation complete']: resList,
-    // });
-    // });
   }
 
   async handleExportSegmentations(segList) {
@@ -280,12 +263,6 @@ class XNATSegmentationExportMenu extends React.Component {
     console.log({
       segmentationModule,
     });
-
-    // Store RecommendedDisplayCIELabValue to localStorage just before exporting
-    for (const item of segList) {
-      const labelKey = `segmentColor_${item.metadata.SegmentLabel}`;
-      setItem(labelKey, item.metadata.RecommendedDisplayCIELabValue);
-    }
 
     const {
       labelmap3D,
@@ -308,14 +285,17 @@ class XNATSegmentationExportMenu extends React.Component {
       labelMap3d,
     });
 
-    try {
-      this.saveExportations({
-        element,
-        segList: segList ? segList : this.state.segList,
-      });
-      console.warn({ response });
-    } catch (error) {}
-    setItem('hasUnsavedChanges', false);
+    const response = await this.saveExportations({
+      element,
+      segList: segList ? segList : this.state.segList,
+    });
+
+    console.warn({ response });
+
+    this.setState({
+      exporting: false,
+    });
+    this.props.onExportCancel();
 
     return;
   }
@@ -398,12 +378,11 @@ class XNATSegmentationExportMenu extends React.Component {
         {!exporting && !emptySegList && (
           <div className="roiCollectionFooter">
             <button
-              // id="triggerExportSegmentations"
               onClick={this.handleExportSegmentations}
-              style={{ marginLeft: 10, display: 'none' }}
+              style={{ marginLeft: 10 }}
             >
               <Icon name="xnat-export" />
-              Export4
+              Export
             </button>
           </div>
         )}

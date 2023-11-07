@@ -18,6 +18,27 @@ import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
 
+// import t1payload from './t1paylod.json';
+// import t2payload from './t2paylod.json';
+// import flairpaylod from './flairpaylod.json';
+// import ct1payload from './ct1payload.json';
+
+const modalityToPayloadMapping = {
+  FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
+  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
+  // T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
+  // Add more mappings as needed
+};
+
+// const modalityToPayloadMapping2 = {
+//   T1: t1payload,
+//   T2: t2payload,
+//   FLAIR: flairpaylod,
+//   T1CE: ct1payload,
+//   // Add more mappings as needed
+// };
+
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
 function getStoredRecommendedDisplayCIELabValueByLabel(label) {
@@ -54,7 +75,14 @@ class XNATSegmentationImportMenu extends React.Component {
 
       if (status === 'success') {
         // Call the method to add these segmentations to the canvas
+
+        const view_ports = cornerstone.getEnabledElements();
+        const viewports = view_ports[0];
+        const element = getEnabledElement(view_ports.indexOf(viewports));
         this.addToCanvas({ processedSegmentations: data });
+
+        refreshViewports();
+        triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
       } else if (status === 'error') {
         console.error('Error from segmentation worker:', message);
         this.props.onImportCancel();
@@ -89,16 +117,16 @@ class XNATSegmentationImportMenu extends React.Component {
             : segDetails.shape,
       });
 
-      const updated2dMaps = getUpdatedSegments({
-        segmentation: uncompressed,
-        segmentIndex: labelmap3D.activeSegmentIndex,
-        currPixelData: labelmap3D.labelmaps2D,
-      });
+      // const updated2dMaps = getUpdatedSegments({
+      //   segmentation: uncompressed,
+      //   segmentIndex: labelmap3D.activeSegmentIndex,
+      //   currPixelData: labelmap3D.labelmaps2D,
+      // });
 
       processedSegmentations.push({
-        item,
+        label: item,
         uncompressed,
-        updated2dMaps,
+        // updated2dMaps,
       });
     });
 
@@ -110,28 +138,30 @@ class XNATSegmentationImportMenu extends React.Component {
     const viewports = view_ports[0];
     const element = getEnabledElement(view_ports.indexOf(viewports));
 
-    const labelmap2D = segmentationModule.getters.labelmap2D(element);
-    const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      ...rest
-    } = segmentationModule.getters.labelmap2D(element);
-
-    processedSegmentations.forEach(({ item, uncompressed, updated2dMaps }) => {
-      if (!element) {
-        return;
-      }
+    processedSegmentations.forEach(({ label, uncompressed }) => {
+      const labelmap2D = segmentationModule.getters.labelmap2D(element);
+      const segmentation = uncompressed;
+      const {
+        labelmap3D,
+        currentImageIdIndex,
+        activeLabelmapIndex,
+        ...rest
+      } = segmentationModule.getters.labelmap2D(element);
 
       let segmentIndex = labelmap3D.activeSegmentIndex;
       let metadata = labelmap3D.metadata[segmentIndex];
 
       if (!metadata) {
-        metadata = generateSegmentationMetadata(item);
-        const storedColor = getStoredRecommendedDisplayCIELabValueByLabel(item);
-        if (storedColor) {
-          // uncompressed.RecommendedDisplayCIELabValue = storedColor;
-        }
+        console.warn('layer not occupied');
+
+        metadata = generateSegmentationMetadata(label);
+        segmentIndex = labelmap3D.activeSegmentIndex;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         if (segmentIndex === 1) {
@@ -145,8 +175,17 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       } else {
-        metadata = generateSegmentationMetadata(item);
+        //theres something on this layer so we need to find the last layer and work on the one after it
+        console.warn('layer occupied', labelmap3D);
+
+        metadata = generateSegmentationMetadata(label);
         segmentIndex = labelmap3D.metadata.length;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
@@ -154,9 +193,6 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       }
-
-      refreshViewports();
-      triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
     });
   }
 
@@ -172,7 +208,10 @@ class XNATSegmentationImportMenu extends React.Component {
     //   segmentations,
     //   labelmap3D,
     // });
-    // this.addToCanvas({ processedSegmentations });
+    // this.addToCanvas({ processedSegmentations, element });
+
+    // refreshViewports();
+    // triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
   }
 
   fetchSegmentations() {
@@ -209,15 +248,56 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
 
-  async onImportButtonClick() {
-    //  const segmentations = this.fetchSegmentationsFromLocalStorage();
-    const startTime = performance.now();
+  // getLocalsegmentsForSeries2(modality) {
+  //   return new Promise((resolve, reject) => {
+  //     const payload = modalityToPayloadMapping2[modality];
 
-    const segmentations = await this.fetchSegmentations();
-    const endTime = performance.now();
-    console.log(
-      `Time taken by fetchSegmentations: ${(endTime - startTime) / 1000}ms`
-    );
+  //     if (payload) {
+  //       resolve(payload);
+  //     } else {
+  //       console.error(`No payload found for modality: ${modality}`);
+  //       reject('err');
+  //     }
+  //   });
+  // }
+
+  getLocalsegmentsForSeries(modality) {
+    return new Promise((resolve, reject) => {
+      const url = modalityToPayloadMapping[modality];
+
+      if (url) {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => resolve(data))
+          .catch(error => {
+            console.error(
+              `Error fetching data for modality: ${modality}`,
+              error
+            );
+            reject(error);
+          });
+      } else {
+        const error = `No URL found for modality: ${modality}`;
+        console.error(error);
+        reject(new Error(error));
+      }
+    });
+  }
+  async onImportButtonClick() {
+    const modality = this.props.viewport.viewportSpecificData[0].Modality;
+
+    let segmentations = {};
+    try {
+      console.log('modality :-------------------', modality);
+      segmentations = await this.getLocalsegmentsForSeries(modality);
+      console.log('segmentations :-------------------', segmentations);
+    } catch (error) {}
+
     console.log({ segmentations });
     this.processAndAddSegmentations({
       segmentations,

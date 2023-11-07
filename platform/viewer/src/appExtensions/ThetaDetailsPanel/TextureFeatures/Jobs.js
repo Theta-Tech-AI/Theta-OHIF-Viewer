@@ -99,7 +99,9 @@ const Jobs = ({
   // this is for checking and setting textures and description
   useEffect(() => {
     if (data.texture_uids) {
-      setTextures(data.texture_uids);
+      // setTextures(data.texture_uids);
+      const updatedTextureUids = data.texture_uids.slice(3);
+      setTextures(updatedTextureUids);
       setDescription(data.texture_descriptions);
     }
   }, [data.texture_descriptions, data.texture_uids]);
@@ -215,7 +217,7 @@ const Jobs = ({
   };
 
   // function for loading an image and setting it as an added layer
-  const addImageLayer = async (image_id) => {
+  const addImageLayer = async image_id => {
     const image = cornerstone.getImage(elementRef.current);
     const instance_uid2 = image.imageId.split('/')[14];
     await cornerstone

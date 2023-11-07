@@ -1,7 +1,7 @@
 import { BrainMode, lungMode } from "@ohif/viewer/src/utils/constants";
 
 const defaultState = {
-  active: lungMode,
+  active: BrainMode,
 };
 
 const mode = (state = defaultState, action) => {

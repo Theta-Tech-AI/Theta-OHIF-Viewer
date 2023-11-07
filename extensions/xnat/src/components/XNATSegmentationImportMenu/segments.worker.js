@@ -137,15 +137,15 @@ function processSegmentations(segmentations, labelmap3D) {
           ? JSON.parse(segDetails.shape)
           : segDetails.shape,
     });
-    const updated2dMaps = getUpdatedSegments({
-      segmentation: uncompressed,
-      segmentIndex: labelmap3D.activeSegmentIndex,
-      currPixelData: labelmap3D.labelmaps2D,
-    });
+    // const updated2dMaps = getUpdatedSegments({
+    //   segmentation: uncompressed,
+    //   segmentIndex: labelmap3D.activeSegmentIndex,
+    //   currPixelData: labelmap3D.labelmaps2D,
+    // });
     processedSegmentations.push({
-      item,
+      label: item,
       uncompressed,
-      updated2dMaps,
+      // updated2dMaps,
     });
   });
   return processedSegmentations;
