@@ -57,6 +57,9 @@ const definitions = [
     id: 'Wwwc',
     label: 'Levels',
     icon: 'level',
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'Wwwc' },
     //
     // type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     // commandName: 'setToolActive',
