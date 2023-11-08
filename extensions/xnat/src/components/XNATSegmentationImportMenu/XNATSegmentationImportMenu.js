@@ -17,6 +17,7 @@ import List, {
 import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
+import { ProgressBar } from '@ohif/viewer/src/components/LoadingBar';
 
 // import t1payload from './t1paylod.json';
 // import t2payload from './t2paylod.json';
@@ -59,6 +60,8 @@ class XNATSegmentationImportMenu extends React.Component {
       segmentations: {},
       selectedSegmentation: '',
     };
+
+    this.progress = React.createRef();
   }
 
   componentWillUnmount() {
@@ -138,6 +141,16 @@ class XNATSegmentationImportMenu extends React.Component {
     const viewports = view_ports[0];
     const element = getEnabledElement(view_ports.indexOf(viewports));
 
+    const totalSegmentations = processedSegmentations.length;
+    const perValue = 100 / totalSegmentations;
+
+    const updateProgressValue = () => {
+      // Directly update the value of the input using the DOM API
+      // This is not the standard React way and should be avoided for value updates
+      // because it doesn't trigger a re-render.
+      this.progress.current.value = this.progress.current.value + perValue;
+    };
+
     processedSegmentations.forEach(({ label, uncompressed }) => {
       const labelmap2D = segmentationModule.getters.labelmap2D(element);
       const segmentation = uncompressed;
@@ -192,6 +205,8 @@ class XNATSegmentationImportMenu extends React.Component {
         labelmap2D.labelmap3D.activeSegmentIndex = segmentIndex;
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
+        // newProgress += perValue;
+        updateProgressValue();
       }
     });
   }
@@ -347,7 +362,13 @@ class XNATSegmentationImportMenu extends React.Component {
               <p>No Segmentations</p>
             )
           ) : (
-            <p>Importing Segmentations. Please wait...</p>
+            <div>
+              <p>Importing Segmentations. Please wait...</p>
+              <p>{this.state.progress}</p>
+              <div style={{ paddingLeft: '10px', paddingRight: '20px' }}>
+                <ProgressBar progress={this.progress} bgColor="#00c7ee" />
+              </div>
+            </div>
           )}
         </div>
         <div className="roiCollectionFooter"></div>

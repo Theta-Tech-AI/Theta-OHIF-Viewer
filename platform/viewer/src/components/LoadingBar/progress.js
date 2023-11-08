@@ -8,7 +8,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import './progress.css';
 import { min } from 'lodash';
-const ProgressBar = ({ progress, indeterminate, helperText, status }) => {
+const ProgressBar = ({
+  progress,
+  indeterminate,
+  helperText,
+  bgColor,
+  status,
+}) => {
   const containerStyles = {
     height: 10,
     width: '100%',
@@ -33,7 +39,7 @@ const ProgressBar = ({ progress, indeterminate, helperText, status }) => {
   };
 
   const determineFillerStyles = () => {
-    let backgroundColor = '#878787';
+    let backgroundColor = bgColor || '#878787';
     if (status === 'success') {
       backgroundColor = '#9ccef9';
     } else if (status === 'error') {
