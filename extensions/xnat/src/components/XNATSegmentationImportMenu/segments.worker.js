@@ -128,6 +128,8 @@ self.addEventListener('message', event => {
 
 function processSegmentations(segmentations, labelmap3D) {
   const processedSegmentations = [];
+  const total = Object.keys(segmentations).length || 0;
+
   Object.keys(segmentations).forEach((item, index) => {
     const segDetails = segmentations[item];
     const uncompressed = uncompress({
@@ -137,15 +139,21 @@ function processSegmentations(segmentations, labelmap3D) {
           ? JSON.parse(segDetails.shape)
           : segDetails.shape,
     });
-    const updated2dMaps = getUpdatedSegments({
-      segmentation: uncompressed,
-      segmentIndex: labelmap3D.activeSegmentIndex,
-      currPixelData: labelmap3D.labelmaps2D,
+    // const updated2dMaps = getUpdatedSegments({
+    //   segmentation: uncompressed,
+    //   segmentIndex: labelmap3D.activeSegmentIndex,
+    //   currPixelData: labelmap3D.labelmaps2D,
+    // });
+
+    const progress = Math.round(((index + 1) / total) * 100);
+    self.postMessage({
+      status: 'progress',
+      progress: progress,
     });
     processedSegmentations.push({
-      item,
+      label: item,
       uncompressed,
-      updated2dMaps,
+      // updated2dMaps,
     });
   });
   return processedSegmentations;

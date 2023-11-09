@@ -57,16 +57,52 @@ const definitions = [
     id: 'Wwwc',
     label: 'Levels',
     icon: 'level',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Wwwc' },
+    // buttons: [
+    //   {
+    //     id: 'preset1',
+    //     label: 'Soft tissue',
+    //     type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    //     commandName: 'resetViewport',
+    //     commandOptions: { preset: 1 },
+    //   },
+    //   {
+    //     id: 'preset2',
+    //     label: 'Lung',
+    //     type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    //     commandName: 'resetViewport',
+    //     commandOptions: { preset: 2 },
+    //   },
+    //   {
+    //     id: 'preset2',
+    //     label: 'Liver',
+    //     type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    //     commandName: 'resetViewport',
+    //     commandOptions: {preset: 3 },
+    //   },
+    //   {
+    //     id: 'preset2',
+    //     label: 'Bone',
+    //     type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    //     commandName: 'resetViewport',
+    //     commandOptions: {preset: 4 },
+    //   },
+    //   {
+    //     id: 'preset2',
+    //     label: 'Brain',
+    //     type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    //     commandName: 'resetViewport',
+    //     commandOptions: {preset: 5 },
+    //   },
+    //   // Add more preset buttons as needed
+    // ],
   },
   {
     id: 'Pan',
     label: 'Pan',
     icon: 'arrows',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Pan' },
@@ -75,7 +111,6 @@ const definitions = [
     id: 'Length',
     label: 'Length',
     icon: 'measure-temp',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Length' },
@@ -93,7 +128,6 @@ const definitions = [
     id: 'Angle',
     label: 'Angle',
     icon: 'angle-left',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Angle' },
@@ -102,9 +136,45 @@ const definitions = [
     id: 'Reset',
     label: 'Reset',
     icon: 'reset',
-    //
     type: TOOLBAR_BUTTON_TYPES.COMMAND,
-    commandName: 'resetViewport',
+    buttons: [
+      {
+        id: 1,
+        label: 'Soft tissue',
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'resetViewport',
+        commandOptions: { presetValue: 1 },
+      },
+      {
+        id: 2,
+        label: 'Lung',
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'resetViewport',
+        commandOptions: { presetValue: 2 },
+      },
+      {
+        id: 3,
+        label: 'Liver',
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'resetViewport',
+        commandOptions: { presetValue: 3 },
+      },
+      {
+        id: 4,
+        label: 'Bone',
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'resetViewport',
+        commandOptions: { presetValue: 4 },
+      },
+      {
+        id: 5,
+        label: 'Brain',
+        type: TOOLBAR_BUTTON_TYPES.COMMAND,
+        commandName: 'resetViewport',
+        commandOptions: { presetValue: 5 },
+      },
+      // Add more preset buttons as needed
+    ],
   },
   {
     id: 'Cine',

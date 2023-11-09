@@ -108,14 +108,14 @@ function createReportSummaryTable(
                   {
                     stack: [
                       {
-                        text: 'Patient Name:',
+                        text: 'Patient ID:',
                         bold: true,
                         fontSize: 9,
                       },
                       {
-                        text: patientName,
-                        color: '#3d3d49',
+                        text: patientID,
                         fontStyle: 'thin',
+                        color: '#3d3d49',
                         fontSize: 10,
                         margin: [0, 4, 0, 0],
                       },
@@ -124,13 +124,13 @@ function createReportSummaryTable(
                   {
                     stack: [
                       {
-                        text: 'Classifier:',
+                        text: 'Tumor Spicularity:',
                         bold: true,
                         noWrap: true,
                         fontSize: 9,
                       },
                       {
-                        text: classifier,
+                        text: '70',
                         color: '#3d3d49',
                         fontStyle: 'thin',
                         fontSize: 10,
@@ -145,14 +145,14 @@ function createReportSummaryTable(
                   {
                     stack: [
                       {
-                        text: 'Patient ID:',
+                        text: 'Longevity prediction:',
                         bold: true,
                         fontSize: 9,
                       },
                       {
-                        text: patientID,
-                        fontStyle: 'thin',
+                        text: '12 to 14 months,70% confidence',
                         color: '#3d3d49',
+                        fontStyle: 'thin',
                         fontSize: 10,
                         margin: [0, 4, 0, 0],
                       },
@@ -243,8 +243,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
 
   images['logo_one'] =
     'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_one.png';
-  images['logo_two'] =
-    'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_two.png';
+  images['logo_two'] ='https://share-ohif.s3.amazonaws.com/Wisconsin-logo.jpg'
 
   const documentDefinition = {
     content: [
@@ -310,19 +309,19 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         'ResNet -18'
         // score
       ),
-      {
-        text: 'ANALYSIS DESCRIPTION',
-        bold: true,
-        fontSize: 9,
-        margin: [0, 17, 0, 0],
-      },
-      {
-        text:
-          'The report is produced by utilizing ResNet models for the classification of lung nodules, with the primary objective of identifying instances with malignant characteristics. The outcomes delineate scans that bear resemblance, particularly those exhibiting malignant indentations, along with their corresponding prediction numbers and unique identification identifiers for each analogous scan.        ',
-        fontSize: 7,
-        width: 200,
-        margin: [0, 5, 0, 0],
-      },
+      // {
+      //   text: 'ANALYSIS DESCRIPTION',
+      //   bold: true,
+      //   fontSize: 9,
+      //   margin: [0, 17, 0, 0],
+      // },
+      // {
+      //   text:
+      //     'The report is produced by utilizing ResNet models for the classification of brain nodules, with the primary objective of identifying instances with malignant characteristics. The outcomes delineate scans that bear resemblance, particularly those exhibiting malignant indentations, along with their corresponding prediction numbers and unique identification identifiers for each analogous scan.        ',
+      //   fontSize: 7,
+      //   width: 200,
+      //   margin: [0, 5, 0, 0],
+      // },
       {
         style: 'headercol',
         // alignment: 'justify',

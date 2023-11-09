@@ -18,6 +18,28 @@ import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
 
+// import t1payload from './t1paylod.json';
+// import t2payload from './t2paylod.json';
+// import flairpaylod from './flairpaylod.json';
+// import ct1payload from './ct1payload.json';
+import ProgressBar from '@ohif/viewer/src/components/LoadingBar/progress';
+
+const modalityToPayloadMapping = {
+  FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
+  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
+  T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
+  // Add more mappings as needed
+};
+
+// const modalityToPayloadMapping2 = {
+//   T1: t1payload,
+//   T2: t2payload,
+//   FLAIR: flairpaylod,
+//   T1CE: ct1payload,
+//   // Add more mappings as needed
+// };
+
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
 function getStoredRecommendedDisplayCIELabValueByLabel(label) {
@@ -33,6 +55,7 @@ class XNATSegmentationImportMenu extends React.Component {
     this.state = {
       importListReady: false,
       importing: false,
+      serviceWorkerDone: false,
       progressText: '',
       importProgress: 0,
       segmentations: {},
@@ -50,11 +73,22 @@ class XNATSegmentationImportMenu extends React.Component {
     this.onImportButtonClick();
 
     this.worker.onmessage = event => {
-      const { status, data, message } = event.data;
+      const { status, data, progress, message } = event.data;
 
       if (status === 'success') {
         // Call the method to add these segmentations to the canvas
+
+        const view_ports = cornerstone.getEnabledElements();
+        const viewports = view_ports[0];
+        const element = getEnabledElement(view_ports.indexOf(viewports));
+
+        this.setState({
+          serviceWorkerDone: true,
+        });
         this.addToCanvas({ processedSegmentations: data });
+
+        refreshViewports();
+        triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
       } else if (status === 'error') {
         console.error('Error from segmentation worker:', message);
         this.props.onImportCancel();
@@ -64,6 +98,11 @@ class XNATSegmentationImportMenu extends React.Component {
         //   error: true,
         //   errorMessage: message,
         // });
+      } else if (status === 'progress') {
+        // Update the state with the new progress
+        this.setState({
+          importProgress: progress,
+        });
       }
     };
   }
@@ -75,6 +114,103 @@ class XNATSegmentationImportMenu extends React.Component {
   onCloseButtonClick() {
     this.props.onImportCancel();
   }
+
+  getRoiCoordinates(element) {
+    // Access the labelmaps3D data structure
+    const { labelmap3D } = segmentationModule.getters.labelmap2D(element);
+
+    // Assuming the first labelmap is the one you want to extract ROIs from
+
+    // Check if the labelmap3D is valid
+    if (!labelmap3D) {
+      console.error('No labelmap3D available.');
+      return;
+    }
+
+    // Iterate over each slice's labelmap
+    const roiCoordinates = labelmap3D.labelmaps2D.map(
+      (labelmap2D, sliceIndex) => {
+        // Extract ROI data from labelmap2D
+        const rois = labelmap2D.segmentsOnLabelmap.map(segmentIndex => {
+          // Get the actual segment data (this is where you'd get your coordinates)
+          // For example purposes, let's assume it's a rectangle with `x`, `y`, `width`, `height`
+          const roiData = {}; // This would be your logic to extract ROI data
+
+          return {
+            sliceIndex,
+            segmentIndex,
+            ...roiData,
+          };
+        });
+
+        return rois;
+      }
+    );
+
+    // Flatten the array of arrays
+    return roiCoordinates.flat();
+  }
+
+  findBoundingBoxForAllRois(allRoiCoordinates) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    allRoiCoordinates.forEach(roi => {
+      const { x, y, width, height } = roi.roiData;
+
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + width);
+      maxY = Math.max(maxY, y + height);
+    });
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    };
+  }
+
+  drawBoundingBox(element, boundingBox) {
+    const enabledElement = cornerstone.getEnabledElement(element);
+    const context = enabledElement.canvas.getContext('2d');
+    const { image } = enabledElement;
+
+    // Convert the bounding box coordinates to canvas coordinates
+    const canvasMinX =
+      boundingBox.minX * image.columnPixelSpacing + image.columns * 0.5;
+    const canvasMinY =
+      boundingBox.minY * image.rowPixelSpacing + image.rows * 0.5;
+    const canvasWidth =
+      (boundingBox.maxX - boundingBox.minX) * image.columnPixelSpacing;
+    const canvasHeight =
+      (boundingBox.maxY - boundingBox.minY) * image.rowPixelSpacing;
+
+    // Set the style for the bounding box
+    context.strokeStyle = 'yellow';
+    context.lineWidth = 2;
+
+    // Draw the rectangle
+    context.beginPath();
+    context.rect(canvasMinX, canvasMinY, canvasWidth, canvasHeight);
+    context.stroke();
+  }
+
+  // // Use this function by passing the cornerstone enabled element and the bounding box
+  // const element = /* Your logic to get the cornerstone element */;
+  // const boundingBox = /* Your logic to calculate the bounding box */;
+
+  // // Now draw the bounding box on the canvas
+  // drawBoundingBox(element, boundingBox);
+
+  // // Assuming `allRoiCoordinates` is the output from your ROIs extraction process
+  // const boundingBox = findBoundingBoxForAllRois(allRoiCoordinates);
+
+  // // Now you have the bounding box that you can use as input to the Cornerstone Brush Tool
+  // console.log(boundingBox);
 
   processSegmentations({ segmentations, labelmap3D }) {
     const processedSegmentations = [];
@@ -89,16 +225,16 @@ class XNATSegmentationImportMenu extends React.Component {
             : segDetails.shape,
       });
 
-      const updated2dMaps = getUpdatedSegments({
-        segmentation: uncompressed,
-        segmentIndex: labelmap3D.activeSegmentIndex,
-        currPixelData: labelmap3D.labelmaps2D,
-      });
+      // const updated2dMaps = getUpdatedSegments({
+      //   segmentation: uncompressed,
+      //   segmentIndex: labelmap3D.activeSegmentIndex,
+      //   currPixelData: labelmap3D.labelmaps2D,
+      // });
 
       processedSegmentations.push({
-        item,
+        label: item,
         uncompressed,
-        updated2dMaps,
+        // updated2dMaps,
       });
     });
 
@@ -109,29 +245,35 @@ class XNATSegmentationImportMenu extends React.Component {
     const view_ports = cornerstone.getEnabledElements();
     const viewports = view_ports[0];
     const element = getEnabledElement(view_ports.indexOf(viewports));
+    const totalSegmentations = processedSegmentations.length || 0;
 
-    const labelmap2D = segmentationModule.getters.labelmap2D(element);
-    const {
-      labelmap3D,
-      currentImageIdIndex,
-      activeLabelmapIndex,
-      ...rest
-    } = segmentationModule.getters.labelmap2D(element);
-
-    processedSegmentations.forEach(({ item, uncompressed, updated2dMaps }) => {
-      if (!element) {
-        return;
-      }
+    processedSegmentations.forEach(({ label, uncompressed }, index) => {
+      // this.setState({
+      //   importProgress: ((index + 1) / totalSegmentations) * 100,
+      // });
+      const labelmap2D = segmentationModule.getters.labelmap2D(element);
+      const segmentation = uncompressed;
+      const {
+        labelmap3D,
+        currentImageIdIndex,
+        activeLabelmapIndex,
+        ...rest
+      } = segmentationModule.getters.labelmap2D(element);
 
       let segmentIndex = labelmap3D.activeSegmentIndex;
       let metadata = labelmap3D.metadata[segmentIndex];
 
       if (!metadata) {
-        metadata = generateSegmentationMetadata(item);
-        const storedColor = getStoredRecommendedDisplayCIELabValueByLabel(item);
-        if (storedColor) {
-          // uncompressed.RecommendedDisplayCIELabValue = storedColor;
-        }
+        console.warn('layer not occupied');
+
+        metadata = generateSegmentationMetadata(label);
+        segmentIndex = labelmap3D.activeSegmentIndex;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         if (segmentIndex === 1) {
@@ -145,8 +287,17 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       } else {
-        metadata = generateSegmentationMetadata(item);
+        //theres something on this layer so we need to find the last layer and work on the one after it
+        console.warn('layer occupied', labelmap3D);
+
+        metadata = generateSegmentationMetadata(label);
         segmentIndex = labelmap3D.metadata.length;
+
+        const updated2dMaps = getUpdatedSegments({
+          segmentation,
+          segmentIndex,
+          currPixelData: labelmap3D.labelmaps2D,
+        });
 
         labelmap2D.labelmap3D.labelmaps2D = updated2dMaps;
         labelmap2D.labelmap3D.metadata[segmentIndex] = metadata;
@@ -154,10 +305,16 @@ class XNATSegmentationImportMenu extends React.Component {
 
         segmentationModule.setters.updateSegmentsOnLabelmap2D(labelmap2D);
       }
-
-      refreshViewports();
-      triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
     });
+
+    // const allRoiCoordinates = this.getRoiCoordinates(element);
+
+    // // Do something with the ROI coordinates, like logging or exporting
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log(allRoiCoordinates);
   }
 
   processAndAddSegmentations({ segmentations }) {
@@ -172,7 +329,10 @@ class XNATSegmentationImportMenu extends React.Component {
     //   segmentations,
     //   labelmap3D,
     // });
-    // this.addToCanvas({ processedSegmentations });
+    // this.addToCanvas({ processedSegmentations, element });
+
+    // refreshViewports();
+    // triggerEvent(element, 'peppermintautosegmentgenerationevent', {});
   }
 
   fetchSegmentations() {
@@ -209,15 +369,56 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
 
-  async onImportButtonClick() {
-    //  const segmentations = this.fetchSegmentationsFromLocalStorage();
-    const startTime = performance.now();
+  // getLocalsegmentsForSeries2(modality) {
+  //   return new Promise((resolve, reject) => {
+  //     const payload = modalityToPayloadMapping2[modality];
 
-    const segmentations = await this.fetchSegmentations();
-    const endTime = performance.now();
-    console.log(
-      `Time taken by fetchSegmentations: ${(endTime - startTime) / 1000}ms`
-    );
+  //     if (payload) {
+  //       resolve(payload);
+  //     } else {
+  //       console.error(`No payload found for modality: ${modality}`);
+  //       reject('err');
+  //     }
+  //   });
+  // }
+
+  getLocalsegmentsForSeries(modality) {
+    return new Promise((resolve, reject) => {
+      const url = modalityToPayloadMapping[modality];
+
+      if (url) {
+        fetch(url)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => resolve(data))
+          .catch(error => {
+            console.error(
+              `Error fetching data for modality: ${modality}`,
+              error
+            );
+            reject(error);
+          });
+      } else {
+        const error = `No URL found for modality: ${modality}`;
+        console.error(error);
+        reject(new Error(error));
+      }
+    });
+  }
+  async onImportButtonClick() {
+    const modality = this.props.viewport.viewportSpecificData[0].Modality;
+
+    let segmentations = {};
+    try {
+      console.log('modality :-------------------', modality);
+      segmentations = await this.getLocalsegmentsForSeries(modality);
+      console.log('segmentations :-------------------', segmentations);
+    } catch (error) {}
+
     console.log({ segmentations });
     this.processAndAddSegmentations({
       segmentations,
@@ -226,7 +427,7 @@ class XNATSegmentationImportMenu extends React.Component {
   }
 
   render() {
-    const { importing } = this.state;
+    const { importing, serviceWorkerDone, importProgress } = this.state;
 
     return (
       <div className="xnatPanel">
@@ -267,7 +468,22 @@ class XNATSegmentationImportMenu extends React.Component {
               <p>No Segmentations</p>
             )
           ) : (
-            <p>Importing Segmentations. Please wait...</p>
+            <>
+              <p>Importing Segmentations. Please wait...</p>
+              {serviceWorkerDone ? (
+                <ProgressBar
+                  indeterminate
+                  status="success"
+                  helperText="Visualizing the segments"
+                />
+              ) : (
+                <ProgressBar
+                  progress={importProgress}
+                  helperText={`Processing, ${importProgress}% completed`}
+                  status="active"
+                />
+              )}
+            </>
           )}
         </div>
         <div className="roiCollectionFooter"></div>
