@@ -57,10 +57,9 @@ const definitions = [
     id: 'Wwwc',
     label: 'Levels',
     icon: 'level',
-    //
-    // type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
-    // commandName: 'setToolActive',
-    // commandOptions: { toolName: 'Wwwc' },
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'Wwwc' },
     // buttons: [
     //   {
     //     id: 'preset1',
@@ -104,7 +103,6 @@ const definitions = [
     id: 'Pan',
     label: 'Pan',
     icon: 'arrows',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Pan' },
@@ -113,7 +111,6 @@ const definitions = [
     id: 'Length',
     label: 'Length',
     icon: 'measure-temp',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Length' },
@@ -131,7 +128,6 @@ const definitions = [
     id: 'Angle',
     label: 'Angle',
     icon: 'angle-left',
-    //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'setToolActive',
     commandOptions: { toolName: 'Angle' },
@@ -140,7 +136,6 @@ const definitions = [
     id: 'Reset',
     label: 'Reset',
     icon: 'reset',
-    //
     type: TOOLBAR_BUTTON_TYPES.COMMAND,
     buttons: [
       {
