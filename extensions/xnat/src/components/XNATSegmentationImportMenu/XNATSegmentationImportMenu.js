@@ -307,14 +307,14 @@ class XNATSegmentationImportMenu extends React.Component {
       }
     });
 
-    const allRoiCoordinates = this.getRoiCoordinates(element);
+    // const allRoiCoordinates = this.getRoiCoordinates(element);
 
-    // Do something with the ROI coordinates, like logging or exporting
-    console.log('-----------------allRoiCoordinates');
-    console.log('-----------------allRoiCoordinates');
-    console.log('-----------------allRoiCoordinates');
-    console.log('-----------------allRoiCoordinates');
-    console.log(allRoiCoordinates);
+    // // Do something with the ROI coordinates, like logging or exporting
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log('-----------------allRoiCoordinates');
+    // console.log(allRoiCoordinates);
   }
 
   processAndAddSegmentations({ segmentations }) {
