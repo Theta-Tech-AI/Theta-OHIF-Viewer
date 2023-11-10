@@ -243,33 +243,33 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
 
   images['logo_one'] =
     'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_one.png';
-  images['logo_two'] ='https://share-ohif.s3.amazonaws.com/Wisconsin-logo.jpg'
+  images['logo_two'] = 'https://share-ohif.s3.amazonaws.com/Wisconsin-logo.jpg';
 
   const documentDefinition = {
     content: [
       {
         style: 'imagescol3',
-        alignment: 'justify',
+        // alignment: 'justify',
         columns: [
+          // {
+          //   image: 'logo_one',
+          //   width: 80,
+          //   height: 80,
+          // },
           {
-            image: 'logo_one',
-            width: 80,
-            height: 80,
-          },
-          {
-            text: 'Radcad Report Summary',
+            text: 'LivAI Report Summary',
             style: 'jumbotronHeader',
-            margin: [70, 20, 0, 0],
+            margin: [0, 20, 0, 0],
             bold: true,
             color: '#243D4E',
             fontSize: 17,
           },
-          {
-            image: 'logo_two',
-            width: 80,
-            height: 80,
-            margin: [12, 0, 0, 0],
-          },
+          // {
+          //   image: 'logo_two',
+          //   width: 80,
+          //   height: 80,
+          //   margin: [12, 0, 0, 0],
+          // },
         ],
       },
       {
@@ -438,7 +438,6 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
     const morphologyHeader = createMorphologyHeader();
     documentDefinition.content.push(morphologyHeader);
     documentDefinition.content.push(morphologyImage);
-
   }
 
   return documentDefinition;
