@@ -146,13 +146,14 @@ function createReportSummaryTable(
                         bold: true,
                         noWrap: true,
                         fontSize: 9,
+                        margin: [-20, 4, 0, 0],
                       },
                       {
                         text: '70',
                         color: '#3d3d49',
                         fontStyle: 'thin',
                         fontSize: 10,
-                        margin: [0, 4, 0, 0],
+                        margin: [-20, 4, 0, 0],
                       },
                     ],
                   },
@@ -166,13 +167,14 @@ function createReportSummaryTable(
                         text: 'Longevity prediction:',
                         bold: true,
                         fontSize: 9,
+                        margin: [-45, 4, 0, 0],
                       },
                       {
                         text: '12 to 14 months,70% confidence',
                         color: '#3d3d49',
                         fontStyle: 'thin',
                         fontSize: 10,
-                        margin: [0, 4, 0, 0],
+                        margin: [-45, 4, 0, 0],
                       },
                     ],
                   },
@@ -352,8 +354,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
 
   const patientData = getItem('selectedStudy');
 
-  images['logo_one'] =
-    'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_one.png';
+  images['logo_one'] = 'https://share-ohif.s3.amazonaws.com/Screenshot+2023-11-15+at+9.21.06+PM.png';
   images['logo_two'] = 'https://share-ohif.s3.amazonaws.com/Wisconsin-logo.jpg';
 
   const documentDefinition = {
@@ -362,14 +363,14 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         style: 'imagescol3',
         // alignment: 'justify',
         columns: [
-          // {
-          //   image: 'logo_one',
-          //   width: 80,
-          //   height: 80,
-          // },
           {
-            text: 'LivAI Report Summary',
-            margin: [0, 20, 0, 0],
+            image: 'logo_one',
+            width: 60,
+            height: 20,
+          },
+          {
+            text: 'Report Summary',
+            margin: [10, 0, 0, 0],
             bold: true,
             color: '#243D4E',
             fontSize: 17,
@@ -408,15 +409,15 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
       },
       // {},
       // },
-      // createReportSummaryTable(
-      //   patientData.PatientID,
-      //   patientData.PatientName,
-      //   'ResNet -18'
-      //   // score
-      // ),
       createReportSummaryTable2(
         patientData.PatientID,
         'John Doe',
+        'ResNet -18'
+        // score
+      ),
+      createReportSummaryTable(
+        patientData.PatientID,
+        patientData.PatientName,
         'ResNet -18'
         // score
       ),
