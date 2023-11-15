@@ -727,21 +727,21 @@ class Radiomics extends Component {
     const { job, isSimilarlookingScans, isComplete } = this.state;
 
     // if (!job || !job.data) return 'Processing Collage Features...';
-    if (!job || !job.data) return 'Processing Report details...';
+    if (!job || !job.data) return 'Processing AI ...';
 
     switch (job.data.status) {
       case 'RUNNING':
-        return `Running Collage Job ${job.data.job} - ${job.data.instances_done}/${job.instances}`;
+        return `Running Algorithm in Background ${job.data.instances_done}/${job.instances}`;
       case 'PENDING':
-        return 'Collage Job pending...';
+        return 'AI pending...';
       case 'ERROR':
         return 'Error occurred...';
       case 'DONE':
         return isSimilarlookingScans
-          ? 'Collage Job completed!'
+          ? 'AI completed!'
           : 'Getting similar looking scans...';
       default:
-        return 'Processing Report details...';
+        return 'Processing AI ...';
     }
   };
 
@@ -865,7 +865,6 @@ class Radiomics extends Component {
             background: 'rgba(23,28,33,0.99)',
             fontSize: '24px',
             zIndex: 8,
-            // display:'none'
             display:
               (isInLungMode &&
                 isComplete &&
@@ -873,8 +872,17 @@ class Radiomics extends Component {
               (!isInLungMode && isComplete)
                 ? 'none'
                 : 'flex',
+            flexDirection: 'column', // Stack items vertically
           }}
         >
+          <img
+            src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
+            alt="Fig"
+            style={{
+              marginBottom: '10px',
+              // animation: 'spin 2s linear infinite', // Add a spinning animation
+            }} // Add some space between the image and the progress bar
+          />
           {this.renderProgressBar()}
         </div>
 
