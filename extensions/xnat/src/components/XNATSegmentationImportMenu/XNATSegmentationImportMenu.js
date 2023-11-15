@@ -18,10 +18,10 @@ import { radcadapi } from '@ohif/viewer/src/utils/constants';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import Worker from './segments.worker';
 
-import t1payload from './t1paylod.json';
-import t2payload from './t2paylod.json';
-import flairpaylod from './flairpaylod.json';
-import ct1payload from './ct1payload.json';
+// import t1payload from './t1paylod.json';
+// import t2payload from './t2paylod.json';
+// import flairpaylod from './flairpaylod.json';
+// import ct1payload from './ct1payload.json';
 import ProgressBar from '@ohif/viewer/src/components/LoadingBar/progress';
 
 const modalityToPayloadMapping = {
@@ -32,13 +32,13 @@ const modalityToPayloadMapping = {
   // Add more mappings as needed
 };
 
-const modalityToPayloadMapping2 = {
-  T1: t1payload,
-  T2: t2payload,
-  FLAIR: flairpaylod,
-  T1CE: ct1payload,
-  // Add more mappings as needed
-};
+// const modalityToPayloadMapping2 = {
+//   T1: t1payload,
+//   T2: t2payload,
+//   FLAIR: flairpaylod,
+//   T1CE: ct1payload,
+//   // Add more mappings as needed
+// };
 
 const segmentationModule = cornerstoneTools.getModule('segmentation');
 
@@ -420,18 +420,18 @@ class XNATSegmentationImportMenu extends React.Component {
     });
   }
 
-  getLocalsegmentsForSeries2(modality) {
-    return new Promise((resolve, reject) => {
-      const payload = modalityToPayloadMapping2[modality];
+  // getLocalsegmentsForSeries2(modality) {
+  //   return new Promise((resolve, reject) => {
+  //     const payload = modalityToPayloadMapping2[modality];
 
-      if (payload) {
-        resolve(payload);
-      } else {
-        console.error(`No payload found for modality: ${modality}`);
-        reject('err');
-      }
-    });
-  }
+  //     if (payload) {
+  //       resolve(payload);
+  //     } else {
+  //       console.error(`No payload found for modality: ${modality}`);
+  //       reject('err');
+  //     }
+  //   });
+  // }
 
   getLocalsegmentsForSeries(modality) {
     return new Promise((resolve, reject) => {
