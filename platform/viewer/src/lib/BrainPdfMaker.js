@@ -11,17 +11,35 @@ function getMalignantScore(data) {
 
 function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
   return {
-    stack: [
+    columns: [
       {
         stack: [
           {
             image: imageDataUrl8,
             width: 350,
             height: 280,
-            margin: [-10, 5, 0, 0],
+            margin: [-40, 5, 0, 0],
           },
         ],
         margin: [70, 0, 0, 0],
+      },
+      {
+        stack: [
+          {
+            stack: [
+              { text: 'Entropic heterogenety:', fontSize: 9 },
+              { text: '0.46', fontSize: 9 },
+            ],
+            margin: [20, 10, 0, 0],
+          },
+          {
+            stack: [
+              { text: 'Correlation heterogenety:', fontSize: 9 },
+              { text: '0.26', fontSize: 9 },
+            ],
+            margin: [20, 255, 0, 0],
+          },
+        ],
       },
       // {
       //   margin: [20, 10, 0, 0],
@@ -89,6 +107,126 @@ function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
   };
 }
 
+// function createReportSummaryTable(
+//   patientID,
+//   patientName,
+//   classifier
+//   // malignantScore
+// ) {
+//   return {
+//     table: {
+//       widths: ['25%', '72%'], // specify widths for both columns
+//       body: [
+//         [
+//           {
+//             style: 'imagescol2',
+//             stack: [
+//               {
+//                 columns: [
+//                   {
+//                     stack: [
+//                       {
+//                         text: 'Patient Name:',
+//                         bold: true,
+//                         fontSize: 9,
+//                       },
+//                       {
+//                         text: 'John Doe',
+//                         fontStyle: 'thin',
+//                         color: '#3d3d49',
+//                         fontSize: 10,
+//                         margin: [0, 4, 0, 0],
+//                       },
+//                     ],
+//                   },
+//                   {
+//                     stack: [
+//                       {
+//                         text: 'Institution:',
+//                         bold: true,
+//                         noWrap: true,
+//                         fontSize: 9,
+//                       },
+//                       {
+//                         text: 'Clearview Hospital',
+//                         color: '#3d3d49',
+//                         fontStyle: 'thin',
+//                         fontSize: 10,
+//                         margin: [0, 4, 0, 0],
+//                       },
+//                     ],
+//                   },
+//                   {
+//                     stack: [
+//                       {
+//                         text: 'Date of Birth:',
+//                         bold: true,
+//                         fontSize: 9,
+//                       },
+//                       {
+//                         text: 'Jan 1, 1970',
+//                         color: '#3d3d49',
+//                         fontStyle: 'thin',
+//                         fontSize: 10,
+//                         margin: [0, 4, 0, 0],
+//                       },
+//                     ],
+//                   },
+//                 ],
+//               },
+//               // {
+//               //   columns: [
+//               //     {
+//               //       stack: [
+//               //         {
+//               //           text: 'Date of Birth:',
+//               //           bold: true,
+//               //           fontSize: 9,
+//               //         },
+//               //         {
+//               //           text: 'Jan 1, 1970',
+//               //           color: '#3d3d49',
+//               //           fontStyle: 'thin',
+//               //           fontSize: 10,
+//               //           margin: [0, 4, 0, 0],
+//               //         },
+//               //       ],
+//               //     },
+//               //     // {
+//               //     //   stack: [
+//               //     //     {
+//               //     //       text: 'Malignant Score:',
+//               //     //       bold: true,
+//               //     //       noWrap: true,
+//               //     //       fontSize: 9,
+//               //     //     },
+//               //     //     {
+//               //     //       text: malignantScore,
+//               //     //       fontStyle: 'thin',
+//               //     //       color: '#3d3d49',
+//               //     //       margin: [0, 4, 0, 0],
+//               //     //     },
+//               //     //   ],
+//               //     // },
+//               //   ],
+//               // },
+//             ],
+//           },
+//           {},
+//         ],
+//       ],
+//     },
+//     layout: {
+//       hLineWidth: () => 0,
+//       vLineWidth: () => 0,
+//       paddingLeft: () => 0,
+//       paddingRight: () => 0,
+//     }, // this layout has no borders and no padding
+//     style: 'jumbotron',
+//     margin: [0, 0, 0, 0],
+//   };
+// }
+
 function createReportSummaryTable(
   patientID,
   patientName,
@@ -97,88 +235,61 @@ function createReportSummaryTable(
 ) {
   return {
     table: {
-      widths: ['25%', '72%'], // specify widths for both columns
+      widths: ['25%', '25%', '50%'], // adjust the widths for all three columns
       body: [
         [
           {
             style: 'imagescol2',
-            columns: [
+            stack: [
               {
-                columns: [
-                  {
-                    stack: [
-                      {
-                        text: 'Patient ID:',
-                        bold: true,
-                        fontSize: 9,
-                      },
-                      {
-                        text: patientID,
-                        fontStyle: 'thin',
-                        color: '#3d3d49',
-                        fontSize: 10,
-                        margin: [0, 4, 0, 0],
-                      },
-                    ],
-                  },
-                  {
-                    stack: [
-                      {
-                        text: 'Tumor Spicularity:',
-                        bold: true,
-                        noWrap: true,
-                        fontSize: 9,
-                      },
-                      {
-                        text: '70',
-                        color: '#3d3d49',
-                        fontStyle: 'thin',
-                        fontSize: 10,
-                        margin: [0, 4, 0, 0],
-                      },
-                    ],
-                  },
-                ],
+                text: 'Patient Name:',
+                bold: true,
+                fontSize: 9,
               },
               {
-                columns: [
-                  {
-                    stack: [
-                      {
-                        text: 'Longevity prediction:',
-                        bold: true,
-                        fontSize: 9,
-                      },
-                      {
-                        text: '12 to 14 months,70% confidence',
-                        color: '#3d3d49',
-                        fontStyle: 'thin',
-                        fontSize: 10,
-                        margin: [0, 4, 0, 0],
-                      },
-                    ],
-                  },
-                  // {
-                  //   stack: [
-                  //     {
-                  //       text: 'Malignant Score:',
-                  //       bold: true,
-                  //       noWrap: true,
-                  //       fontSize: 9,
-                  //     },
-                  //     {
-                  //       text: malignantScore,
-                  //       fontStyle: 'thin',
-                  //       color: '#3d3d49',
-                  //       margin: [0, 4, 0, 0],
-                  //     },
-                  //   ],
-                  // },
-                ],
+                text: 'John Doe',
+                fontStyle: 'thin',
+                color: '#3d3d49',
+                fontSize: 10,
+                margin: [0, 4, 0, 0],
               },
             ],
           },
-          {},
+          {
+            style: 'imagescol2',
+            stack: [
+              {
+                text: 'Institution:',
+                bold: true,
+                noWrap: true,
+                fontSize: 9,
+              },
+              {
+                text: 'Clearview Hospital',
+                color: '#3d3d49',
+                fontStyle: 'thin',
+                fontSize: 10,
+                margin: [0, 4, 0, 0],
+              },
+            ],
+          },
+          {
+            style: 'imagescol2',
+            stack: [
+              {
+                text: 'Date of Birth:',
+                bold: true,
+                fontSize: 9,
+              },
+              {
+                text: 'Jan 1, 1970',
+                color: '#3d3d49',
+                fontStyle: 'thin',
+                fontSize: 10,
+                margin: [0, 4, 0, 0],
+              },
+            ],
+          },
         ],
       ],
     },
@@ -474,7 +585,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         margin: [0, 0, 0, 10],
       },
       imagescol2: {
-        columnGap: 90,
+        columnGap: 170,
         margin: [10, 7, 30, 7],
       },
       jumbotron: {
