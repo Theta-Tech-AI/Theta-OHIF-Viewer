@@ -22,6 +22,7 @@ import Worker from './segments.worker';
 // import t2payload from './t2paylod.json';
 // import flairpaylod from './flairpaylod.json';
 // import ct1payload from './ct1payload.json';
+
 import ProgressBar from '@ohif/viewer/src/components/LoadingBar/progress';
 
 const modalityToPayloadMapping = {
