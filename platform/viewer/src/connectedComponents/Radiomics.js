@@ -47,6 +47,7 @@ import ConnectedStudyBrowser from './ConnectedStudyBrowser';
 import { ProgressBar } from '../components/LoadingBar';
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
+
 // const currentMode = BrainMode;
 
 let hasRestoredState = false;
@@ -595,6 +596,21 @@ class Radiomics extends Component {
           this.setState({
             showImages: false,
           });
+
+          // pdfmake.fonts = {
+          //   Playfair: {
+          //     normal:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Regular.ttf',
+          //     bold:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Bold.ttf',
+          //     italics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Italic.ttf',
+          //     bolditalics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-BoldItalic.ttf',
+          //   },
+          //   // other fonts...
+          // };
+
           pdfmake.createPdf(definition).download();
         })
         .catch(error => {
@@ -664,30 +680,30 @@ class Radiomics extends Component {
     this.setState({
       showImages: true,
     });
-  
+
     setTimeout(() => {
       const similarityResultState = this.state.similarityResultState;
-  
+
       if (!similarityResultState || similarityResultState.knn.length < 1) {
         return;
       }
-  
+
       for (let i = 0; i < similarityResultState.knn.length; i++) {
         const imageElement = this.imageRefs[i];
         promises.push(exportComponent(imageElement));
       }
-  
+
       Promise.all(promises)
-        .then((data) => {
-          data.forEach((element) => {
+        .then(data => {
+          data.forEach(element => {
             base64.push(element.toDataURL());
           });
-  
+
           return exportComponent(this.canvas);
         })
-        .then((collage) => {
+        .then(collage => {
           const SimilarScans = JSON.parse(
-            localStorage.getItem("print-similarscans") || "{}"
+            localStorage.getItem('print-similarscans') || '{}'
           );
           const definition = LungPdfMaker(
             SimilarScans[0],
@@ -699,14 +715,13 @@ class Radiomics extends Component {
           });
           pdfmake.createPdf(definition).download();
         })
-        .catch((error) => {
+        .catch(error => {
           this.setState({
             showImages: false,
           });
         });
     }, 500);
   };
-  
 
   getHelperText = () => {
     const { job, isSimilarlookingScans, isComplete } = this.state;
@@ -941,7 +956,10 @@ class Radiomics extends Component {
                 style={{
                   width: '100%',
                   background:
-                    isComplete && isSimilarlookingScans
+                    (this.props.currentMode === BrainMode && isComplete) ||
+                    (this.props.currentMode !== BrainMode &&
+                      isComplete &&
+                      isSimilarlookingScans)
                       ? '#000000'
                       : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',

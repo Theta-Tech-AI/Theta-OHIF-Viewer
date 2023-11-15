@@ -11,7 +11,7 @@ const TextureFeature = props => {
   const [jobs, setJobs] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { user, viewport } = props;
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(0);
   const [showMore, setShowMore] = useState(true);
   const access_token = user.access_token;
   // const email = user.profile.email;
@@ -64,7 +64,7 @@ const TextureFeature = props => {
             (response.data.jobs[0].status === 'DONE' &&
               jobs[0].status !== 'DONE')
           ) {
-            setIsActive(false);
+            // setIsActive(false);
             setJobs([...response.data.jobs]);
             jobsLengthRef.current = response.data.jobs.length;
           }
