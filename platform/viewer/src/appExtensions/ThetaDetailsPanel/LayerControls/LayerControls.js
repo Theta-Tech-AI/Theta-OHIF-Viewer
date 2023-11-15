@@ -113,7 +113,7 @@ const LayerControls = () => {
 
   return (
     <div className="component">
-      <div
+      {/* <div
         style={{
           display: 'flex',
           flexDirection: 'row',
@@ -130,7 +130,7 @@ const LayerControls = () => {
         >
           {activeTab ? ' Hide Layout Parameter' : ' Show Layout Parameter'}
         </div>
-      </div>
+      </div> */}
 
       {activeTab && (
         <>

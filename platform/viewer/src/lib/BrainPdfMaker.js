@@ -193,6 +193,112 @@ function createReportSummaryTable(
   };
 }
 
+
+
+
+function createReportSummaryTable2(
+  patientID,
+  patientName,
+  classifier
+  // malignantScore
+) {
+  return {
+    table: {
+      widths: ['25%', '72%'], // specify widths for both columns
+      body: [
+        [
+          {
+            style: 'imagescol2',
+            columns: [
+              {
+                columns: [
+                  {
+                    stack: [
+                      {
+                        text: 'Patient Name:',
+                        bold: true,
+                        fontSize: 9,
+                      },
+                      {
+                        text: "John Doe",
+                        fontStyle: 'thin',
+                        color: '#3d3d49',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                  {
+                    stack: [
+                      {
+                        text: 'Date of Birth:',
+                        bold: true,
+                        noWrap: true,
+                        fontSize: 9,
+                      },
+                      {
+                        text: 'Jan 1, 1970',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                columns: [
+                  {
+                    stack: [
+                      {
+                        text: 'Institution: ',
+                        bold: true,
+                        fontSize: 9,
+                      },
+                      {
+                        text: 'Clearview Hospital',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                  // {
+                  //   stack: [
+                  //     {
+                  //       text: 'Malignant Score:',
+                  //       bold: true,
+                  //       noWrap: true,
+                  //       fontSize: 9,
+                  //     },
+                  //     {
+                  //       text: malignantScore,
+                  //       fontStyle: 'thin',
+                  //       color: '#3d3d49',
+                  //       margin: [0, 4, 0, 0],
+                  //     },
+                  //   ],
+                  // },
+                ],
+              },
+            ],
+          },
+          {},
+        ],
+      ],
+    },
+    layout: {
+      hLineWidth: () => 0,
+      vLineWidth: () => 0,
+      paddingLeft: () => 0,
+      paddingRight: () => 0,
+    }, // this layout has no borders and no padding
+    style: 'jumbotron',
+    margin: [0, 0, 0, 0],
+  };
+}
 function createMorphologyHeader() {
   return {
     style: 'headercol',
@@ -204,7 +310,7 @@ function createMorphologyHeader() {
           body: [
             [
               {
-                text: 'MORPHOLOGY',
+                text: 'Tumor Complexity & Spikiness',
                 style: 'jumbotronHeader',
                 colSpan: 2,
               },
@@ -258,7 +364,6 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
           // },
           {
             text: 'LivAI Report Summary',
-            style: 'jumbotronHeader',
             margin: [0, 20, 0, 0],
             bold: true,
             color: '#243D4E',
@@ -282,7 +387,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
               body: [
                 [
                   {
-                    text: 'PATIENT INFORMATION',
+                    text: 'Patient Information',
                     style: 'jumbotronHeader',
                     colSpan: 2, // span across 2 columns
                   },
@@ -309,6 +414,12 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         'ResNet -18'
         // score
       ),
+      createReportSummaryTable2(
+        patientData.PatientID,
+        "John Doe",
+        'ResNet -18'
+        // score
+      ),
       // {
       //   text: 'ANALYSIS DESCRIPTION',
       //   bold: true,
@@ -332,7 +443,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
               body: [
                 [
                   {
-                    text: 'COLLAGE RADIOMICS',
+                    text: 'Local Heterogeneity',
                     style: 'jumbotronHeader',
                     colSpan: 2, // span across 2 columns
                   },
@@ -353,6 +464,9 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
       },
     ],
     styles: {
+      branding: {
+        font: 'Times',
+      },
       header: {
         fontSize: 12,
         bold: true,
