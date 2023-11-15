@@ -11,17 +11,35 @@ function getMalignantScore(data) {
 
 function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
   return {
-    stack: [
+    columns: [
       {
         stack: [
           {
             image: imageDataUrl8,
             width: 350,
             height: 280,
-            margin: [-10, 5, 0, 0],
+            margin: [-70, 5, 0, 0],
           },
         ],
         margin: [70, 0, 0, 0],
+      },
+      {
+        stack: [
+          {
+            stack: [
+              { text: 'Entropic heterogenety:', fontSize: 9 },
+              { text: '0.46', fontSize: 9 },
+            ],
+            margin: [20, 10, 0, 0],
+          },
+          {
+            stack: [
+              { text: 'Correlation heterogenety:', fontSize: 9 },
+              { text: '0.26', fontSize: 9 },
+            ],
+            margin: [20, 25, 0, 0],
+          },
+        ],
       },
       // {
       //   margin: [20, 10, 0, 0],
@@ -97,7 +115,7 @@ function createReportSummaryTable(
 ) {
   return {
     table: {
-      widths: ['25%', '72%'], // specify widths for both columns
+      widths: ['30%', '72%'],
       body: [
         [
           {
@@ -182,19 +200,11 @@ function createReportSummaryTable(
         ],
       ],
     },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    }, // this layout has no borders and no padding
+    layout: 'noBorders',
     style: 'jumbotron',
     margin: [0, 0, 0, 0],
   };
 }
-
-
-
 
 function createReportSummaryTable2(
   patientID,
@@ -204,7 +214,7 @@ function createReportSummaryTable2(
 ) {
   return {
     table: {
-      widths: ['25%', '72%'], // specify widths for both columns
+      widths: ['30%', '72%'],
       body: [
         [
           {
@@ -217,10 +227,10 @@ function createReportSummaryTable2(
                       {
                         text: 'Patient Name:',
                         bold: true,
-                        fontSize: 9,
+                        fontSize: 8,
                       },
                       {
-                        text: "John Doe",
+                        text: 'John Doe',
                         fontStyle: 'thin',
                         color: '#3d3d49',
                         fontSize: 10,
@@ -289,12 +299,7 @@ function createReportSummaryTable2(
         ],
       ],
     },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    }, // this layout has no borders and no padding
+    layout: 'noBorders',
     style: 'jumbotron',
     margin: [0, 0, 0, 0],
   };
@@ -306,7 +311,7 @@ function createMorphologyHeader() {
     stack: [
       {
         table: {
-          widths: ['22%', '72%'],
+          widths: ['30%', '70%'],
           body: [
             [
               {
@@ -318,7 +323,7 @@ function createMorphologyHeader() {
             ],
           ],
         },
-        layout: {},
+        layout: 'noBorders',
         style: 'jumbotronLBlue2',
         margin: [0, 20, -10, 5],
       },
@@ -331,9 +336,9 @@ function createMorphologyBody(image) {
     stack: [
       {
         image: image,
-        width: 370,
-        height: 300,
-        margin: [40, 10, 0, 0],
+        width: 350,
+        height: 280,
+        margin: [80, 5, 0, 0],
       },
     ],
   };
@@ -383,7 +388,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         stack: [
           {
             table: {
-              widths: ['22%', '72%'], // specify widths for both columns
+              widths: ['30%', '70%'],
               body: [
                 [
                   {
@@ -395,12 +400,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
                 ],
               ],
             },
-            layout: {
-              hLineWidth: () => 0,
-              vLineWidth: () => 0,
-              paddingLeft: () => 0,
-              paddingRight: () => 0,
-            }, // this layout has no borders and no padding
+            layout: 'noBorders',
             style: 'jumbotronLBlue2',
             margin: [0, 5, -10, 5],
           },
@@ -408,15 +408,15 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
       },
       // {},
       // },
-      createReportSummaryTable(
-        patientData.PatientID,
-        patientData.PatientName,
-        'ResNet -18'
-        // score
-      ),
+      // createReportSummaryTable(
+      //   patientData.PatientID,
+      //   patientData.PatientName,
+      //   'ResNet -18'
+      //   // score
+      // ),
       createReportSummaryTable2(
         patientData.PatientID,
-        "John Doe",
+        'John Doe',
         'ResNet -18'
         // score
       ),
@@ -439,7 +439,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         stack: [
           {
             table: {
-              widths: ['22%', '72%'], // specify widths for both columns
+              widths: ['30%', '70%'],
               body: [
                 [
                   {
@@ -451,12 +451,7 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
                 ],
               ],
             },
-            layout: {
-              hLineWidth: () => 0,
-              vLineWidth: () => 0,
-              paddingLeft: () => 0,
-              paddingRight: () => 0,
-            }, // this layout has no borders and no padding
+            layout: 'noBorders',
             style: 'jumbotronLBlue2',
             margin: [0, 20, -10, 5],
           },
@@ -504,6 +499,14 @@ const PdfMaker = (ohif_image, morphologyBase64) => {
         padding: [10, 0, 10, 10],
         border: 'grey',
         color: 'white',
+      },
+      noBorders: {
+        hLineWidth: function(i, node) {
+          return 0;
+        },
+        vLineWidth: function(i, node) {
+          return 0;
+        },
       },
     },
     images,
