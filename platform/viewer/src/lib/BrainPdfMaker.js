@@ -16,8 +16,8 @@ function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
         stack: [
           {
             image: imageDataUrl8,
-            width: 350,
-            height: 280,
+            width: 320,
+            height: 240,
             margin: [-40, 5, 0, 0],
           },
         ],
@@ -27,17 +27,17 @@ function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
         stack: [
           {
             stack: [
-              { text: 'Entropic heterogenety:', fontSize: 9 },
+              { text: 'Entropic heterogeneity:', fontSize: 9 },
               { text: '0.46', fontSize: 9 },
             ],
-            margin: [20, 10, 0, 0],
+            margin: [20, 5, 0, 0],
           },
           {
             stack: [
-              { text: 'Correlation heterogenety:', fontSize: 9 },
+              { text: 'Correlation heterogeneity:', fontSize: 9 },
               { text: '0.26', fontSize: 9 },
             ],
-            margin: [20, 255, 0, 0],
+            margin: [20, 200, 0, 0],
           },
         ],
       },
@@ -235,7 +235,7 @@ function createReportSummaryTable(
 ) {
   return {
     table: {
-      widths: ['25%', '25%', '50%'], // adjust the widths for all three columns
+      widths: ['25%', '25%', '46%'], // adjust the widths for all three columns
       body: [
         [
           {
@@ -263,6 +263,7 @@ function createReportSummaryTable(
                 bold: true,
                 noWrap: true,
                 fontSize: 9,
+                margin: [0, 0, 0, 0],
               },
               {
                 text: 'Clearview Hospital',
@@ -280,13 +281,14 @@ function createReportSummaryTable(
                 text: 'Date of Birth:',
                 bold: true,
                 fontSize: 9,
+                margin: [40, 0, 0, 0],
               },
               {
                 text: 'Jan 1, 1970',
                 color: '#3d3d49',
                 fontStyle: 'thin',
                 fontSize: 10,
-                margin: [0, 4, 0, 0],
+                margin: [40, 4, 0, 0],
               },
             ],
           },
@@ -307,7 +309,7 @@ function createReportSummaryTable(
 function createMorphologyHeader() {
   return {
     style: 'headercol',
-    pageBreak: 'before',
+    // pageBreak: 'before',
     stack: [
       {
         table: {
@@ -336,9 +338,9 @@ function createMorphologyBody(image) {
     stack: [
       {
         image: image,
-        width: 370,
-        height: 300,
-        margin: [40, 10, 0, 0],
+        width: 320,
+        height: 250,
+        margin: [35, 0, 0, 0],
       },
     ],
   };
