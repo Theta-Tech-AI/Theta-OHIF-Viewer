@@ -875,14 +875,16 @@ class Radiomics extends Component {
             flexDirection: 'column', // Stack items vertically
           }}
         >
-          <img
-            src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
-            alt="Fig"
-            style={{
-              marginBottom: '10px',
-              // animation: 'spin 2s linear infinite', // Add a spinning animation
-            }} // Add some space between the image and the progress bar
-          />
+          {!isInLungMode && (
+            <img
+              src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
+              alt="Fig"
+              style={{
+                marginBottom: '10px',
+                // animation: 'spin 2s linear infinite', // Add a spinning animation
+              }} // Add some space between the image and the progress bar
+            />
+          )}
           {this.renderProgressBar()}
         </div>
 

@@ -81,7 +81,7 @@ const Header = ({ onMobileClose, openMobile }) => {
     </section>
   );
 
-  const applicationTitle = currentMode == BrainMode ? 'LivAI' : 'Lung Mode';
+  const applicationTitle = currentMode == BrainMode ? 'LivAI' : 'LungRadCad';
 
   return (
     <div
