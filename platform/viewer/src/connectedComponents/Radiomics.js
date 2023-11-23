@@ -865,14 +865,13 @@ class Radiomics extends Component {
             background: 'rgba(23,28,33,0.99)',
             fontSize: '24px',
             zIndex: 8,
-            display: 'none',
-            // display:
-            //   (isInLungMode &&
-            //     isComplete &&
-            //     this.state.isSimilarlookingScans) ||
-            //   (!isInLungMode && isComplete)
-            //     ? 'none'
-            //     : 'flex',
+            display:
+              (isInLungMode &&
+                isComplete &&
+                this.state.isSimilarlookingScans) ||
+              (!isInLungMode && isComplete)
+                ? 'none'
+                : 'flex',
             flexDirection: 'column', // Stack items vertically
           }}
         >
