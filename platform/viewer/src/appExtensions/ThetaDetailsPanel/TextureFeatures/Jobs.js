@@ -470,19 +470,24 @@ const Jobs = ({
             <ScrollableArea scrollStep={201} class="series-browser">
               {textures.length > 0 && (
                 <div className="textures">
-                  {textures.map((texture, index) => (
-                    <li
-                      key={index}
-                      onClick={() => handleOverlay(texture)}
-                      className={
-                        isInstance === texture
-                          ? 'selected-instance'
-                          : 'texture_uids'
-                      }
-                    >
-                      {description[index]}
-                    </li>
-                  ))}
+                  {textures.map((texture, index) => {
+                    const descriptionText = description[index]
+                      .split('Collage HaralickFeature.')[1]
+                      .split(' ')[0];
+                    return (
+                      <li
+                        key={index}
+                        onClick={() => handleOverlay(texture)}
+                        className={
+                          isInstance === texture
+                            ? 'selected-instance'
+                            : 'texture_uids'
+                        }
+                      >
+                        {descriptionText}
+                      </li>
+                    );
+                  })}
                 </div>
               )}
             </ScrollableArea>

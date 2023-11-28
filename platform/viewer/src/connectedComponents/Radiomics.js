@@ -47,6 +47,7 @@ import ConnectedStudyBrowser from './ConnectedStudyBrowser';
 import { ProgressBar } from '../components/LoadingBar';
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
+
 // const currentMode = BrainMode;
 
 let hasRestoredState = false;
@@ -595,6 +596,21 @@ class Radiomics extends Component {
           this.setState({
             showImages: false,
           });
+
+          // pdfmake.fonts = {
+          //   Playfair: {
+          //     normal:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Regular.ttf',
+          //     bold:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Bold.ttf',
+          //     italics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Italic.ttf',
+          //     bolditalics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-BoldItalic.ttf',
+          //   },
+          //   // other fonts...
+          // };
+
           pdfmake.createPdf(definition).download();
         })
         .catch(error => {
@@ -664,30 +680,30 @@ class Radiomics extends Component {
     this.setState({
       showImages: true,
     });
-  
+
     setTimeout(() => {
       const similarityResultState = this.state.similarityResultState;
-  
+
       if (!similarityResultState || similarityResultState.knn.length < 1) {
         return;
       }
-  
+
       for (let i = 0; i < similarityResultState.knn.length; i++) {
         const imageElement = this.imageRefs[i];
         promises.push(exportComponent(imageElement));
       }
-  
+
       Promise.all(promises)
-        .then((data) => {
-          data.forEach((element) => {
+        .then(data => {
+          data.forEach(element => {
             base64.push(element.toDataURL());
           });
-  
+
           return exportComponent(this.canvas);
         })
-        .then((collage) => {
+        .then(collage => {
           const SimilarScans = JSON.parse(
-            localStorage.getItem("print-similarscans") || "{}"
+            localStorage.getItem('print-similarscans') || '{}'
           );
           const definition = LungPdfMaker(
             SimilarScans[0],
@@ -699,34 +715,33 @@ class Radiomics extends Component {
           });
           pdfmake.createPdf(definition).download();
         })
-        .catch((error) => {
+        .catch(error => {
           this.setState({
             showImages: false,
           });
         });
     }, 500);
   };
-  
 
   getHelperText = () => {
-    const { job, isSimilarlookingScans, isComplete } = this.state;
+    const { job, isSimilarlookingScans } = this.state;
 
     // if (!job || !job.data) return 'Processing Collage Features...';
-    if (!job || !job.data) return 'Processing Report details...';
+    if (!job || !job.data) return 'Processing AI ...';
 
     switch (job.data.status) {
       case 'RUNNING':
-        return `Running Collage Job ${job.data.job} - ${job.data.instances_done}/${job.instances}`;
+        return `Running Algorithm in Background ${job.data.instances_done}/${job.instances}`;
       case 'PENDING':
-        return 'Collage Job pending...';
+        return 'AI pending...';
       case 'ERROR':
         return 'Error occurred...';
       case 'DONE':
         return isSimilarlookingScans
-          ? 'Collage Job completed!'
+          ? 'AI completed!'
           : 'Getting similar looking scans...';
       default:
-        return 'Processing Report details...';
+        return 'Processing AI ...';
     }
   };
 
@@ -850,7 +865,6 @@ class Radiomics extends Component {
             background: 'rgba(23,28,33,0.99)',
             fontSize: '24px',
             zIndex: 8,
-            // display:'none'
             display:
               (isInLungMode &&
                 isComplete &&
@@ -858,8 +872,19 @@ class Radiomics extends Component {
               (!isInLungMode && isComplete)
                 ? 'none'
                 : 'flex',
+            flexDirection: 'column', // Stack items vertically
           }}
         >
+          {!isInLungMode && (
+            <img
+              src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
+              alt="Fig"
+              style={{
+                marginBottom: '10px',
+                // animation: 'spin 2s linear infinite', // Add a spinning animation
+              }} // Add some space between the image and the progress bar
+            />
+          )}
           {this.renderProgressBar()}
         </div>
 
@@ -941,7 +966,10 @@ class Radiomics extends Component {
                 style={{
                   width: '100%',
                   background:
-                    isComplete && isSimilarlookingScans
+                    (this.props.currentMode === BrainMode && isComplete) ||
+                    (this.props.currentMode !== BrainMode &&
+                      isComplete &&
+                      isSimilarlookingScans)
                       ? '#000000'
                       : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',

@@ -81,8 +81,7 @@ const Header = ({ onMobileClose, openMobile }) => {
     </section>
   );
 
-  const applicationTitle =
-    currentMode == BrainMode ? 'LivAI' : 'Lung Mode';
+  const applicationTitle = currentMode == BrainMode ? 'LivAI' : 'LungRadCad';
 
   return (
     <div
@@ -124,7 +123,13 @@ const Header = ({ onMobileClose, openMobile }) => {
             lineHeight: '31px',
           }}
         >
-          <h4>{applicationTitle}</h4>
+          <h4
+            style={{
+              fontFamily: 'Times New Roman',
+            }}
+          >
+            {applicationTitle}
+          </h4>
         </div>
       </div>
 
