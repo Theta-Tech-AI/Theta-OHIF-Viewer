@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, matchPath, Link as RouterLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Icon } from '@ohif/ui';
@@ -54,6 +54,7 @@ const renderNavItems = ({ items, pathname, depth = 0 }) => {
 const Header = ({ onMobileClose, openMobile }) => {
   const location = useLocation();
   const { active: currentMode } = useSelector(state => state && state.mode);
+  const [lungMode, setLungMode] = useState(false);
   useEffect(() => {
     if (openMobile && onMobileClose) {
       onMobileClose();
@@ -93,7 +94,8 @@ const Header = ({ onMobileClose, openMobile }) => {
         top: 0,
         left: 0,
         borderBottom: '1px  #87878780 solid',
-        background: '#1A1C21',
+        color: !lungMode ? 'black' : 'white',
+        backgroundColor: !lungMode ? 'white' : '',
         paddingRight: '6px',
         paddingTop: '6px',
         flexDirection: 'row',
@@ -102,7 +104,8 @@ const Header = ({ onMobileClose, openMobile }) => {
     >
       <div
         style={{
-          color: '#fff',
+          color: !lungMode ? 'black' : 'white',
+          backgroundColor: !lungMode ? 'white' : '',
           // flex: 1,
         }}
       >
@@ -126,6 +129,8 @@ const Header = ({ onMobileClose, openMobile }) => {
           <h4
             style={{
               fontFamily: 'Times New Roman',
+              color: !lungMode ? 'black' : 'white',
+              backgroundColor: !lungMode ? 'white' : '',
             }}
           >
             {applicationTitle}
@@ -133,10 +138,20 @@ const Header = ({ onMobileClose, openMobile }) => {
         </div>
       </div>
 
-      <div className="portal__header">{content}</div>
+      <div
+        className="portal__header"
+        style={{
+          color: 'black',
+          backgroundColor: !lungMode ? 'white' : '',
+          // flex: 1,
+        }}
+      >
+        {content}
+      </div>
       <div
         style={{
           color: '#fff',
+          backgroundColor: !lungMode ? 'white' : '',
           // flex: 1,
         }}
       >

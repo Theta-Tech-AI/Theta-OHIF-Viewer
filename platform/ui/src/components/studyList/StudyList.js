@@ -1,6 +1,6 @@
 import './StudyList.styl';
 
-import React from 'react';
+import React, {useState} from 'react';
 import classNames from 'classnames';
 import TableSearchFilter from './TableSearchFilter.js';
 import PropTypes from 'prop-types';
@@ -41,6 +41,8 @@ function StudyList(props) {
     displaySize,
   } = props;
   const { t, ready: translationsAreReady } = useTranslation('StudyList');
+
+  const [lungMode, setLungMode] = useState(false);
 
   const largeTableMeta = [
     {
@@ -140,7 +142,7 @@ function StudyList(props) {
   return translationsAreReady ? (
     <>
       <div
-        className="study-list-container"
+        className={`study-list-container ${!lungMode ? 'brain' : ''}`}
         style={{
           marginTop: '20px',
         }}
@@ -163,9 +165,9 @@ function StudyList(props) {
           />
         </div>
       </div>
-      <div className="study-list-container">
+      <div className={`study-list-container ${!lungMode ? 'brain' : ''}`}>
         <div
-          className="filters2"
+          className={`filters2 ${!lungMode ? 'brain' : ''}`}
           style={{
             display: 'flex',
             padding: '0 2%',

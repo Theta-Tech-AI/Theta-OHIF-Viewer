@@ -56,6 +56,7 @@ class ToolbarRow extends Component {
     this.state = {
       toolbarButtons: toolbarButtonDefinitions,
       activeButtons: [],
+      lungMode: false,
     };
 
     this.seriesPerStudyCount = [];
@@ -248,7 +249,10 @@ class ToolbarRow extends Component {
 
     return (
       <>
-        <div className="ToolbarRow">
+        <div
+          className={`ToolbarRow${!this.state.lungMode ? ' brain' : ''}`}
+          style={{ backgroundColor: !this.state.lungMode ? 'white' : '' }}
+        >
           {/* <div className="pull-left m-t-1 p-y-1" style={{ padding: '10px' }}>
             <RoundedButtonGroup
               options={this.buttonGroups.left}

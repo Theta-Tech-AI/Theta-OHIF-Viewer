@@ -61,6 +61,7 @@ function StudyListRoute(props) {
     isSearchingForStudies: false,
     error: null,
   });
+  const [lungMode, setLungMode] = useState(false);
   const [showImportIdcModal, setShowImportIdcModal] = useState(false);
   const [showHowtoGuide, setShowHowtoGuide] = useState(false);
   const [activeModalId, setActiveModalId] = useState(null);
@@ -111,6 +112,7 @@ function StudyListRoute(props) {
     }
   };
 
+  // const LightModeObj = { backgroundColor: !lungMode ? 'white' : '' };
   // Called when relevant state/props are updated
   // Watches filters and sort, debounced
   useEffect(
@@ -236,6 +238,7 @@ function StudyListRoute(props) {
     <div
       style={{
         paddingBottom: 100,
+        backgroundColor: !lungMode ? 'white' : '',
       }}
     >
       {studyListFunctionsEnabled ? (
@@ -258,7 +261,7 @@ function StudyListRoute(props) {
         onSuccess={handleGuideClose2}
       />
 
-      <div className="study-list-header print">
+      <div className={`study-list-header print ${!lungMode ? 'brain' : ''}`}>
         <div className="header">
           <h1 style={{ fontWeight: 700, fontSize: '24px' }}>
             {t('StudyList')}
@@ -324,6 +327,7 @@ function StudyListRoute(props) {
           paddingRight: '2%',
           paddingLeft: '2%',
           width: '100%',
+          backgroundColor: !lungMode ? 'white' : '',
           paddingTop: '0',
           paddingBottom: '0',
         }}
@@ -429,7 +433,7 @@ async function getStudyList(
 
     return {
       AccessionNumber: study.AccessionNumber, // "1"
-      modalities: study.modalities, // "SEG\\MR"  ​​
+      modalities: study.modalities, // "SEG\\MR"
       // numberOfStudyRelatedInstances: "3"
       // numberOfStudyRelatedSeries: "3"
       // PatientBirthdate: undefined
