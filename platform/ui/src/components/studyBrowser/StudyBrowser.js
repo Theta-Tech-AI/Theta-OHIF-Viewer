@@ -101,9 +101,10 @@ function StudyBrowser(props) {
       onImageRendered
     );
   };
+  const [lungMode, setLungMode] = useState(false);
 
   return (
-    <div className="study-browser">
+    <div className={`study-browser ${!lungMode ? 'brain' : ''}`}>
       {hideThumbnails ? null : (
         <div className="scrollable-study-thumbnails">
           {studies

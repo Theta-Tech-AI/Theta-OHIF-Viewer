@@ -62,6 +62,7 @@ class XNATSegmentationImportMenu extends React.Component {
       serviceWorkerDone: false,
       progressText: '',
       importProgress: 0,
+      lungMode: false,
       segmentations: {},
       selectedSegmentation: '',
     };
@@ -481,10 +482,15 @@ class XNATSegmentationImportMenu extends React.Component {
   }
 
   render() {
-    const { importing, serviceWorkerDone, importProgress } = this.state;
+    const {
+      importing,
+      serviceWorkerDone,
+      importProgress,
+      lungMode,
+    } = this.state;
 
     return (
-      <div className="xnatPanel">
+      <div className={` xnatPanel ${!this.state.lungMode ? 'brain' : ''}`}>
         <div className="panelHeader">
           <h3>Import mask-based ROI collections</h3>
           {importing ? null : (

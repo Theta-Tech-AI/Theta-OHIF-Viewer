@@ -56,6 +56,7 @@ class RadiomicsToolbarRow extends Component {
     this.state = {
       toolbarButtons: toolbarButtonDefinitions,
       activeButtons: [],
+      lungMode: false,
     };
 
     this.seriesPerStudyCount = [];
@@ -222,7 +223,12 @@ class RadiomicsToolbarRow extends Component {
 
     return (
       <>
-        <div className="ToolbarRow">{buttonComponents}</div>
+        <div
+          className={`ToolbarRow${!this.state.lungMode ? ' brain' : ''}`}
+          style={{ backgroundColor: !this.state.lungMode ? 'white' : '' }}
+        >
+          {buttonComponents}
+        </div>
       </>
     );
   }

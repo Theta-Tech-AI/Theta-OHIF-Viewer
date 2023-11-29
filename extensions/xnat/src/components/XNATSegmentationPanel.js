@@ -132,6 +132,7 @@ class XNATSegmentationPanel extends React.Component {
       exporting: false,
       showSegmentationSettings: false,
       labelmap3D,
+      lungMode: false,
     };
 
     this.addEventListeners();
@@ -909,9 +910,13 @@ class XNATSegmentationPanel extends React.Component {
       );
     } else {
       component = (
-        <div className="xnatPanel">
+        <div className={` xnatPanel ${!this.state.lungMode ? 'brain' : ''}`}>
           <div className="panelHeader">
-            <div className="title-with-icon">
+            <div
+              className={`title-with-icon  ${
+                !this.state.lungMode ? 'brain-text' : ''
+              }`}
+            >
               <h3>Mask-based ROIs</h3>
               <Icon
                 className="settings-icon"
@@ -936,7 +941,9 @@ class XNATSegmentationPanel extends React.Component {
             />
           </div>
           <div className="roiCollectionBody">
-            <div className="workingCollectionHeader">
+            <div className={`workingCollectionHeader ${
+                !this.state.lungMode ? 'brain-text' : ''
+              }`}>
               <h4> {importMetadata.name} </h4>
               <div>{addSegmentButton}</div>
             </div>
@@ -952,8 +959,10 @@ class XNATSegmentationPanel extends React.Component {
                       Label
                       <span
                         style={{
-                          color: 'var(--text-secondary-color)',
-                        }}
+                          color: !this.state.lungMode
+                            ? 'black'
+                            : 'var(--text-secondary-color)',
+                      }}
                       >
                         {' '}
                         / Type{' '}

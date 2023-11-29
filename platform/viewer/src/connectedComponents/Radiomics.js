@@ -139,6 +139,7 @@ class Radiomics extends Component {
       isSimilarlookingScans: false,
       similarityResultState: { knn: [] },
       isEditSelection: true,
+      lungMode: false,
     };
 
     this.canvas = React.createRef(null);
@@ -892,6 +893,7 @@ class Radiomics extends Component {
           className="printView"
           style={{
             paddingBottom: 140,
+            backgroundColor: !this.state.lungMode ? 'white' : '',
             // display: this.state.isComplete ? 'block' : 'none',
           }}
         >
