@@ -972,7 +972,7 @@ class Radiomics extends Component {
                     (this.props.currentMode !== BrainMode &&
                       isComplete &&
                       isSimilarlookingScans)
-                      ? '#000000'
+                      ? '#e6e6e6'
                       : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',
                   padding: '20px',
@@ -983,6 +983,10 @@ class Radiomics extends Component {
                     style={{
                       textAlign: 'left',
                       margin: 0,
+                      color:
+                        this.props.currentMode === BrainMode
+                          ? 'black'
+                          : 'white',
                     }}
                   >
                     Collage

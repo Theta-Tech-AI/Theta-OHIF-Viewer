@@ -8,6 +8,7 @@ import { StudyListLoadingText } from './StudyListLoadingText.js';
 import { useTranslation } from 'react-i18next';
 import TableLabel from './TableLabel';
 import { setItem } from '@ohif/viewer/src/lib/localStorageUtils';
+import { lungMode } from '@ohif/viewer/src/utils/constants';
 
 const getContentFromUseMediaValue = (
   displaySize,
@@ -42,7 +43,7 @@ function StudyList(props) {
   } = props;
   const { t, ready: translationsAreReady } = useTranslation('StudyList');
 
-  const [lungMode, setLungMode] = useState(false);
+  const [lungActive, setLungActive] = useState(false);
 
   const largeTableMeta = [
     {
@@ -142,7 +143,7 @@ function StudyList(props) {
   return translationsAreReady ? (
     <>
       <div
-        className={`study-list-container ${!lungMode ? 'brain' : ''}`}
+        className={`study-list-container ${!lungActive ? 'brain' : ''}`}
         style={{
           marginTop: '20px',
         }}
@@ -165,9 +166,9 @@ function StudyList(props) {
           />
         </div>
       </div>
-      <div className={`study-list-container ${!lungMode ? 'brain' : ''}`}>
+      <div className={`study-list-container ${!lungActive ? 'brain' : ''}`}>
         <div
-          className={`filters2 ${!lungMode ? 'brain' : ''}`}
+          className={`filters2 ${!lungActive ? 'brain' : ''}`}
           style={{
             display: 'flex',
             padding: '0 2%',
@@ -307,17 +308,26 @@ function TableRow(props) {
 
   const { t } = useTranslation('StudyList');
 
+  const [lungActive, setLungActive] = useState(false);
+
   const largeRowTemplate = (
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
+      style={{ color: !lungActive ? 'black' : 'white' }}
     >
       <td className={classNames({ 'empty-value': !PatientName })}>
         {PatientName || `(${t('Empty')})`}
       </td>
-      <td>{PatientID}</td>
-      <td>{AccessionNumber}</td>
-      <td>{StudyDate}</td>
+      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+        {PatientID}
+      </td>
+      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+        {AccessionNumber}
+      </td>
+      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+        {StudyDate}
+      </td>
       <td className={classNames({ 'empty-value': !modalities })}>
         {modalities || `(${t('Empty')})`}
       </td>
@@ -329,12 +339,16 @@ function TableRow(props) {
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
+      style={{ color: !lungActive ? 'black' : 'white' }}
     >
-      <td className={classNames({ 'empty-value': !PatientName })}>
+      <td
+        className={classNames({ 'empty-value': !PatientName })}
+        style={{ backgroundColor: !lungActive ? 'white' : 'black' }}
+      >
         {PatientName || `(${t('Empty')})`}
         <div style={{ color: '#60656f' }}>{PatientID}</div>
       </td>
-      <td>
+      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* DESCRIPTION */}
           <div
@@ -380,10 +394,22 @@ function TableRow(props) {
           </div> */}
         </div>
       </td>
-      <td className="hide-xs">{AccessionNumber}</td>
+      <td
+        className="hide-xs"
+        style={{ backgroundColor: !lungActive ? 'white' : 'black' }}
+      >
+        {AccessionNumber}
+      </td>
 
       {/* DATE */}
-      <td style={{ textAlign: 'left' }}>{StudyDate}</td>
+      <td
+        style={{
+          textAlign: 'left',
+          backgroundColor: !lungActive ? 'white' : 'black',
+        }}
+      >
+        {StudyDate}
+      </td>
     </tr>
   );
 
@@ -391,6 +417,7 @@ function TableRow(props) {
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
+      style={{ color: !lungActive ? 'black' : 'white' }}
     >
       <td style={{ position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -22,6 +22,8 @@ function TableLabel(props) {
   const sortIconForSortField =
     sortDirection === 'asc' ? sortIcons[1] : sortIcons[2];
 
+  const [lungMode, setLungMode] = useState(false);
+
   return translationsAreReady
     ? meta.map((field, i) => {
         const { displayText, fieldName, inputType } = field;
@@ -38,6 +40,7 @@ function TableLabel(props) {
             <label
               htmlFor={`filter-${fieldName}`}
               onClick={() => onSort(fieldName)}
+             style={{backgroundColor: !lungMode ? '#F8FAFC' : 'black', color: !lungMode ? 'black' : 'white'}}
             >
               {`${displayText}`}
               <Icon name={sortIcon} style={{ fontSize: '12px' }} />

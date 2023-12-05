@@ -263,7 +263,7 @@ function StudyListRoute(props) {
 
       <div className={`study-list-header print ${!lungMode ? 'brain' : ''}`}>
         <div className="header">
-          <h1 style={{ fontWeight: 700, fontSize: '24px' }}>
+          <h1 style={{ fontWeight: 700, fontSize: '24px', color: !lungMode ? 'black': 'white' }}>
             {t('StudyList')}
           </h1>
         </div>
