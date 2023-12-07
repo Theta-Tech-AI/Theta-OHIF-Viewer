@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { connect } from 'react-redux';
 
 import { MODULE_TYPES } from '@ohif/core';
 import {
@@ -31,6 +32,7 @@ class RadiomicsToolbarRow extends Component {
     handleSidePanelChange: PropTypes.func.isRequired,
     activeContexts: PropTypes.arrayOf(PropTypes.string).isRequired,
     studies: PropTypes.array,
+    currentMode: PropTypes.string.isRequired,
     t: PropTypes.func.isRequired,
     // NOTE: withDialog, withModal HOCs
     dialog: PropTypes.any,
@@ -216,6 +218,10 @@ class RadiomicsToolbarRow extends Component {
     const onPress = (side, value) => {
       this.props.handleSidePanelChange(side, value);
     };
+    const state = window.store.getState();
+    const current = state.mode.active;
+    // eslint-disable-next-line no-console
+    console.log(current);
     const onPressLeft = onPress.bind(this, 'left');
     const onPressRight = onPress.bind(this, 'right');
 
@@ -224,8 +230,10 @@ class RadiomicsToolbarRow extends Component {
     return (
       <>
         <div
-          className={`ToolbarRow${!this.state.lungMode ? ' brain' : ''}`}
-          style={{ backgroundColor: !this.state.lungMode ? 'white' : '' }}
+          className={`ToolbarRow${current === 'brain' ? ' brain' : ''}`}
+          style={{
+            backgroundColor: current === 'brain' ? 'white' : '',
+          }}
         >
           {buttonComponents}
         </div>

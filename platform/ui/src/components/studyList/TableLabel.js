@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Icon } from '../../elements/Icon';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 function TableLabel(props) {
   const {
@@ -23,6 +24,12 @@ function TableLabel(props) {
     sortDirection === 'asc' ? sortIcons[1] : sortIcons[2];
 
   const [lungMode, setLungMode] = useState(false);
+  const { active: currentMode } = useSelector(state => state && state.mode);
+  // const state = window.store.getState();
+  // const current = state.mode;
+
+  // eslint-disable-next-line no-console
+  // console.log(current);
 
   return translationsAreReady
     ? meta.map((field, i) => {
@@ -40,7 +47,10 @@ function TableLabel(props) {
             <label
               htmlFor={`filter-${fieldName}`}
               onClick={() => onSort(fieldName)}
-             style={{backgroundColor: !lungMode ? '#F8FAFC' : 'black', color: !lungMode ? 'black' : 'white'}}
+              style={{
+                backgroundColor: currentMode === 'brain' ? '#F8FAFC' : 'black',
+                color: currentMode === 'brain' ? 'black' : 'white',
+              }}
             >
               {`${displayText}`}
               <Icon name={sortIcon} style={{ fontSize: '12px' }} />

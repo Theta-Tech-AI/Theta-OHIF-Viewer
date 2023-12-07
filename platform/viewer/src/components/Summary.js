@@ -8,7 +8,7 @@ import { lungMode } from '../utils/constants';
 const Summary = props => {
   const { similarityResultState, currentMode } = props;
   const [patientData, setPatientData] = useState({});
-  const [lungMode, setLungMode] = useState(false);
+  // const [lungMode, setLungMode] = useState(false);
 
   useEffect(() => {
     setPatientData(getItem('selectedStudy'));
@@ -16,11 +16,13 @@ const Summary = props => {
 
   const isInLungMode = currentMode === lungMode;
 
+  console.log(isInLungMode);
+
   return (
     <div
       style={{
         width: '100%',
-        backgroundColor: !lungMode ? '#e6e6e6' : 'black',
+        backgroundColor: !isInLungMode ? '#e6e6e6' : 'black',
         borderRadius: '8px',
         padding: '20px',
       }}
@@ -34,7 +36,7 @@ const Summary = props => {
           style={{
             textAlign: 'left',
             margin: 0,
-            color: !lungMode ? 'black' : 'white',
+            color: !isInLungMode ? 'black' : 'white',
           }}
         >
           RadCard Report Summary
@@ -63,7 +65,7 @@ const Summary = props => {
           >
             Patient ID :{' '}
           </h2>
-          <h2 style={{ color: !lungMode ? 'black' : 'white' }}>
+          <h2 style={{ color: !isInLungMode ? 'black' : 'white' }}>
             {' '}
             {patientData.PatientID}{' '}
           </h2>
@@ -86,7 +88,7 @@ const Summary = props => {
           >
             Patient Name :{' '}
           </h2>
-          <h2 style={{ color: !lungMode ? 'black' : 'white' }}> {patientData.PatientName} </h2>
+          <h2 style={{ color: !isInLungMode ? 'black' : 'white' }}> {patientData.PatientName} </h2>
         </div>
 
         <div
@@ -106,7 +108,7 @@ const Summary = props => {
           >
             Classifier :{' '}
           </h2>
-          <h2 style={{ color: !lungMode ? 'black' : 'white' }}>Resnet-18 </h2>
+          <h2 style={{ color: !isInLungMode ? 'black' : 'white' }}>Resnet-18 </h2>
         </div>
 
         {isInLungMode && (

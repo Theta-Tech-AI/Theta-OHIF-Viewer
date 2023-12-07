@@ -18,6 +18,7 @@ import ConnectedDicomStorePicker from '../googleCloud/ConnectedDicomStorePicker'
 import ImportIdcModal from '../importIdc/ImportIdcModal.js';
 import filesToStudies from '../lib/filesToStudies.js';
 import cornerstone from 'cornerstone-core';
+import { useSelector } from 'react-redux';
 
 // Contexts
 import AppContext from '../context/AppContext';
@@ -31,7 +32,7 @@ function StudyListRoute(props) {
   const {
     history,
     server,
-    currentMode,
+    // currentMode,
     user,
     studyListFunctionsEnabled,
   } = props;
@@ -61,7 +62,8 @@ function StudyListRoute(props) {
     isSearchingForStudies: false,
     error: null,
   });
-  const [lungMode, setLungMode] = useState(false);
+  // const [lungMode, setLungMode] = useState(false);
+  const { active: currentMode } = useSelector(state => state && state.mode);
   const [showImportIdcModal, setShowImportIdcModal] = useState(false);
   const [showHowtoGuide, setShowHowtoGuide] = useState(false);
   const [activeModalId, setActiveModalId] = useState(null);
@@ -238,7 +240,7 @@ function StudyListRoute(props) {
     <div
       style={{
         paddingBottom: 100,
-        backgroundColor: !lungMode ? 'white' : '',
+        backgroundColor: currentMode === 'brain' ? 'white' : '',
       }}
     >
       {studyListFunctionsEnabled ? (
@@ -261,9 +263,9 @@ function StudyListRoute(props) {
         onSuccess={handleGuideClose2}
       />
 
-      <div className={`study-list-header print ${!lungMode ? 'brain' : ''}`}>
+      <div className={`study-list-header print ${currentMode === 'brain' ? 'brain' : ''}`}>
         <div className="header">
-          <h1 style={{ fontWeight: 700, fontSize: '24px', color: !lungMode ? 'black': 'white' }}>
+          <h1 style={{ fontWeight: 700, fontSize: '24px', color: currentMode === 'brain' ? 'black': 'white' }}>
             {t('StudyList')}
           </h1>
         </div>
@@ -327,7 +329,7 @@ function StudyListRoute(props) {
           paddingRight: '2%',
           paddingLeft: '2%',
           width: '100%',
-          backgroundColor: !lungMode ? 'white' : '',
+          backgroundColor: currentMode === 'brain' ? 'white' : '',
           paddingTop: '0',
           paddingBottom: '0',
         }}

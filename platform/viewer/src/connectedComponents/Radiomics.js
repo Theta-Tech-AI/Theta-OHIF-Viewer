@@ -841,6 +841,8 @@ class Radiomics extends Component {
     const text = '';
     const isInLungMode = this.props.currentMode === lungMode;
 
+    console.log(isInLungMode);
+
     return (
       <div
         style={{
@@ -893,7 +895,7 @@ class Radiomics extends Component {
           className="printView"
           style={{
             paddingBottom: 140,
-            backgroundColor: !this.state.lungMode ? 'white' : '',
+            backgroundColor: !isInLungMode ? 'white' : 'black',
             // display: this.state.isComplete ? 'block' : 'none',
           }}
         >
@@ -969,7 +971,7 @@ class Radiomics extends Component {
                   width: '100%',
                   background:
                     (this.props.currentMode === BrainMode && isComplete) ||
-                    (this.props.currentMode !== BrainMode &&
+                    (this.props.currentMode === BrainMode &&
                       isComplete &&
                       isSimilarlookingScans)
                       ? '#e6e6e6'

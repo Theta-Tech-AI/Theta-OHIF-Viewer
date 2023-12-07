@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 
 import { MODULE_TYPES } from '@ohif/core';
 import {
@@ -125,6 +126,11 @@ class ToolbarRow extends Component {
      * that depends on derived display sets to be loaded.
      * (Implement pubsub for better tracking of derived display sets)
      */
+    const state = window.store.getState();
+    const current = state.mode.active;
+    // eslint-disable-next-line no-console
+    console.log(current);
+
     document.addEventListener(
       'deriveddisplaysetsloadedandcached',
       this._onDerivedDisplaySetsLoadedAndCached
@@ -240,6 +246,10 @@ class ToolbarRow extends Component {
     const onPress = (side, value) => {
       this.props.handleSidePanelChange(side, value);
     };
+    const state = window.store.getState();
+    const current = state.mode.active;
+    // eslint-disable-next-line no-console
+    console.log(current);
     const onPressLeft = onPress.bind(this, 'left');
     const onPressRight = onPress.bind(this, 'right');
 
@@ -250,8 +260,8 @@ class ToolbarRow extends Component {
     return (
       <>
         <div
-          className={`ToolbarRow${!this.state.lungMode ? ' brain' : ''}`}
-          style={{ backgroundColor: !this.state.lungMode ? 'white' : '' }}
+          className={`ToolbarRow${current === 'brain' ? ' brain' : ''}`}
+          style={{ backgroundColor: current === 'brain' ? 'white' : '' }}
         >
           {/* <div className="pull-left m-t-1 p-y-1" style={{ padding: '10px' }}>
             <RoundedButtonGroup

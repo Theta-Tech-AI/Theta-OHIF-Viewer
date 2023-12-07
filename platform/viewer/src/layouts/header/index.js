@@ -94,8 +94,8 @@ const Header = ({ onMobileClose, openMobile }) => {
         top: 0,
         left: 0,
         borderBottom: '1px  #87878780 solid',
-        color: !lungMode ? 'black' : 'white',
-        backgroundColor: !lungMode ? 'white' : '',
+        color: currentMode === 'brain' ? 'black' : 'white',
+        backgroundColor: currentMode === 'brain' ? 'white' : '',
         paddingRight: '6px',
         paddingTop: '6px',
         flexDirection: 'row',
@@ -104,8 +104,8 @@ const Header = ({ onMobileClose, openMobile }) => {
     >
       <div
         style={{
-          color: !lungMode ? 'black' : 'white',
-          backgroundColor: !lungMode ? 'white' : '',
+          color: currentMode === 'brain' ? 'black' : 'white',
+          backgroundColor: currentMode === 'brain' ? 'white' : '',
           // flex: 1,
         }}
       >
@@ -129,8 +129,8 @@ const Header = ({ onMobileClose, openMobile }) => {
           <h4
             style={{
               fontFamily: 'Times New Roman',
-              color: !lungMode ? 'black' : 'white',
-              backgroundColor: !lungMode ? 'white' : '',
+              color: currentMode === 'brain' ? 'black' : 'white',
+              backgroundColor: currentMode === 'brain' ? 'white' : '',
             }}
           >
             {applicationTitle}
@@ -141,8 +141,8 @@ const Header = ({ onMobileClose, openMobile }) => {
       <div
         className="portal__header"
         style={{
-          color: 'black',
-          backgroundColor: !lungMode ? 'white' : '',
+          color: currentMode === 'brain' ? 'black' : 'white',
+          backgroundColor: currentMode === 'brain' ? 'white' : '',
           // flex: 1,
         }}
       >
@@ -151,7 +151,7 @@ const Header = ({ onMobileClose, openMobile }) => {
       <div
         style={{
           color: '#fff',
-          backgroundColor: !lungMode ? 'white' : '',
+          backgroundColor: currentMode === 'brain' ? 'white' : '',
           // flex: 1,
         }}
       >

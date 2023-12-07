@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import TableLabel from './TableLabel';
 import { setItem } from '@ohif/viewer/src/lib/localStorageUtils';
 import { lungMode } from '@ohif/viewer/src/utils/constants';
+import { useSelector } from 'react-redux';
 
 const getContentFromUseMediaValue = (
   displaySize,
@@ -43,7 +44,8 @@ function StudyList(props) {
   } = props;
   const { t, ready: translationsAreReady } = useTranslation('StudyList');
 
-  const [lungActive, setLungActive] = useState(false);
+  // const [lungActive, setLungActive] = useState(false);
+  const { active: currentMode } = useSelector(state => state && state.mode);
 
   const largeTableMeta = [
     {
@@ -143,7 +145,9 @@ function StudyList(props) {
   return translationsAreReady ? (
     <>
       <div
-        className={`study-list-container ${!lungActive ? 'brain' : ''}`}
+        className={`study-list-container ${
+          currentMode === 'brain' ? 'brain' : ''
+        }`}
         style={{
           marginTop: '20px',
         }}
@@ -166,9 +170,13 @@ function StudyList(props) {
           />
         </div>
       </div>
-      <div className={`study-list-container ${!lungActive ? 'brain' : ''}`}>
+      <div
+        className={`study-list-container ${
+          currentMode === 'brain' ? 'brain' : ''
+        }`}
+      >
         <div
-          className={`filters2 ${!lungActive ? 'brain' : ''}`}
+          className={`filters2 ${currentMode === 'brain' ? 'brain' : ''}`}
           style={{
             display: 'flex',
             padding: '0 2%',
@@ -308,24 +316,31 @@ function TableRow(props) {
 
   const { t } = useTranslation('StudyList');
 
-  const [lungActive, setLungActive] = useState(false);
+  // const [lungActive, setLungActive] = useState(false);
+  const { active: currentMode } = useSelector(state => state && state.mode);
 
   const largeRowTemplate = (
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
-      style={{ color: !lungActive ? 'black' : 'white' }}
+      style={{ color: currentMode === 'brain' ? 'black' : 'white' }}
     >
       <td className={classNames({ 'empty-value': !PatientName })}>
         {PatientName || `(${t('Empty')})`}
       </td>
-      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+      <td
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+      >
         {PatientID}
       </td>
-      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+      <td
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+      >
         {AccessionNumber}
       </td>
-      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+      <td
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+      >
         {StudyDate}
       </td>
       <td className={classNames({ 'empty-value': !modalities })}>
@@ -339,16 +354,18 @@ function TableRow(props) {
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
-      style={{ color: !lungActive ? 'black' : 'white' }}
+      style={{ color: currentMode === 'brain' ? 'black' : 'white' }}
     >
       <td
         className={classNames({ 'empty-value': !PatientName })}
-        style={{ backgroundColor: !lungActive ? 'white' : 'black' }}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
       >
         {PatientName || `(${t('Empty')})`}
         <div style={{ color: '#60656f' }}>{PatientID}</div>
       </td>
-      <td style={{ backgroundColor: !lungActive ? 'white' : 'black' }}>
+      <td
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* DESCRIPTION */}
           <div
@@ -396,7 +413,7 @@ function TableRow(props) {
       </td>
       <td
         className="hide-xs"
-        style={{ backgroundColor: !lungActive ? 'white' : 'black' }}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
       >
         {AccessionNumber}
       </td>
@@ -405,7 +422,7 @@ function TableRow(props) {
       <td
         style={{
           textAlign: 'left',
-          backgroundColor: !lungActive ? 'white' : 'black',
+          backgroundColor: currentMode === 'brain' ? 'white' : 'black',
         }}
       >
         {StudyDate}
@@ -417,7 +434,7 @@ function TableRow(props) {
     <tr
       onClick={() => handleClick(StudyInstanceUID)}
       className={classNames({ active: isHighlighted })}
-      style={{ color: !lungActive ? 'black' : 'white' }}
+      style={{ color: currentMode === 'brain' ? 'black' : 'white' }}
     >
       <td style={{ position: 'relative', overflow: 'hidden' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
