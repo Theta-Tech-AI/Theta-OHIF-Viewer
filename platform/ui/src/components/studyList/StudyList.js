@@ -1,6 +1,6 @@
 import './StudyList.styl';
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import TableSearchFilter from './TableSearchFilter.js';
 import PropTypes from 'prop-types';
@@ -325,28 +325,30 @@ function TableRow(props) {
       className={classNames({ active: isHighlighted })}
       style={{ color: currentMode === 'brain' ? 'black' : 'white' }}
     >
-      <td className={classNames({ 'empty-value': !PatientName })}>
+      <td
+        className={classNames({ 'empty-value': !PatientName })}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}
+      >
         {PatientName || `(${t('Empty')})`}
       </td>
-      <td
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
-      >
+      <td style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}>
         {PatientID}
       </td>
-      <td
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
-      >
+      <td style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}>
         {AccessionNumber}
       </td>
-      <td
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
-      >
+      <td style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}>
         {StudyDate}
       </td>
-      <td className={classNames({ 'empty-value': !modalities })}>
+      <td
+        className={classNames({ 'empty-value': !modalities })}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}
+      >
         {modalities || `(${t('Empty')})`}
       </td>
-      <td>{StudyDescription}</td>
+      <td style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}>
+        {StudyDescription}
+      </td>
     </tr>
   );
 
@@ -358,14 +360,12 @@ function TableRow(props) {
     >
       <td
         className={classNames({ 'empty-value': !PatientName })}
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}
       >
         {PatientName || `(${t('Empty')})`}
         <div style={{ color: '#60656f' }}>{PatientID}</div>
       </td>
-      <td
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
-      >
+      <td style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {/* DESCRIPTION */}
           <div
@@ -413,7 +413,7 @@ function TableRow(props) {
       </td>
       <td
         className="hide-xs"
-        style={{ backgroundColor: currentMode === 'brain' ? 'white' : 'black' }}
+        style={{ backgroundColor: currentMode === 'brain' ? 'white' : '' }}
       >
         {AccessionNumber}
       </td>
@@ -422,7 +422,7 @@ function TableRow(props) {
       <td
         style={{
           textAlign: 'left',
-          backgroundColor: currentMode === 'brain' ? 'white' : 'black',
+          backgroundColor: currentMode === 'brain' ? 'white' : '',
         }}
       >
         {StudyDate}
