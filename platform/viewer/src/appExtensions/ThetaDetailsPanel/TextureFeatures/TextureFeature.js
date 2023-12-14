@@ -6,6 +6,7 @@ import { JobsContext } from '../../../context/JobsContext';
 import circularLoading from './utils/circular-loading.json';
 import { useLottie } from 'lottie-react';
 import { radcadapi } from '../../../utils/constants';
+import { getItem } from '../../../lib/localStorageUtils';
 
 const TextureFeature = props => {
   const [jobs, setJobs] = React.useState([]);
@@ -31,7 +32,6 @@ const TextureFeature = props => {
 
   const { View: Loader } = useLottie(options);
 
-
   useEffect(() => {
     const interval = setInterval(() => {
       getJobs(jobs);
@@ -50,8 +50,11 @@ const TextureFeature = props => {
         },
       };
 
+      const storeName = getItem('dicomStore');
+      console.log(storeName);
+
       await fetch(
-        `${radcadapi}/jobs?series=${series}&email=${email}`,
+        `${radcadapi}/jobs?series=${series}&email=${email}&gcp_data_store_id=${storeName}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))

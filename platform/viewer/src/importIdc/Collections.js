@@ -4,6 +4,7 @@ import OHIF from '@ohif/core';
 import { useTranslation } from 'react-i18next';
 import { TablePagination, useMedia, Icon } from '@ohif/ui';
 import { connect } from 'react-redux';
+import { getItem } from '../lib/localStorageUtils';
 
 // Contexts
 import { CollectionList } from './CollectionList';
@@ -94,9 +95,10 @@ function Collections(props) {
         var requestOptions = {
           method: 'GET',
         };
+        const storeName = getItem('dicomStore');
 
         const response = await fetch(
-          `${radcadapi}/tcia-collections`,
+          `${radcadapi}/tcia-collections?gcp_data_store_id=${storeName}`,
           requestOptions
         );
         let result = await response.json();

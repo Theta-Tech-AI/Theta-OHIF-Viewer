@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './googleCloud.css';
 import { withTranslation } from 'react-i18next';
 import { Icon } from '@ohif/ui';
+import { setItem } from '../lib/localStorageUtils';
 
 class DicomStoreList extends Component {
   state = {
@@ -21,6 +22,8 @@ class DicomStoreList extends Component {
   };
 
   renderTableRow = store => {
+    const storeName = store.name.split('/')[7];
+
     return (
       <tr
         key={store.name}
@@ -34,6 +37,7 @@ class DicomStoreList extends Component {
         }}
         onClick={() => {
           this.props.onSelect(store);
+          setItem('dicomStore', storeName);
         }}
       >
         <td className="project">{store.name.split('/')[7]}</td>
