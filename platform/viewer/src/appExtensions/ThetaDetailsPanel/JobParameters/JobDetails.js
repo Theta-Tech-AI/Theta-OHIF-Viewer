@@ -197,7 +197,7 @@ const JobParameters = props => {
     };
     // sample
 
-    fetch(`${radcadapi}/texture`, requestOptions)
+    fetch(`${radcadapi}/texturea`, requestOptions)
       .then(r => r.json().then(data => ({ status: r.status, data: data })))
       .then(response => {
         console.log('response--------texture');

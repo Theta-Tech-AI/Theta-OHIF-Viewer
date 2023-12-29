@@ -379,8 +379,9 @@ const SearchDetails = props => {
       };
       const storeName = getItem('dicomStore');
 
+      // `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
       let response = await fetch(
-        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
+        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}`,
         requestOptions
       );
       response = await response.json();
