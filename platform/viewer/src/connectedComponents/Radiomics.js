@@ -137,8 +137,7 @@ class Radiomics extends Component {
       thumbnails: [],
       job: null,
       isComplete: false,
-      isSimilarlookingScans: true,
-      // isSimilarlookingScans: false,
+      isSimilarlookingScans: false,
       similarityResultState: { knn: [] },
       isEditSelection: true,
     };
@@ -420,8 +419,9 @@ class Radiomics extends Component {
       const state = window.store.getState();
       const storeName = getItem('dicomStore');
 
+      // `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
       const response = await fetch(
-        `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
+        `${radcadapi}/series?study=${studyInstanceUID}`,
         {
           method: 'GET',
           redirect: 'follow',
@@ -890,7 +890,7 @@ class Radiomics extends Component {
           )}
         </div> */}
         
-        {this.renderProgressBar()}
+        {/* {this.renderProgressBar()} */}
 
         <div
           className="printView"
@@ -922,7 +922,7 @@ class Radiomics extends Component {
                 />
               )}
               {/* RIGHT */}
-              {/* {isInLungMode && (
+              {isInLungMode && (
                 <div
                   style={{
                     marginTop: '20px',
@@ -962,7 +962,7 @@ class Radiomics extends Component {
                     </div>
                   </ErrorBoundaryDialog>
                 </div>
-              )} */}
+              )}
             </div>
             <div className="container-item-extra">
               {/* VIEWPORTS + SIDEPANELS */}
@@ -1011,7 +1011,7 @@ class Radiomics extends Component {
                       <div></div>
                     </div>
                   </div>
-
+{/* 
                   <div
                     className=" remove-padding"
                     style={{
@@ -1036,7 +1036,7 @@ class Radiomics extends Component {
                         )}
                       </div>
                     </ErrorBoundaryDialog>{' '}
-                  </div>
+                  </div> */}
 
                   <ErrorBoundaryDialog context="LeftSidePanel">
                     <div>
