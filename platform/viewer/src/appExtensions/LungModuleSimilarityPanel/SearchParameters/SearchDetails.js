@@ -377,9 +377,10 @@ const SearchDetails = props => {
           Authorization: `Bearer ${access_token}`,
         },
       };
+      const storeName = getItem('dicomStore');
 
       let response = await fetch(
-        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}`,
+        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
         requestOptions
       );
       response = await response.json();

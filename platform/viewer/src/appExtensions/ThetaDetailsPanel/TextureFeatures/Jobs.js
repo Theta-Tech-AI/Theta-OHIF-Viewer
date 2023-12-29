@@ -188,9 +188,10 @@ const Jobs = ({
           Authorization: `Bearer ${access_token}`,
         },
       };
+      const storeName = getItem('dicomStore');
 
       await fetch(
-        `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}`,
+        `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}&gcp_data_store_id=${storeName}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))

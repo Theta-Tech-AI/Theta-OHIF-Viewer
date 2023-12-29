@@ -402,9 +402,10 @@ class SelectMask extends Component {
   async handleFetchAndSetSeries(studyInstanceUID) {
     try {
       const state = window.store.getState();
+      const storeName = getItem('dicomStore');
 
       const response = await fetch(
-        `${radcadapi}/series?study=${studyInstanceUID}`,
+        `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
         {
           method: 'GET',
           redirect: 'follow',

@@ -136,9 +136,10 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       };
+      const storeName = getItem('dicomStore');
 
       let segmentations = await fetch(
-        `${radcadapi}/segmentations?series=${series_uid}&email=${email}`,
+        `${radcadapi}/segmentations?series=${series_uid}&email=${email}&gcp_data_store_id=${storeName}`,
         requestOptions
       );
       if (segmentations.status == 200)
@@ -179,9 +180,10 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
       var requestOptions = {
         method: 'GET',
       };
+      const storeName = getItem('dicomStore');
 
       let response = await fetch(
-        `${radcadapi}/job-status?email=${email}&job_type=NNUNET_BRAIN`,
+        `${radcadapi}/job-status?email=${email}&gcp_data_store_id=${storeName}&job_type=NNUNET_BRAIN`,
         requestOptions
       );
       response = await response.json();
@@ -219,8 +221,12 @@ function NnunetPage({ studyInstanceUIDs, seriesInstanceUIDs }) {
         },
         body: JSON.stringify(body),
       };
+      const storeName = getItem('dicomStore');
 
-      const response = await fetch(`${radcadapi}/nnunet_brain`, requestOptions);
+      const response = await fetch(
+        `${radcadapi}/nnunet_brain?gcp_data_store_id=${storeName}`,
+        requestOptions
+      );
       const result = await response.json();
 
       setProcessState(true);

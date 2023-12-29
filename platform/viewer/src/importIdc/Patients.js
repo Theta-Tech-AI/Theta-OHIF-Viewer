@@ -3,6 +3,7 @@ import PropTypes, { func } from 'prop-types';
 import OHIF from '@ohif/core';
 import { useTranslation } from 'react-i18next';
 import { TablePagination, useMedia, Icon } from '@ohif/ui';
+import { getItem } from '../lib/localStorageUtils';
 
 // Contexts
 import { PatientList } from './PatientList';
@@ -65,8 +66,11 @@ function ConfirmDialog(props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ study_uid: StudyUID }),
       };
-
-      const response = await fetch(`${radcadapi}/import-idc-study`, requestOptions);
+      const storeName = getItem('dicomStore');
+      const response = await fetch(
+        `${radcadapi}/import-idc-study?gcp_data_store_id=${storeName}`,
+        requestOptions
+      );
 
       setSearchStatus({ error: null, isFetching: false });
       onComplete();
@@ -190,9 +194,10 @@ function PatientsPage(props) {
         var requestOptions = {
           method: 'GET',
         };
+        const storeName = getItem('dicomStore');
 
         const response = await fetch(
-          `${radcadapi}/tcia-collection-studies?collection=${collection_api_id}`,
+          `${radcadapi}/tcia-collection-studies?collection=${collection_api_id}&gcp_data_store_id=${storeName}`,
           requestOptions
         );
         let result = await response.json();

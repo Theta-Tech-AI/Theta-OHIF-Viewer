@@ -38,8 +38,9 @@ function useInterval(callback, delay) {
 
 export const getExistingSegmentations = async (series_uid, userEmail) => {
   try {
+    const storeName = getItem('dicomStore');
     const response = await fetch(
-      `${radcadapi}/segmentations?series=${series_uid}&email=${userEmail}`,
+      `${radcadapi}/segmentations?series=${series_uid}&email=${userEmail}&gcp_data_store_id=${storeName}`,
       {
         headers: {
           'Content-Type': 'application/json',
