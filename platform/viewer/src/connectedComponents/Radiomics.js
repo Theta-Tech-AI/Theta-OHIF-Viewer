@@ -137,7 +137,8 @@ class Radiomics extends Component {
       thumbnails: [],
       job: null,
       isComplete: false,
-      isSimilarlookingScans: false,
+      isSimilarlookingScans: true,
+      // isSimilarlookingScans: false,
       similarityResultState: { knn: [] },
       isEditSelection: true,
     };
@@ -857,7 +858,7 @@ class Radiomics extends Component {
           overlay={false}
           instance={text}
         />
-        <div
+        {/* <div
           style={{
             width: '100vw',
             height: '100vh',
@@ -887,8 +888,9 @@ class Radiomics extends Component {
               }} // Add some space between the image and the progress bar
             />
           )}
-          {this.renderProgressBar()}
-        </div>
+        </div> */}
+        
+        {this.renderProgressBar()}
 
         <div
           className="printView"
@@ -897,13 +899,13 @@ class Radiomics extends Component {
             // display: this.state.isComplete ? 'block' : 'none',
           }}
         >
-          <div className="container">
+          {/* <div className="container">
             <div className="container-item">
               <button className="btn btn-danger" onClick={this.handleBack}>
                 Back to Studylist
               </button>
             </div>
-          </div>
+          </div> */}
           <div className="container">
             <div className="container-item">
               {isInLungMode ? (
@@ -920,7 +922,7 @@ class Radiomics extends Component {
                 />
               )}
               {/* RIGHT */}
-              {isInLungMode && (
+              {/* {isInLungMode && (
                 <div
                   style={{
                     marginTop: '20px',
@@ -943,7 +945,7 @@ class Radiomics extends Component {
                       Similar Looking Scans
                     </h1>
                   </div>
-                  <ErrorBoundaryDialog context="RightSidePanel">
+                   <ErrorBoundaryDialog context="RightSidePanel">
                     <div>
                       {SimilarScans && (
                         <SimilarScans
@@ -960,7 +962,7 @@ class Radiomics extends Component {
                     </div>
                   </ErrorBoundaryDialog>
                 </div>
-              )}
+              )} */}
             </div>
             <div className="container-item-extra">
               {/* VIEWPORTS + SIDEPANELS */}
