@@ -15,8 +15,8 @@ const TextureFeature = props => {
   const [isActive, setIsActive] = useState(0);
   const [showMore, setShowMore] = useState(true);
   const access_token = user.access_token;
-  // const email = user.profile.email;
-  const email = 'nick.fragakis@thetatech.ai';
+  const email = user.profile.email;
+  // const email = 'nick.fragakis@thetatech.ai';
 
   const series = viewport.viewportSpecificData[0].SeriesInstanceUID;
   const { overlayStatus, setOverlayStatus } = useContext(JobsContext);
@@ -34,7 +34,7 @@ const TextureFeature = props => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // getJobs(jobs);
+      getJobs(jobs);
     }, 2000);
     return () => clearInterval(interval);
   }, [getJobs, jobs]);

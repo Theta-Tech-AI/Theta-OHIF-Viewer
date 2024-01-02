@@ -15,13 +15,13 @@ import OHIF, { MODULE_TYPES, DICOMSR } from '@ohif/core';
 import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
-import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
+import ErrorBoundaryDialog from '../components/ErrorBoundaryDialog/index.js';
 import {
   commandsManager,
   extensionManager,
   servicesManager,
-} from './../App.js';
-import { ReconstructionIssues } from './../../../core/src/enums.js';
+} from '../App.js';
+import { ReconstructionIssues } from '../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
@@ -29,23 +29,23 @@ import * as Plotly from 'plotly.js';
 
 import './Viewer.css';
 import JobsContextUtil from './JobsContextUtil.js';
-import { getEnabledElement } from '../../../../extensions/cornerstone/src/state';
-import eventBus from '../lib/eventBus';
-import { Icon } from '../../../ui/src/elements/Icon';
-import { BrainMode, lungMode, radcadapi } from '../utils/constants';
-import { Morphology3DComponent } from '../components/3DSegmentation/3D';
+import { getEnabledElement } from '../../../../extensions/cornerstone/src/state.js';
+import eventBus from '../lib/eventBus.js';
+import { Icon } from '../../../ui/src/elements/Icon/index.js';
+import { BrainMode, lungMode, radcadapi } from '../utils/constants.js';
+import { Morphology3DComponent } from '../components/3DSegmentation/3D.js';
 // import { Morphology3DComponent } from '../components/3DSegmentation/3D_old';
 import pdfmake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import exportComponent from '../lib/ExportComponent';
-import Summary from '../components/Summary';
-import LungPdfMaker from '../lib/LungPdfMaker';
-import BrainPdfMaker from '../lib/BrainPdfMaker';
-import handleScrolltoIndex from '../utils/handleScrolltoIndex';
-import { handleRestoreToolState } from '../utils/syncrhonizeToolState';
-import ConnectedStudyBrowser from './ConnectedStudyBrowser';
+import exportComponent from '../lib/ExportComponent.js';
+import Summary from '../components/Summary.js';
+import LungPdfMaker from '../lib/LungPdfMaker.js';
+import BrainPdfMaker from '../lib/BrainPdfMaker.js';
+import handleScrolltoIndex from '../utils/handleScrolltoIndex.js';
+import { handleRestoreToolState } from '../utils/syncrhonizeToolState.js';
+import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
-import { ProgressBar } from '../components/LoadingBar';
+import { ProgressBar } from '../components/LoadingBar/index.js';
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -858,7 +858,7 @@ class Radiomics extends Component {
           overlay={false}
           instance={text}
         />
-        {/* <div
+        <div
           style={{
             width: '100vw',
             height: '100vh',
@@ -888,9 +888,8 @@ class Radiomics extends Component {
               }} // Add some space between the image and the progress bar
             />
           )}
-        </div> */}
-        
-        {/* {this.renderProgressBar()} */}
+          {this.renderProgressBar()}
+        </div>
 
         <div
           className="printView"
@@ -899,13 +898,13 @@ class Radiomics extends Component {
             // display: this.state.isComplete ? 'block' : 'none',
           }}
         >
-          {/* <div className="container">
+          <div className="container">
             <div className="container-item">
               <button className="btn btn-danger" onClick={this.handleBack}>
                 Back to Studylist
               </button>
             </div>
-          </div> */}
+          </div>
           <div className="container">
             <div className="container-item">
               {isInLungMode ? (
@@ -945,7 +944,7 @@ class Radiomics extends Component {
                       Similar Looking Scans
                     </h1>
                   </div>
-                   <ErrorBoundaryDialog context="RightSidePanel">
+                  <ErrorBoundaryDialog context="RightSidePanel">
                     <div>
                       {SimilarScans && (
                         <SimilarScans
@@ -1011,7 +1010,7 @@ class Radiomics extends Component {
                       <div></div>
                     </div>
                   </div>
-{/* 
+
                   <div
                     className=" remove-padding"
                     style={{
@@ -1036,7 +1035,7 @@ class Radiomics extends Component {
                         )}
                       </div>
                     </ErrorBoundaryDialog>{' '}
-                  </div> */}
+                  </div>
 
                   <ErrorBoundaryDialog context="LeftSidePanel">
                     <div>
