@@ -377,8 +377,13 @@ const SearchDetails = props => {
           Authorization: `Bearer ${access_token}`,
         },
       };
-      const storeName = getItem('dicomStore');
 
+      // const storeName = getItem('dicomStore');
+
+      // let response = await fetch(
+      //   `${radcadapi}/job-status?&email=${email}&job_type=SIMILARITY`,
+      //   requestOptions
+      // );
       // `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
       let response = await fetch(
         `${radcadapi}/similarity?instance=${instance_uid}&email=${email}`,
@@ -430,8 +435,8 @@ const SearchDetails = props => {
     const study_uid =
       data.StudyInstanceUID ||
       JSON.parse(localStorage.getItem('studyInstanceUID'));
-    // const email = user.profile.email;
-    const email = 'nick.fragakis@thetatech.ai';
+    const email = user.profile.email;
+    // const email = 'nick.fragakis@thetatech.ai';
 
     // get current image
     const image = cornerstone.getImage(element);
