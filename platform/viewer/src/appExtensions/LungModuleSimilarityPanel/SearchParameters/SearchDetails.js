@@ -14,6 +14,7 @@ import circularLoading from '../../ThetaDetailsPanel/TextureFeatures/utils/circu
 import { useLottie } from 'lottie-react';
 import eventBus from '../../../lib/eventBus';
 import { radcadapi } from '../../../utils/constants';
+import { getItem } from '../../../lib/localStorageUtils';
 
 function getMalignantScore(data) {
   const knnLength = data.knn.length;
@@ -378,14 +379,10 @@ const SearchDetails = props => {
         },
       };
 
-      // const storeName = getItem('dicomStore');
+      const storeName = getItem('dicomStore');
 
-      // let response = await fetch(
-      //   `${radcadapi}/job-status?&email=${email}&job_type=SIMILARITY`,
-      //   requestOptions
-      // );
-      // `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
       let response = await fetch(
+        // `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
         `${radcadapi}/similarity?instance=${instance_uid}&email=${email}`,
         requestOptions
       );
