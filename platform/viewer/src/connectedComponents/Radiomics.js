@@ -16,11 +16,7 @@ import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
 import ErrorBoundaryDialog from '../components/ErrorBoundaryDialog/index.js';
-import {
-  commandsManager,
-  extensionManager,
-  servicesManager,
-} from '../App.js';
+import { commandsManager, extensionManager, servicesManager } from '../App.js';
 import { ReconstructionIssues } from '../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
@@ -417,11 +413,11 @@ class Radiomics extends Component {
   async handleFetchAndSetSeries(studyInstanceUID) {
     try {
       const state = window.store.getState();
-      const storeName = getItem('dicomStore');
+      const storeName = getItem('dicomStore') || 'Test_Demo';
 
-      // `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
       const response = await fetch(
-        `${radcadapi}/series?study=${studyInstanceUID}`,
+        `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/series?study=${studyInstanceUID}`,
         {
           method: 'GET',
           redirect: 'follow',
@@ -868,6 +864,7 @@ class Radiomics extends Component {
             background: 'rgba(23,28,33,0.99)',
             fontSize: '24px',
             zIndex: 8,
+            display: 'none',
             display:
               (isInLungMode &&
                 isComplete &&
@@ -878,6 +875,7 @@ class Radiomics extends Component {
             flexDirection: 'column', // Stack items vertically
           }}
         >
+          {this.renderProgressBar()}
           {!isInLungMode && (
             <img
               src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
@@ -888,7 +886,6 @@ class Radiomics extends Component {
               }} // Add some space between the image and the progress bar
             />
           )}
-          {this.renderProgressBar()}
         </div>
 
         <div

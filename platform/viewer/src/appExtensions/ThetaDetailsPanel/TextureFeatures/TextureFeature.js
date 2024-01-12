@@ -53,9 +53,9 @@ const TextureFeature = props => {
       const storeName = getItem('dicomStore');
       console.log(storeName);
 
-      // `${radcadapi}/jobs?series=${series}&email=${email}&gcp_data_store_id=${storeName}`,
       await fetch(
-        `${radcadapi}/jobs?series=${series}&email=${email}`,
+        `${radcadapi}/jobs?series=${series}&email=${email}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/jobs?series=${series}&email=${email}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))

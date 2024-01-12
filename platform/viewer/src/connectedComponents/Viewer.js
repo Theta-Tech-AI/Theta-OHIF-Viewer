@@ -442,9 +442,9 @@ class Viewer extends Component {
     try {
       const state = window.store.getState();
       const storeName = getItem('dicomStore');
-      // `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
       const response = await fetch(
-        `${radcadapi}/series?study=${studyInstanceUID}`,
+        `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/series?study=${studyInstanceUID}`,
         {
           method: 'GET',
           redirect: 'follow',
