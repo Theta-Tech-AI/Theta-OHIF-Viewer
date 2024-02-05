@@ -7,6 +7,7 @@ import ProjectPicker from './ProjectPicker';
 import LocationPicker from './LocationPicker';
 import GoogleCloudApi from './api/GoogleCloudApi';
 import './googleCloud.css';
+import { setItem } from '../lib/localStorageUtils';
 
 class DatasetSelector extends Component {
   state = {
@@ -75,6 +76,7 @@ class DatasetSelector extends Component {
       dataset: parts[5],
       dicomStore: parts[7],
     };
+    setItem('dicomStore', parts[7]);
     this.props.setServers(result);
   };
 

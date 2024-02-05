@@ -14,6 +14,7 @@ import circularLoading from '../../ThetaDetailsPanel/TextureFeatures/utils/circu
 import { useLottie } from 'lottie-react';
 import eventBus from '../../../lib/eventBus';
 import { radcadapi } from '../../../utils/constants';
+import { getItem } from '../../../lib/localStorageUtils';
 
 function getMalignantScore(data) {
   const knnLength = data.knn.length;
@@ -336,8 +337,8 @@ const SearchDetails = props => {
     // const series_uid = data.SeriesInstanceUID;
     // const study_uid = data.StudyInstanceUID;
     setLoadingState('list');
-    const email = 'nick.fragakis@thetatech.ai';
-    // const email = user.profile.email;
+    // const email = 'nick.fragakis@thetatech.ai';
+    const email = user.profile.email;
 
     // get current image
     const image = cornerstone.getImage(el);
@@ -377,10 +378,12 @@ const SearchDetails = props => {
           Authorization: `Bearer ${access_token}`,
         },
       };
+
       const storeName = getItem('dicomStore');
 
       let response = await fetch(
-        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/similarity?instance=${instance_uid}&email=${email}&gcp_data_store_id=${storeName}`,
+        `${radcadapi}/similarity?instance=${instance_uid}&email=${email}`,
         requestOptions
       );
       response = await response.json();
@@ -429,8 +432,8 @@ const SearchDetails = props => {
     const study_uid =
       data.StudyInstanceUID ||
       JSON.parse(localStorage.getItem('studyInstanceUID'));
-    // const email = user.profile.email;
-    const email = 'nick.fragakis@thetatech.ai';
+    const email = user.profile.email;
+    // const email = 'nick.fragakis@thetatech.ai';
 
     // get current image
     const image = cornerstone.getImage(element);

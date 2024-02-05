@@ -15,8 +15,8 @@ const TextureFeature = props => {
   const [isActive, setIsActive] = useState(0);
   const [showMore, setShowMore] = useState(true);
   const access_token = user.access_token;
-  // const email = user.profile.email;
-  const email = 'nick.fragakis@thetatech.ai';
+  const email = user.profile.email;
+  // const email = 'nick.fragakis@thetatech.ai';
 
   const series = viewport.viewportSpecificData[0].SeriesInstanceUID;
   const { overlayStatus, setOverlayStatus } = useContext(JobsContext);
@@ -55,6 +55,7 @@ const TextureFeature = props => {
 
       await fetch(
         `${radcadapi}/jobs?series=${series}&email=${email}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/jobs?series=${series}&email=${email}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))

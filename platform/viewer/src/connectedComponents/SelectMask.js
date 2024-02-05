@@ -404,6 +404,7 @@ class SelectMask extends Component {
       const state = window.store.getState();
       const storeName = getItem('dicomStore');
 
+      // `${radcadapi}/series?study=${studyInstanceUID}`,
       const response = await fetch(
         `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
         {
@@ -436,7 +437,6 @@ class SelectMask extends Component {
       });
     }
   }
-
 
   handleGoRadionics = () => {
     const location = this.props.location;

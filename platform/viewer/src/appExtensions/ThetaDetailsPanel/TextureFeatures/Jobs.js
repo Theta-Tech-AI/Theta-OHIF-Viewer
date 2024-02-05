@@ -192,6 +192,7 @@ const Jobs = ({
 
       await fetch(
         `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))

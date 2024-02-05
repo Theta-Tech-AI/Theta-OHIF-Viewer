@@ -405,6 +405,7 @@ class XNATSegmentationImportMenu extends React.Component {
 
         await fetch(
           `${radcadapi}/segmentations?series=${series_uid}&email=${email}&gcp_data_store_id=${storeName}`,
+          // `${radcadapi}/segmentations?series=${series_uid}&email=${email}`,
           requestOptions
         )
           .then(r => r.json().then(data => ({ status: r.status, data: data })))

@@ -12,7 +12,8 @@ const storeName = getItem('dicomStore');
 
 export class _3DSegmentationApiClass {
   static async get3DSegmentationData(config) {
-    const url = `${radcadapi}/morphology?email=${email}&series=${config.series_uid}&label=${config.label}&gcp_data_store_id=${storeName}`;
+    const url = `${radcadapi}/morphology?email=${email}&series=${config.series_uid}&label=${config.label}`;
+    // const url = `${radcadapi}/morphology?email=${email}&series=${config.series_uid}&label=${config.label}&gcp_data_store_id=${storeName}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -28,7 +29,8 @@ export class _3DSegmentationApiClass {
   }
 
   static async get3DLabels(series_uid) {
-    const url = `${radcadapi}/segmentations?series=${series_uid}&email=${email}&gcp_data_store_id=${storeName}`;
+    const url = `${radcadapi}/segmentations?series=${series_uid}&email=${email}`;
+    // const url = `${radcadapi}/segmentations?series=${series_uid}&email=${email}&gcp_data_store_id=${storeName}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

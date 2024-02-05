@@ -444,6 +444,7 @@ class Viewer extends Component {
       const storeName = getItem('dicomStore');
       const response = await fetch(
         `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/series?study=${studyInstanceUID}`,
         {
           method: 'GET',
           redirect: 'follow',
