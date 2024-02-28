@@ -71,8 +71,9 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
     }
   }, [segmentationData, currentProperty]);
 
-  const loadSegmentations = async series_uid => {
+  const loadSegmentations = async series_uid2 => {
     try {
+      const series_uid = '2.25.4245612297026806970528336476469769568';
       const segmentationLabels = await _3DSegmentationApiClass.get3DLabels(
         series_uid
       );
@@ -83,8 +84,9 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
     } catch (error) {}
   };
 
-  const load3DData = async (label, series_uid) => {
+  const load3DData = async (label, series_uid2) => {
     try {
+      const series_uid = '2.25.4245612297026806970528336476469769568';
       const segmentationData = await _3DSegmentationApiClass.get3DSegmentationData(
         {
           series_uid,

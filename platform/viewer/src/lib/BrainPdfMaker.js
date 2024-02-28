@@ -16,75 +16,93 @@ function createCollage(zoom, w, date, time, imageDataUrl3, imageDataUrl8) {
         stack: [
           {
             image: imageDataUrl8,
-            width: 300,
-            height: 180,
-            margin: [-10, 5, 0, 0],
+            width: 350,
+            height: 280,
+            margin: [-70, 5, 0, 0],
           },
         ],
-        margin: [40, 0, 0, 0],
+        margin: [70, 0, 0, 0],
       },
       {
-        margin: [20, 10, 0, 0],
         stack: [
           {
             stack: [
-              {
-                columns: [
-                  {
-                    text: 'Zoom:',
-                    bold: true,
-                    fontSize: 8,
-                    margin: [60, 0, 0, 0],
-                  },
-                  {
-                    text: zoom,
-                    fontSize: 8,
-                    margin: [-70, 0, 0, 0],
-                  },
-                ],
-              },
-              {
-                columns: [
-                  {
-                    text: 'W:',
-                    fontSize: 8,
-                    bold: true,
-                    margin: [60, 0, 0, 0],
-                  },
-                  {
-                    text: w,
-                    fontSize: 8,
-                    margin: [-80, 0, 0, 0],
-                  },
-                ],
-              },
-              {
-                text: 'Loseless/',
-                fontSize: 8,
-                margin: [60, 0, 0, 0],
-              },
-              {
-                text: 'uncompressed',
-                fontSize: 8,
-                margin: [60, 0, 0, 0],
-              },
+              { text: 'Entropic heterogenety:', fontSize: 9 },
+              { text: '0.46', fontSize: 9 },
             ],
+            margin: [20, 10, 0, 0],
           },
           {
-            margin: [60, 110, 0, 0],
             stack: [
-              {
-                text: date,
-                fontSize: 8,
-              },
-              {
-                text: time,
-                fontSize: 8,
-              },
+              { text: 'Correlation heterogenety:', fontSize: 9 },
+              { text: '0.26', fontSize: 9 },
             ],
+            margin: [20, 25, 0, 0],
           },
         ],
       },
+      // {
+      //   margin: [20, 10, 0, 0],
+      //   stack: [
+      //     {
+      //       stack: [
+      //         {
+      //           columns: [
+      //             {
+      //               text: 'Zoom:',
+      //               bold: true,
+      //               fontSize: 8,
+      //               margin: [60, 0, 0, 0],
+      //             },
+      //             {
+      //               text: zoom,
+      //               fontSize: 8,
+      //               margin: [-70, 0, 0, 0],
+      //             },
+      //           ],
+      //         },
+      //         {
+      //           columns: [
+      //             {
+      //               text: 'W:',
+      //               fontSize: 8,
+      //               bold: true,
+      //               margin: [60, 0, 0, 0],
+      //             },
+      //             {
+      //               text: w,
+      //               fontSize: 8,
+      //               margin: [-80, 0, 0, 0],
+      //             },
+      //           ],
+      //         },
+      //         {
+      //           text: 'Loseless/',
+      //           fontSize: 8,
+      //           margin: [60, 0, 0, 0],
+      //         },
+      //         {
+      //           text: 'uncompressed',
+      //           fontSize: 8,
+      //           margin: [60, 0, 0, 0],
+      //         },
+      //       ],
+      //     },
+      //     {
+      //       margin: [60, 110, 0, 0],
+      //       stack: [
+      //         {
+      //           text: date,
+      //           fontSize: 8,
+      //         },
+      //         {
+      //           text: time,
+      //           fontSize: 8,
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
     ],
   };
 }
@@ -97,49 +115,12 @@ function createReportSummaryTable(
 ) {
   return {
     table: {
-      widths: ['25%', '72%'], // specify widths for both columns
+      widths: ['30%', '72%'],
       body: [
         [
           {
             style: 'imagescol2',
             columns: [
-              {
-                columns: [
-                  {
-                    stack: [
-                      {
-                        text: 'Patient Name:',
-                        bold: true,
-                        fontSize: 9,
-                      },
-                      {
-                        text: patientName,
-                        color: '#3d3d49',
-                        fontStyle: 'thin',
-                        fontSize: 10,
-                        margin: [0, 4, 0, 0],
-                      },
-                    ],
-                  },
-                  {
-                    stack: [
-                      {
-                        text: 'Classifier:',
-                        bold: true,
-                        noWrap: true,
-                        fontSize: 9,
-                      },
-                      {
-                        text: classifier,
-                        color: '#3d3d49',
-                        fontStyle: 'thin',
-                        fontSize: 10,
-                        margin: [0, 4, 0, 0],
-                      },
-                    ],
-                  },
-                ],
-              },
               {
                 columns: [
                   {
@@ -153,6 +134,144 @@ function createReportSummaryTable(
                         text: patientID,
                         fontStyle: 'thin',
                         color: '#3d3d49',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                  {
+                    stack: [
+                      {
+                        text: 'Tumor Spicularity:',
+                        bold: true,
+                        noWrap: true,
+                        fontSize: 9,
+                        margin: [-20, 4, 0, 0],
+                      },
+                      {
+                        text: '70',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
+                        fontSize: 10,
+                        margin: [-20, 4, 0, 0],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                columns: [
+                  {
+                    stack: [
+                      {
+                        text: 'Longevity prediction:',
+                        bold: true,
+                        fontSize: 9,
+                        margin: [-45, 4, 0, 0],
+                      },
+                      {
+                        text: '12 to 14 months,70% confidence',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
+                        fontSize: 10,
+                        margin: [-45, 4, 0, 0],
+                      },
+                    ],
+                  },
+                  // {
+                  //   stack: [
+                  //     {
+                  //       text: 'Malignant Score:',
+                  //       bold: true,
+                  //       noWrap: true,
+                  //       fontSize: 9,
+                  //     },
+                  //     {
+                  //       text: malignantScore,
+                  //       fontStyle: 'thin',
+                  //       color: '#3d3d49',
+                  //       margin: [0, 4, 0, 0],
+                  //     },
+                  //   ],
+                  // },
+                ],
+              },
+            ],
+          },
+          {},
+        ],
+      ],
+    },
+    layout: 'noBorders',
+    style: 'jumbotron',
+    margin: [0, 0, 0, 0],
+  };
+}
+
+function createReportSummaryTable2(
+  patientID,
+  patientName,
+  classifier
+  // malignantScore
+) {
+  return {
+    table: {
+      widths: ['30%', '72%'],
+      body: [
+        [
+          {
+            style: 'imagescol2',
+            columns: [
+              {
+                columns: [
+                  {
+                    stack: [
+                      {
+                        text: 'Patient Name:',
+                        bold: true,
+                        fontSize: 8,
+                      },
+                      {
+                        text: 'John Doe',
+                        fontStyle: 'thin',
+                        color: '#3d3d49',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                  {
+                    stack: [
+                      {
+                        text: 'Date of Birth:',
+                        bold: true,
+                        noWrap: true,
+                        fontSize: 9,
+                      },
+                      {
+                        text: 'Jan 1, 1970',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
+                        fontSize: 10,
+                        margin: [0, 4, 0, 0],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                columns: [
+                  {
+                    stack: [
+                      {
+                        text: 'Institution: ',
+                        bold: true,
+                        fontSize: 9,
+                      },
+                      {
+                        text: 'Clearview Hospital',
+                        color: '#3d3d49',
+                        fontStyle: 'thin',
                         fontSize: 10,
                         margin: [0, 4, 0, 0],
                       },
@@ -182,43 +301,35 @@ function createReportSummaryTable(
         ],
       ],
     },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    }, // this layout has no borders and no padding
+    layout: 'noBorders',
     style: 'jumbotron',
     margin: [0, 0, 0, 0],
   };
 }
-
 function createMorphologyHeader() {
   return {
-    table: {
-      widths: ['25%', '72%'],
-      body: [
-        [
-          {
-            text: 'Morphology',
-            colSpan: 2,
-            margin: [20, 5, 0, 5],
-            bold: true,
-            fontSize: 18,
-          },
-          {},
-        ],
-      ],
-    },
-    layout: {
-      hLineWidth: () => 0,
-      vLineWidth: () => 0,
-      paddingLeft: () => 0,
-      paddingRight: () => 0,
-    },
-    style: 'jumbotron',
-    margin: [0, 20, 0, 0],
-    // pageBreak: 'before',
+    style: 'headercol',
+    pageBreak: 'before',
+    stack: [
+      {
+        table: {
+          widths: ['30%', '70%'],
+          body: [
+            [
+              {
+                text: 'Tumor Complexity & Spikiness',
+                style: 'jumbotronHeader',
+                colSpan: 2,
+              },
+              {},
+            ],
+          ],
+        },
+        layout: 'noBorders',
+        style: 'jumbotronLBlue2',
+        margin: [0, 20, -10, 5],
+      },
+    ],
   };
 }
 
@@ -227,15 +338,15 @@ function createMorphologyBody(image) {
     stack: [
       {
         image: image,
-        width: 370,
-        height: 200,
-        margin: [40, 10, 0, 0],
+        width: 350,
+        height: 280,
+        margin: [80, 5, 0, 0],
       },
     ],
   };
 }
 
-const PdfMaker = (ohif_image, chart, morphologyBase64) => {
+const PdfMaker = (ohif_image, morphologyBase64) => {
   let contents = [];
   let contents2 = [];
   let contents3 = null;
@@ -243,36 +354,33 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
 
   const patientData = getItem('selectedStudy');
 
-  images['logo_one'] =
-    'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_one.png';
-  images['logo_two'] =
-    'https://afrogane-storage.s3.eu-central-1.amazonaws.com/logo_two.png';
+  images['logo_one'] = 'https://share-ohif.s3.amazonaws.com/Screenshot+2023-11-15+at+9.21.06+PM.png';
+  images['logo_two'] = 'https://share-ohif.s3.amazonaws.com/Wisconsin-logo.jpg';
 
   const documentDefinition = {
     content: [
       {
         style: 'imagescol3',
-        alignment: 'justify',
+        // alignment: 'justify',
         columns: [
           {
             image: 'logo_one',
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 20,
           },
           {
-            text: 'Radcad Report Summary',
-            style: 'jumbotronHeader',
-            margin: [70, 20, 0, 0],
+            text: 'Report Summary',
+            margin: [10, 0, 0, 0],
             bold: true,
             color: '#243D4E',
             fontSize: 17,
           },
-          {
-            image: 'logo_two',
-            width: 80,
-            height: 80,
-            margin: [12, 0, 0, 0],
-          },
+          // {
+          //   image: 'logo_two',
+          //   width: 80,
+          //   height: 80,
+          //   margin: [12, 0, 0, 0],
+          // },
         ],
       },
       {
@@ -281,11 +389,11 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
         stack: [
           {
             table: {
-              widths: ['22%', '72%'], // specify widths for both columns
+              widths: ['30%', '70%'],
               body: [
                 [
                   {
-                    text: 'PATIENT INFORMATION',
+                    text: 'Patient Information',
                     style: 'jumbotronHeader',
                     colSpan: 2, // span across 2 columns
                   },
@@ -293,12 +401,7 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
                 ],
               ],
             },
-            layout: {
-              hLineWidth: () => 0,
-              vLineWidth: () => 0,
-              paddingLeft: () => 0,
-              paddingRight: () => 0,
-            }, // this layout has no borders and no padding
+            layout: 'noBorders',
             style: 'jumbotronLBlue2',
             margin: [0, 5, -10, 5],
           },
@@ -306,36 +409,42 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
       },
       // {},
       // },
+      createReportSummaryTable2(
+        patientData.PatientID,
+        'John Doe',
+        'ResNet -18'
+        // score
+      ),
       createReportSummaryTable(
         patientData.PatientID,
         patientData.PatientName,
         'ResNet -18'
         // score
       ),
-      {
-        text: 'ANALYSIS DESCRIPTION',
-        bold: true,
-        fontSize: 9,
-        margin: [0, 17, 0, 0],
-      },
-      {
-        text:
-          'The report is produced by utilizing ResNet models for the classification of lung nodules, with the primary objective of identifying instances with malignant characteristics. The outcomes delineate scans that bear resemblance, particularly those exhibiting malignant indentations, along with their corresponding prediction numbers and unique identification identifiers for each analogous scan.        ',
-        fontSize: 7,
-        width: 200,
-        margin: [0, 5, 0, 0],
-      },
+      // {
+      //   text: 'ANALYSIS DESCRIPTION',
+      //   bold: true,
+      //   fontSize: 9,
+      //   margin: [0, 17, 0, 0],
+      // },
+      // {
+      //   text:
+      //     'The report is produced by utilizing ResNet models for the classification of brain nodules, with the primary objective of identifying instances with malignant characteristics. The outcomes delineate scans that bear resemblance, particularly those exhibiting malignant indentations, along with their corresponding prediction numbers and unique identification identifiers for each analogous scan.        ',
+      //   fontSize: 7,
+      //   width: 200,
+      //   margin: [0, 5, 0, 0],
+      // },
       {
         style: 'headercol',
         // alignment: 'justify',
         stack: [
           {
             table: {
-              widths: ['22%', '72%'], // specify widths for both columns
+              widths: ['30%', '70%'],
               body: [
                 [
                   {
-                    text: 'COLLAGE RADIOMICS',
+                    text: 'Local Heterogeneity',
                     style: 'jumbotronHeader',
                     colSpan: 2, // span across 2 columns
                   },
@@ -343,12 +452,7 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
                 ],
               ],
             },
-            layout: {
-              hLineWidth: () => 0,
-              vLineWidth: () => 0,
-              paddingLeft: () => 0,
-              paddingRight: () => 0,
-            }, // this layout has no borders and no padding
+            layout: 'noBorders',
             style: 'jumbotronLBlue2',
             margin: [0, 20, -10, 5],
           },
@@ -356,6 +460,9 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
       },
     ],
     styles: {
+      branding: {
+        font: 'Times',
+      },
       header: {
         fontSize: 12,
         bold: true,
@@ -393,6 +500,14 @@ const PdfMaker = (ohif_image, chart, morphologyBase64) => {
         padding: [10, 0, 10, 10],
         border: 'grey',
         color: 'white',
+      },
+      noBorders: {
+        hLineWidth: function(i, node) {
+          return 0;
+        },
+        vLineWidth: function(i, node) {
+          return 0;
+        },
       },
     },
     images,

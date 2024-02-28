@@ -15,13 +15,9 @@ import OHIF, { MODULE_TYPES, DICOMSR } from '@ohif/core';
 import { withDialog } from '@ohif/ui';
 import moment from 'moment';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
-import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
-import {
-  commandsManager,
-  extensionManager,
-  servicesManager,
-} from './../App.js';
-import { ReconstructionIssues } from './../../../core/src/enums.js';
+import ErrorBoundaryDialog from '../components/ErrorBoundaryDialog/index.js';
+import { commandsManager, extensionManager, servicesManager } from '../App.js';
+import { ReconstructionIssues } from '../../../core/src/enums.js';
 import '../googleCloud/googleCloud.css';
 // import Lottie from 'lottie-react';
 import cornerstone from 'cornerstone-core';
@@ -29,24 +25,26 @@ import * as Plotly from 'plotly.js';
 
 import './Viewer.css';
 import JobsContextUtil from './JobsContextUtil.js';
-import { getEnabledElement } from '../../../../extensions/cornerstone/src/state';
-import eventBus from '../lib/eventBus';
-import { Icon } from '../../../ui/src/elements/Icon';
-import { BrainMode, lungMode, radcadapi } from '../utils/constants';
-import { Morphology3DComponent } from '../components/3DSegmentation/3D';
+import { getEnabledElement } from '../../../../extensions/cornerstone/src/state.js';
+import eventBus from '../lib/eventBus.js';
+import { Icon } from '../../../ui/src/elements/Icon/index.js';
+import { BrainMode, lungMode, radcadapi } from '../utils/constants.js';
+import { Morphology3DComponent } from '../components/3DSegmentation/3D.js';
 // import { Morphology3DComponent } from '../components/3DSegmentation/3D_old';
 import pdfmake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import exportComponent from '../lib/ExportComponent';
-import Summary from '../components/Summary';
-import LungPdfMaker from '../lib/LungPdfMaker';
-import BrainPdfMaker from '../lib/BrainPdfMaker';
-import handleScrolltoIndex from '../utils/handleScrolltoIndex';
-import { handleRestoreToolState } from '../utils/syncrhonizeToolState';
-import ConnectedStudyBrowser from './ConnectedStudyBrowser';
-import { ProgressBar } from '../components/LoadingBar';
+import exportComponent from '../lib/ExportComponent.js';
+import Summary from '../components/Summary.js';
+import LungPdfMaker from '../lib/LungPdfMaker.js';
+import BrainPdfMaker from '../lib/BrainPdfMaker.js';
+import handleScrolltoIndex from '../utils/handleScrolltoIndex.js';
+import { handleRestoreToolState } from '../utils/syncrhonizeToolState.js';
+import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
+import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
+import { ProgressBar } from '../components/LoadingBar/index.js';
 
 pdfmake.vfs = pdfFonts.pdfMake.vfs;
+
 // const currentMode = BrainMode;
 
 let hasRestoredState = false;
@@ -415,9 +413,11 @@ class Radiomics extends Component {
   async handleFetchAndSetSeries(studyInstanceUID) {
     try {
       const state = window.store.getState();
+      const storeName = getItem('dicomStore') || 'Test_Demo';
 
       const response = await fetch(
-        `${radcadapi}/series?study=${studyInstanceUID}`,
+        `${radcadapi}/series?study=${studyInstanceUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/series?study=${studyInstanceUID}`,
         {
           method: 'GET',
           redirect: 'follow',
@@ -560,35 +560,130 @@ class Radiomics extends Component {
     this.setState(updatedState);
   };
 
-  downloadReportAsPdf = () => {
-    const base64 = [];
-    const promises = [];
-    let chart = null;
-    let ohif_image = null;
-
+  downloadBrainModePdf = () => {
     this.setState({
       showImages: true,
     });
-    const { UINotificationService } = servicesManager.services;
 
-    UINotificationService.show({
-      title: 'Generating Pdf',
-      type: 'info',
-      autoClose: true,
+    setTimeout(() => {
+      const fetchBase64Data = [exportComponent(this.canvas)];
+
+      const customScene = this.componentRef.current.el.layout.scene;
+      const plotDiv = this.componentRef.current.el;
+      const { graphDiv } = plotDiv._fullLayout.scene._scene;
+      const divToDownload = {
+        ...graphDiv,
+        layout: { ...graphDiv.layout, scene: customScene },
+      };
+
+      fetchBase64Data.push(
+        Plotly.toImage(divToDownload, {
+          format: 'png',
+          width: 800,
+          height: 600,
+        })
+      );
+
+      Promise.all(fetchBase64Data)
+        .then(data => {
+          const collage = data[0];
+          const morphologyBase64 = data[1];
+          const definition = BrainPdfMaker(
+            collage.toDataURL(),
+            morphologyBase64
+          );
+          this.setState({
+            showImages: false,
+          });
+
+          // pdfmake.fonts = {
+          //   Playfair: {
+          //     normal:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Regular.ttf',
+          //     bold:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Bold.ttf',
+          //     italics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-Italic.ttf',
+          //     bolditalics:
+          //       'https://share-ohif.s3.amazonaws.com/PlayfairDisplay-BoldItalic.ttf',
+          //   },
+          //   // other fonts...
+          // };
+
+          pdfmake.createPdf(definition).download();
+        })
+        .catch(error => {
+          this.setState({
+            showImages: false,
+          });
+        });
+    }, 500);
+  };
+
+  downloadBrainModePdf = () => {
+    // this.setState({
+    //   showImages: true,
+    // });
+
+    setTimeout(() => {
+      const fetchBase64Data = [exportComponent(this.canvas)];
+
+      const customScene = this.componentRef.current.el.layout.scene;
+      const plotDiv = this.componentRef.current.el;
+      const { graphDiv } = plotDiv._fullLayout.scene._scene;
+      const divToDownload = {
+        ...graphDiv,
+        layout: { ...graphDiv.layout, scene: customScene },
+      };
+
+      fetchBase64Data.push(
+        Plotly.toImage(divToDownload, {
+          format: 'png',
+          width: 800,
+          height: 600,
+        })
+      );
+
+      Promise.all(fetchBase64Data)
+        .then(data => {
+          const collage = data[0];
+          const morphologyBase64 = data[1];
+          const definition = BrainPdfMaker(
+            collage.toDataURL(),
+            morphologyBase64
+          );
+          // this.setState({
+          //   showImages: false,
+          // });
+          pdfmake.createPdf(definition).download();
+        })
+        .catch(error => {
+          // this.setState({
+          //   showImages: false,
+          // });
+        });
+    }, 500);
+  };
+
+  downloadReportAsPdf = () => {
+    if (this.props.currentMode === BrainMode) {
+      this.downloadBrainModePdf();
+    } else if (this.props.currentMode === lungMode) {
+      this.downloadLungModePdf();
+    }
+  };
+
+  downloadLungModePdf = () => {
+    const base64 = [];
+    const promises = [];
+    this.setState({
+      showImages: true,
     });
 
-    // grpah
     setTimeout(() => {
       const similarityResultState = this.state.similarityResultState;
 
-      console.log({
-        similarityResultState,
-      });
-
-      if (!similarityResultState) {
-        return;
-      }
-      if (similarityResultState.knn.length < 1) {
+      if (!similarityResultState || similarityResultState.knn.length < 1) {
         return;
       }
 
@@ -603,94 +698,23 @@ class Radiomics extends Component {
             base64.push(element.toDataURL());
           });
 
-          const fetchBase64Data = [exportComponent(this.canvas)];
-          try {
-            if (this.props.currentMode === BrainMode) {
-              // if (currentMode === BrainMode) {
-              const customScene = this.componentRef.current.el.layout.scene;
-
-              const plotDiv = this.componentRef.current.el;
-              const { graphDiv } = plotDiv._fullLayout.scene._scene;
-              console.log(this.componentRef.current);
-              const divToDownload = {
-                ...graphDiv,
-                layout: { ...graphDiv.layout, scene: customScene },
-              };
-
-              fetchBase64Data.push(
-                Plotly.toImage(divToDownload, {
-                  format: 'png',
-                  width: 800,
-                  height: 600,
-                })
-              );
-            }
-          } catch (error) {
-            console.log(
-              'Error occurred while setting morphologyBase64:',
-              error
-            );
-          }
-          return Promise.all(fetchBase64Data);
+          return exportComponent(this.canvas);
         })
-        .then(data => {
-          const collage = data[0];
-          let morphologyBase64 = null;
-          try {
-            if (this.props.currentMode === BrainMode)
-              morphologyBase64 = data[1];
-          } catch (error) {
-            console.log(
-              'Error occurred while setting morphologyBase64:',
-              error
-            );
-          }
+        .then(collage => {
           const SimilarScans = JSON.parse(
             localStorage.getItem('print-similarscans') || '{}'
           );
-          if (this.props.currentMode === lungMode) {
-            const definition = LungPdfMaker(
-              SimilarScans[0],
-              collage.toDataURL(),
-              base64,
-              morphologyBase64
-            );
-            this.setState({
-              showImages: false,
-            });
-            pdfmake.createPdf(definition).download();
-          } else {
-            const definition = BrainPdfMaker(
-              // SimilarScans[0],
-              collage.toDataURL(),
-              base64,
-              morphologyBase64
-            );
-            this.setState({
-              showImages: false,
-            });
-            pdfmake.createPdf(definition).download();
-          }
-          // const definition = LungPdfMaker(
-          //   SimilarScans[0],
-          //   collage.toDataURL(),
-          //   base64,
-          //   morphologyBase64
-          // );
-          // this.setState({
-          //   showImages: false,
-          // });
-          // pdfmake.createPdf(definition).download();
-
-          UINotificationService.show({
-            title: 'Pdf Generation Completed',
-            // message,
-            type: 'info',
-            autoClose: true,
+          const definition = LungPdfMaker(
+            SimilarScans[0],
+            collage.toDataURL(),
+            base64
+          );
+          this.setState({
+            showImages: false,
           });
+          pdfmake.createPdf(definition).download();
         })
         .catch(error => {
-          console.log(error);
           this.setState({
             showImages: false,
           });
@@ -699,24 +723,24 @@ class Radiomics extends Component {
   };
 
   getHelperText = () => {
-    const { job, isSimilarlookingScans, isComplete } = this.state;
+    const { job, isSimilarlookingScans } = this.state;
 
     // if (!job || !job.data) return 'Processing Collage Features...';
-    if (!job || !job.data) return 'Processing Report details...';
+    if (!job || !job.data) return 'Processing AI ...';
 
     switch (job.data.status) {
       case 'RUNNING':
-        return `Running Collage Job ${job.data.job} - ${job.data.instances_done}/${job.instances}`;
+        return `Running Algorithm in Background ${job.data.instances_done}/${job.instances}`;
       case 'PENDING':
-        return 'Collage Job pending...';
+        return 'AI pending...';
       case 'ERROR':
         return 'Error occurred...';
       case 'DONE':
         return isSimilarlookingScans
-          ? 'Collage Job completed!'
+          ? 'AI completed!'
           : 'Getting similar looking scans...';
       default:
-        return 'Processing Report details...';
+        return 'Processing AI ...';
     }
   };
 
@@ -730,11 +754,58 @@ class Radiomics extends Component {
     return Math.min(progress, 100);
   };
 
+  renderProgressBar = () => {
+    const { job } = this.state;
+    const helperText = this.getHelperText();
+    const isInLungMode = this.props.currentMode === 'LungMode'; // Assuming LungMode is a string constant or you can replace it with the actual value
+
+    if (!job || !job.data) {
+      return (
+        <ProgressBar indeterminate status="active" helperText={helperText} />
+      );
+    }
+
+    const progressBarProps = {
+      helperText: helperText,
+    };
+
+    switch (job.data.status) {
+      case 'RUNNING':
+        progressBarProps.progress = this.getProgress();
+        progressBarProps.status = 'active';
+        break;
+      case 'PENDING':
+        progressBarProps.indeterminate = true;
+        progressBarProps.status = 'active';
+        break;
+      case 'ERROR':
+        progressBarProps.progress = 100;
+        progressBarProps.status = 'error';
+        break;
+      case 'DONE':
+        if (isInLungMode && !this.state.isSimilarlookingScans) {
+          progressBarProps.indeterminate = true;
+          progressBarProps.status = 'active';
+        } else if (isInLungMode && this.state.isSimilarlookingScans) {
+          progressBarProps.progress = 100;
+          progressBarProps.status = 'success';
+        } else {
+          progressBarProps.progress = 100;
+          progressBarProps.status = 'success';
+        }
+        break;
+      default:
+        break;
+    }
+
+    return <ProgressBar {...progressBarProps} />;
+  };
+
   render() {
     const { studies } = this.props;
     const { isComplete, jobs, isSimilarlookingScans, job } = this.state;
     const helperText = this.getHelperText();
-    const progress = this.getProgress();
+    // const progress = this.getProgress();
 
     if (this.state.loading) {
       return (
@@ -766,6 +837,7 @@ class Radiomics extends Component {
     });
 
     const text = '';
+    const isInLungMode = this.props.currentMode === lungMode;
 
     return (
       <div
@@ -792,58 +864,26 @@ class Radiomics extends Component {
             background: 'rgba(23,28,33,0.99)',
             fontSize: '24px',
             zIndex: 8,
-            // display:'none'
-            display: isComplete && isSimilarlookingScans ? 'none' : 'flex',
+            display: 'none',
+            display:
+              (isInLungMode &&
+                isComplete &&
+                this.state.isSimilarlookingScans) ||
+              (!isInLungMode && isComplete)
+                ? 'none'
+                : 'flex',
+            flexDirection: 'column', // Stack items vertically
           }}
         >
-          {job && job.data ? (
-            <div>
-              {job.data.status === 'RUNNING' && (
-                <ProgressBar
-                  progress={progress}
-                  status="active"
-                  helperText={helperText}
-                />
-              )}
-              {job.data.status === 'PENDING' && (
-                <ProgressBar
-                  indeterminate
-                  status="active"
-                  helperText={helperText}
-                />
-              )}
-              {job.data.status === 'ERROR' && (
-                <ProgressBar
-                  progress={100}
-                  status="error"
-                  helperText={helperText}
-                />
-              )}
-
-              {job.data.status === 'DONE' && !this.state.isSimilarlookingScans && (
-                <div>
-                  <ProgressBar
-                    indeterminate
-                    status="active"
-                    helperText={helperText}
-                  />
-                </div>
-              )}
-
-              {job.data.status === 'DONE' &&
-                this.state.isSimilarlookingScans && (
-                  <ProgressBar
-                    progress={100}
-                    status="success"
-                    helperText={helperText}
-                  />
-                )}
-            </div>
-          ) : (
-            <ProgressBar
-              indeterminate
-              status="active"
-              helperText={helperText}
+          {this.renderProgressBar()}
+          {!isInLungMode && (
+            <img
+              src="https://share-ohif.s3.amazonaws.com/loader-removebg-preview.png"
+              alt="Fig"
+              style={{
+                marginBottom: '10px',
+                // animation: 'spin 2s linear infinite', // Add a spinning animation
+              }} // Add some space between the image and the progress bar
             />
           )}
         </div>
@@ -864,51 +904,61 @@ class Radiomics extends Component {
           </div>
           <div className="container">
             <div className="container-item">
-              <Summary
-                similarityResultState={this.state.similarityResultState}
-                triggerDownload={this.downloadReportAsPdf}
-              />
+              {isInLungMode ? (
+                <Summary
+                  currentMode={this.props.currentMode}
+                  similarityResultState={this.state.similarityResultState}
+                  triggerDownload={this.downloadReportAsPdf}
+                />
+              ) : (
+                <Summary
+                  currentMode={this.props.currentMode}
+                  similarityResultState={this.state.similarityResultState}
+                  triggerDownload={this.downloadBrainModePdf}
+                />
+              )}
               {/* RIGHT */}
-              <div
-                style={{
-                  marginTop: '20px',
-                  width: '100%',
-                  borderRadius: '8px',
-                  background:
-                    isComplete && isSimilarlookingScans
-                      ? '#000000'
-                      : 'rgba(23,28,33,0.99)',
-                  padding: '20px',
-                }}
-              >
-                <div>
-                  <h1
-                    style={{
-                      textAlign: 'left',
-                      margin: 0,
-                    }}
-                  >
-                    Similar Looking Scans
-                  </h1>
-                </div>
-
-                <ErrorBoundaryDialog context="RightSidePanel">
+              {isInLungMode && (
+                <div
+                  style={{
+                    marginTop: '20px',
+                    width: '100%',
+                    borderRadius: '8px',
+                    background:
+                      isComplete && isSimilarlookingScans
+                        ? '#000000'
+                        : 'rgba(23,28,33,0.99)',
+                    padding: '20px',
+                  }}
+                >
                   <div>
-                    {SimilarScans && (
-                      <SimilarScans
-                        isOpen={true}
-                        viewports={this.props.viewports}
-                        studies={this.props.studies}
-                        activeIndex={this.props.activeViewportIndex}
-                        activeViewport={
-                          this.props.viewports[this.props.activeViewportIndex]
-                        }
-                        getActiveViewport={this._getActiveViewport}
-                      />
-                    )}
+                    <h1
+                      style={{
+                        textAlign: 'left',
+                        margin: 0,
+                      }}
+                    >
+                      Similar Looking Scans
+                    </h1>
                   </div>
-                </ErrorBoundaryDialog>
-              </div>
+                  <ErrorBoundaryDialog context="RightSidePanel">
+                    <div>
+                      {SimilarScans && (
+                        <SimilarScans
+                          isOpen={true}
+                          viewports={this.props.viewports}
+                          studies={this.props.studies}
+                          activeIndex={this.props.activeViewportIndex}
+                          activeViewport={
+                            this.props.viewports[this.props.activeViewportIndex]
+                          }
+                          getActiveViewport={this._getActiveViewport}
+                        />
+                      )}
+                    </div>
+                  </ErrorBoundaryDialog>
+                </div>
+              )}
             </div>
             <div className="container-item-extra">
               {/* VIEWPORTS + SIDEPANELS */}
@@ -916,7 +966,10 @@ class Radiomics extends Component {
                 style={{
                   width: '100%',
                   background:
-                    isComplete && isSimilarlookingScans
+                    (this.props.currentMode === BrainMode && isComplete) ||
+                    (this.props.currentMode !== BrainMode &&
+                      isComplete &&
+                      isSimilarlookingScans)
                       ? '#000000'
                       : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',

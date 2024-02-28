@@ -103,18 +103,24 @@ export const getUpdatedSegments = ({
 self.addEventListener('message', event => {
   try {
     // Extract the necessary data from the event
-    const { segmentations, labelmap3D } = event.data;
+    // const { segmentations, labelmap3D } = event.data;
+    const { segDetails, segmentIndex, label, labelmap3D } = event.data;
 
-    // Replicate the processSegmentations logic here
-    const processedSegmentations = processSegmentations(
-      segmentations,
-      labelmap3D
-    );
+    const {
+      updated2dMaps,
+      newSegmentIndex,
+      metadataExists,
+    } = processSegmentation(segDetails, segmentIndex, labelmap3D);
 
     // Sending back the processed data:
     self.postMessage({
       status: 'success',
-      data: processedSegmentations,
+      data: {
+        label,
+        updated2dMaps,
+        newSegmentIndex,
+        metadataExists,
+      },
     });
   } catch (error) {
     self.postMessage({
@@ -126,8 +132,41 @@ self.addEventListener('message', event => {
   }
 });
 
+function processSegmentation(segDetails, segmentIndex, labelmap3D) {
+  const segmentation = uncompress({
+    segmentation: segDetails.segmentation,
+    shape:
+      typeof segDetails.shape === 'string'
+        ? JSON.parse(segDetails.shape)
+        : segDetails.shape,
+  });
+
+  let updated2dMaps;
+  let newSegmentIndex = segmentIndex;
+  let metadataExists = !!labelmap3D.metadata[segmentIndex];
+
+  if (!metadataExists) {
+    updated2dMaps = getUpdatedSegments({
+      segmentation,
+      segmentIndex,
+      currPixelData: labelmap3D.labelmaps2D,
+    });
+  } else {
+    newSegmentIndex = labelmap3D.metadata.length;
+    updated2dMaps = getUpdatedSegments({
+      segmentation,
+      segmentIndex: newSegmentIndex,
+      currPixelData: labelmap3D.labelmaps2D,
+    });
+  }
+
+  return { updated2dMaps, newSegmentIndex, metadataExists };
+}
+
 function processSegmentations(segmentations, labelmap3D) {
   const processedSegmentations = [];
+  const total = Object.keys(segmentations).length || 0;
+
   Object.keys(segmentations).forEach((item, index) => {
     const segDetails = segmentations[item];
     const uncompressed = uncompress({
@@ -137,15 +176,21 @@ function processSegmentations(segmentations, labelmap3D) {
           ? JSON.parse(segDetails.shape)
           : segDetails.shape,
     });
-    const updated2dMaps = getUpdatedSegments({
-      segmentation: uncompressed,
-      segmentIndex: labelmap3D.activeSegmentIndex,
-      currPixelData: labelmap3D.labelmaps2D,
+    // const updated2dMaps = getUpdatedSegments({
+    //   segmentation: uncompressed,
+    //   segmentIndex: labelmap3D.activeSegmentIndex,
+    //   currPixelData: labelmap3D.labelmaps2D,
+    // });
+
+    const progress = Math.round(((index + 1) / total) * 100);
+    self.postMessage({
+      status: 'progress',
+      progress: progress,
     });
     processedSegmentations.push({
-      item,
+      label: item,
       uncompressed,
-      updated2dMaps,
+      // updated2dMaps,
     });
   });
   return processedSegmentations;

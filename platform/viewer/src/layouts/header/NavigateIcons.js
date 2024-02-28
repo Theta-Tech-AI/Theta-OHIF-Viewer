@@ -91,7 +91,7 @@ const NavigateIcons = () => {
       currentMode == BrainMode
         ? {
             1: 'edit',
-            2: 'nnunet',
+            // 2: 'nnunet',
             3: 'edit',
             4: 'selectmask',
           }
@@ -138,7 +138,7 @@ const NavigateIcons = () => {
         ? {
             2: 'studylist',
             3: 'view',
-            4: 'nnunet',
+            // 4: 'nnunet',
             5: 'edit',
             6: 'selectmask',
           }
@@ -148,10 +148,21 @@ const NavigateIcons = () => {
             4: 'selectmask',
           };
 
-    const newPathname = location.pathname.replace(
-      /(view|edit|nnunet|selectmask|radionics)/,
-      paths[activeStep]
-    );
+    const direction = localStorage.getItem('direction');
+    let newPathname;
+    if (isBrainMode) {
+      let newstep = activeStep;
+      if (newstep == 4) newstep = 3;
+      newPathname = location.pathname.replace(
+        /(view|edit|nnunet|selectmask|radionics)/,
+        paths[newstep]
+      );
+    } else {
+      newPathname = location.pathname.replace(
+        /(view|edit|nnunet|selectmask|radionics)/,
+        paths[activeStep]
+      );
+    }
 
     if (activeStep === 2) cornerstone.imageCache.purgeCache();
     window.location.href = newPathname;
@@ -244,7 +255,8 @@ const NavigateIcons = () => {
     if (location.pathname.includes('/studylist')) {
       setActiveStep(1);
     } else if (location.pathname.includes('/view')) {
-      setActiveStep(2);
+      if (isBrainMode) setActiveStep(3);
+      else setActiveStep(2);
       localStorage.setItem('direction', 'forward');
     } else if (location.pathname.includes('/nnunet') && isBrainMode) {
       setActiveStep(3);

@@ -1,7 +1,7 @@
 .component {
-  background-color: var(--primary-background-color);
+  background-color: #000 !important;
   color: white;
-  padding: 10px;
+  padding: 4px !important;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -41,6 +41,7 @@
   font-size: 22px;
   font-weight: 300;
   text-align: left;
+  margin-bottom: 12px;
   flex: 1;
 }
 
@@ -50,8 +51,7 @@ h1 {
 }
 
 .accordion {
-  max-width: 100%;
-  /* margin: 2rem auto; */
+  max-width: 100% !important;
 }
 
 .accordion-item {
@@ -76,7 +76,8 @@ h1 {
 }
 
 .accordion-content {
-  background-color: #355c64;
+  background-color: #000000;
+  /* background-color: #355c64; */
 }
 
 .textures {
@@ -87,11 +88,36 @@ h1 {
 }
 
 .texture_uids {
-  color: #ffffff;
+  text-decoration: none;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 18px;
+  background-color: #886fd8; /* Green */
+  color: white;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  transition-duration: 0.4s;
 }
 
 .selected-instance {
-  color: rgb(155, 155, 255);
+  text-decoration: none;
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 18px;
+  background-color: #725ac1; /* Darker green */
+  color: white;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  transition-duration: 0.4s;
+}
+
+.selected-instance:hover,
+.texture_uids:hover {
+  background-color: #45a049; /* Darker green */
 }
 
 .reveal-error {

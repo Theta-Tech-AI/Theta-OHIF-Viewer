@@ -6,16 +6,17 @@ import { JobsContext } from '../../../context/JobsContext';
 import circularLoading from './utils/circular-loading.json';
 import { useLottie } from 'lottie-react';
 import { radcadapi } from '../../../utils/constants';
+import { getItem } from '../../../lib/localStorageUtils';
 
 const TextureFeature = props => {
   const [jobs, setJobs] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const { user, viewport } = props;
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(0);
   const [showMore, setShowMore] = useState(true);
   const access_token = user.access_token;
-  // const email = user.profile.email;
-  const email = 'nick.fragakis@thetatech.ai';
+  const email = user.profile.email;
+  // const email = 'nick.fragakis@thetatech.ai';
 
   const series = viewport.viewportSpecificData[0].SeriesInstanceUID;
   const { overlayStatus, setOverlayStatus } = useContext(JobsContext);
@@ -30,7 +31,6 @@ const TextureFeature = props => {
   };
 
   const { View: Loader } = useLottie(options);
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,8 +50,12 @@ const TextureFeature = props => {
         },
       };
 
+      const storeName = getItem('dicomStore');
+      console.log(storeName);
+
       await fetch(
-        `${radcadapi}/jobs?series=${series}&email=${email}`,
+        `${radcadapi}/jobs?series=${series}&email=${email}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/jobs?series=${series}&email=${email}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))
@@ -64,7 +68,7 @@ const TextureFeature = props => {
             (response.data.jobs[0].status === 'DONE' &&
               jobs[0].status !== 'DONE')
           ) {
-            setIsActive(false);
+            // setIsActive(false);
             setJobs([...response.data.jobs]);
             jobsLengthRef.current = response.data.jobs.length;
           }

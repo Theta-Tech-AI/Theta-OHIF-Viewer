@@ -99,7 +99,9 @@ const Jobs = ({
   // this is for checking and setting textures and description
   useEffect(() => {
     if (data.texture_uids) {
-      setTextures(data.texture_uids);
+      // setTextures(data.texture_uids);
+      const updatedTextureUids = data.texture_uids.slice(3);
+      setTextures(updatedTextureUids);
       setDescription(data.texture_descriptions);
     }
   }, [data.texture_descriptions, data.texture_uids]);
@@ -186,9 +188,11 @@ const Jobs = ({
           Authorization: `Bearer ${access_token}`,
         },
       };
+      const storeName = getItem('dicomStore');
 
       await fetch(
-        `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}`,
+        `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}&gcp_data_store_id=${storeName}`,
+        // `${radcadapi}/instance?source=${source_uid}&texture=${seriesUID}`,
         requestOptions
       )
         .then(r => r.json().then(data => ({ status: r.status, data: data })))
@@ -215,7 +219,7 @@ const Jobs = ({
   };
 
   // function for loading an image and setting it as an added layer
-  const addImageLayer = async (image_id) => {
+  const addImageLayer = async image_id => {
     const image = cornerstone.getImage(elementRef.current);
     const instance_uid2 = image.imageId.split('/')[14];
     await cornerstone
@@ -468,19 +472,24 @@ const Jobs = ({
             <ScrollableArea scrollStep={201} class="series-browser">
               {textures.length > 0 && (
                 <div className="textures">
-                  {textures.map((texture, index) => (
-                    <li
-                      key={index}
-                      onClick={() => handleOverlay(texture)}
-                      className={
-                        isInstance === texture
-                          ? 'selected-instance'
-                          : 'texture_uids'
-                      }
-                    >
-                      {description[index]}
-                    </li>
-                  ))}
+                  {textures.map((texture, index) => {
+                    const descriptionText = description[index]
+                      .split('Collage HaralickFeature.')[1]
+                      .split(' ')[0];
+                    return (
+                      <li
+                        key={index}
+                        onClick={() => handleOverlay(texture)}
+                        className={
+                          isInstance === texture
+                            ? 'selected-instance'
+                            : 'texture_uids'
+                        }
+                      >
+                        {descriptionText}
+                      </li>
+                    );
+                  })}
                 </div>
               )}
             </ScrollableArea>

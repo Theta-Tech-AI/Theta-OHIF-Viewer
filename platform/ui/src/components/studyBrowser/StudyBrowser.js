@@ -59,6 +59,7 @@ function StudyBrowser(props) {
   const onImageRendered = event => {
     if (!hasRestoredState) {
       if (studies.length > 0 && useEffectCalled === false) {
+        setItem('modalities', studies);
         setUseEffectCalled(true);
         try {
           const activeStudy = getItem('selectedStudy');
