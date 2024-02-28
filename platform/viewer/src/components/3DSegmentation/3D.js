@@ -4,6 +4,7 @@ import { _3DSegmentationApiClass } from './3DApi';
 import Plot from 'react-plotly.js';
 import './3d.css';
 import { RenderLoadingIcon } from '../../appExtensions/LungModuleSimilarityPanel/SearchParameters/SearchDetails';
+import { useSelector } from 'react-redux';
 
 const Morphology3DComponent = React.forwardRef((props, ref) => {
   const [currentImage, setCurrentImage] = useState('');
@@ -17,6 +18,8 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
   const [segmentationLabels, setSegmentationLabels] = useState([]);
   const [currentSegmentationLabel, setCurrentSegmentationLabel] = useState('');
   const [seriesUid, setSeriesUid] = useState('');
+  const userEmail = useSelector(state => state.oidc.user.email);
+
   const graphRef = useRef(null);
 
   const [figure, setFigure] = useState({
@@ -75,7 +78,8 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
     try {
       const series_uid = '2.25.4245612297026806970528336476469769568';
       const segmentationLabels = await _3DSegmentationApiClass.get3DLabels(
-        series_uid
+        series_uid,
+        userEmail
       );
       setSegmentationLabels(segmentationLabels);
       setCurrentSegmentationLabel(segmentationLabels[0]);
@@ -91,6 +95,7 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
         {
           series_uid,
           label,
+          email: userEmail,
         }
       );
       const segmentationProperties = Object.keys(segmentationData);
