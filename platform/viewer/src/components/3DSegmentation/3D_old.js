@@ -268,7 +268,7 @@ class Morphology3DComponent extends React.Component {
                     padding: '5px 12px',
                     borderRadius: '13px',
                     fontSize: '15px',
-                    backgroundColor: 'rgb(26, 28, 33)',
+                    backgroundColor: 'var(--background-color-mode)',
                     color: '#fff',
                   }}
                   id="segmentation_labels"

@@ -162,7 +162,7 @@ function LoginPage({}) {
           alignItems: 'center',
           justifyContent: 'space-around',
           // minHeight: '100vh',
-          backgroundColor: 'black',
+          backgroundColor: 'var(--black-background-color)',
           borderRadius: '10px',
           // padding: '80px',
           margin: '20px',

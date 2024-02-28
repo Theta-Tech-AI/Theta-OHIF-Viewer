@@ -101,10 +101,37 @@ class OHIFStandaloneViewer extends Component {
         this.props.setContext(window.location.pathname);
       }
     });
+    this.updateBackgroundColor();
+  }
+
+  componentDidUpdate(prevProps) {
+    // Check if the mode has changed
+    if (prevProps.currentMode !== this.props.currentMode) {
+      this.updateBackgroundColor();
+    }
   }
 
   componentWillUnmount() {
     this.unlisten();
+  }
+
+  updateBackgroundColor() {
+    const { currentMode } = this.props;
+    const isBrainMode = currentMode === 'brain';
+    const newBlackgroundColor = isBrainMode ? '#ffffff' : '#black';
+    const newBackgroundColor = isBrainMode ? '#ffffff' : '#1a1c21';
+    document.documentElement.style.setProperty(
+      '--background-color-mode',
+      newBackgroundColor
+    );
+    document.documentElement.style.setProperty(
+      '--black-background-color',
+      newBlackgroundColor
+    );
+    document.documentElement.style.setProperty(
+      '--default-text-color',
+      newBlackgroundColor
+    );
   }
 
   render() {
@@ -349,6 +376,7 @@ class OHIFStandaloneViewer extends Component {
 const mapStateToProps = state => {
   return {
     user: state.oidc.user,
+    currentMode: state.mode.active,
   };
 };
 

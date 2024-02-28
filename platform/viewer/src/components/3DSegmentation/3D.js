@@ -170,7 +170,7 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
                 padding: '5px 12px',
                 borderRadius: '13px',
                 fontSize: '15px',
-                backgroundColor: 'rgb(26, 28, 33)',
+                backgroundColor: 'var(--background-color-mode)',
                 color: '#fff',
               }}
               name="segmentationLabel"
@@ -199,7 +199,7 @@ const Morphology3DComponent = React.forwardRef((props, ref) => {
                     padding: '5px 12px',
                     borderRadius: '13px',
                     fontSize: '15px',
-                    backgroundColor: 'rgb(26, 28, 33)',
+                    backgroundColor: 'var(--background-color-mode)',
                     color: '#fff',
                   }}
                   name="property"
