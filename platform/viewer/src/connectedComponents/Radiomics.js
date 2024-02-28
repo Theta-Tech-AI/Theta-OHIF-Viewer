@@ -136,6 +136,7 @@ class Radiomics extends Component {
       isSimilarlookingScans: false,
       similarityResultState: { knn: [] },
       isEditSelection: true,
+      lungMode: false,
     };
 
     this.canvas = React.createRef(null);
@@ -839,6 +840,8 @@ class Radiomics extends Component {
     const text = '';
     const isInLungMode = this.props.currentMode === lungMode;
 
+    console.log(isInLungMode);
+
     return (
       <div
         style={{
@@ -892,6 +895,7 @@ class Radiomics extends Component {
           className="printView"
           style={{
             paddingBottom: 140,
+            backgroundColor: !isInLungMode ? 'white' : 'black',
             // display: this.state.isComplete ? 'block' : 'none',
           }}
         >
@@ -967,10 +971,10 @@ class Radiomics extends Component {
                   width: '100%',
                   background:
                     (this.props.currentMode === BrainMode && isComplete) ||
-                    (this.props.currentMode !== BrainMode &&
+                    (this.props.currentMode === BrainMode &&
                       isComplete &&
                       isSimilarlookingScans)
-                      ? '#000000'
+                      ? '#e6e6e6'
                       : 'rgba(23,28,33,0.99)',
                   borderRadius: '8px',
                   padding: '20px',
@@ -981,6 +985,10 @@ class Radiomics extends Component {
                     style={{
                       textAlign: 'left',
                       margin: 0,
+                      color:
+                        this.props.currentMode === BrainMode
+                          ? 'black'
+                          : 'white',
                     }}
                   >
                     Collage

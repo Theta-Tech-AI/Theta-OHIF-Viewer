@@ -11,6 +11,11 @@
     align-items: center;
 }
 
+.brain {
+    background-color: white !important; 
+}
+
+
 ToolbarRow.expanded {
     height: calc(var(--toolbar-height) + var(--toolbar-drawer-height));
 }

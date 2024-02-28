@@ -6,6 +6,7 @@ import cornerstone from 'cornerstone-core';
 import './StudyBrowser.styl';
 import { getItem, setItem } from '@ohif/viewer/src/lib/localStorageUtils.js';
 import eventBus from '@ohif/viewer/src/lib/eventBus.js';
+import { useSelector } from 'react-redux';
 
 let hasRestoredState = false;
 
@@ -17,6 +18,7 @@ function StudyBrowser(props) {
     supportsDrag,
   } = props;
   const location = useLocation();
+  const { active: currentMode } = useSelector(state => state && state.mode);
 
   const [hideThumbnails, setHideThumbnails] = useState(true);
   const [useEffectCalled, setUseEffectCalled] = useState(false);
@@ -101,9 +103,10 @@ function StudyBrowser(props) {
       onImageRendered
     );
   };
+  const [lungMode, setLungMode] = useState(false);
 
   return (
-    <div className="study-browser">
+    <div className={`study-browser ${currentMode === 'brain' ? 'brain' : ''}`}>
       {hideThumbnails ? null : (
         <div className="scrollable-study-thumbnails">
           {studies
