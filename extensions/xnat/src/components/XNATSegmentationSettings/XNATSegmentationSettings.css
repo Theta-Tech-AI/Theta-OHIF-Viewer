@@ -57,7 +57,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid var(--black-background-color);
   padding: 10px 15px;
 }
 

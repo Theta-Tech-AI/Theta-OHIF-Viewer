@@ -52,7 +52,7 @@ class CallbackPage extends Component {
             width: '100vw',
             height: '100vh',
             display: 'flex',
-            backgroundColor: '#1a1c21',
+            backgroundColor: 'var(--background-color-mode)',
             justifyContent: 'center',
             alignItems: 'center',
           }}

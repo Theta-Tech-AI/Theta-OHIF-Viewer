@@ -7,7 +7,7 @@ body {
   height: 100%;
 }
 body {
-  background: #1a1c21;
+  background: var(--background-color-mode);
   margin: 0px;
   padding: 0px;
   font-size: 12px;
@@ -37,7 +37,7 @@ h6 {
   padding: 0px;
   -webkit-font-smoothing: antialiased;
   /* margin-bottom: 15px; */
-  color: #ffffff;
+  color: var(--black-background-color);
 }
 /*  */
 a {
@@ -118,7 +118,7 @@ span.make__bg {
   display: block;
   padding: 18px;
   position: fixed;
-  background-color: #1a1c21;
+  background-color: var(--background-color-mode);
   bottom: 0;
   left: 0;
   right: 0;
@@ -144,7 +144,7 @@ span.make__bg {
   display: block;
   /* padding: 16px 16px 16px 15px; */
   /* position: fixed; */
-  background-color: #1a1c21;
+  background-color: var(--background-color-mode);
   /* top: 0; */
   flex: 5;
   /* left: 0; */
@@ -240,7 +240,7 @@ a.menu-toggle.active span.line.b {
   padding: 30px;
   padding-top: 80px;
   height: 100%;
-  background-color: black;
+  background-color: var(--background-color-mode) ;
 }
 .sidebar__menu::-webkit-scrollbar {
   width: 8px;
@@ -366,7 +366,7 @@ a.menu-toggle.active span.line.b {
 .portal__wraper {
   padding-top: 80px;
   position: relative;
-  background-color: #1a1c21;
+  background-color: var(--background-color-mode);
   min-height: 100vh;
   width: 100%;
   color: white;
@@ -378,7 +378,7 @@ a.menu-toggle.active span.line.b {
   /* padding: 20px; */
   /* padding-top: 200px; */
   position: relative;
-  background-color: #1a1c21;
+  background-color: var(--background-color-mode);
   /* min-height: 100vh; */
   display: flex;
   width: 100%;
@@ -397,7 +397,7 @@ a.menu-toggle.active span.line.b {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: black;
+  color: var(--background-color-mode) ;
   background-color: #00c7ee;
   cursor: pointer;
   border-radius: 100%;
@@ -487,7 +487,7 @@ a.menu-toggle.active span.line.b {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* color: black; */
+  /* color: var(--background-color-mode) ; */
   /* background-color: gray; */
   border-radius: 100%;
   font-size: 0.875rem;

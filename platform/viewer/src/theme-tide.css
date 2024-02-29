@@ -9,6 +9,7 @@
 :root {
   /* Interface UI Colors */
   --default-color: #9ccef9;
+  --default-text-color: #ffffff;
   --hover-color: #ffffff;
   --active-color: #20a5d6;
   --ui-border-color: #44626f;
@@ -16,9 +17,10 @@
   --ui-border-color-dark: #3c5d80;
   --ui-border-color-active: #00a4d9;
   --primary-background-color: #1a1c21;
+  --black-background-color: black;
+  --background-color-mode: #1a1c21; /* Default background color */
   /* --primary-background-color: #000000; */
   --box-background-color: #3e5975;
-
   /* Common palette */
   --ui-yellow: #e29e4a;
   --ui-sky-blue: #6fbde2;

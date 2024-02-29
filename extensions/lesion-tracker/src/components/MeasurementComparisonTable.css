@@ -55,6 +55,6 @@
 
 .MeasurementComparisonTable .generate-report button {
   font-size: 12px;
-  color: black;
+  color: var(--black-background-color);
   background-color: var(--active-color);
 }

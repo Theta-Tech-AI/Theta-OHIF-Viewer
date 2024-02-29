@@ -93,7 +93,7 @@ const Header = ({ onMobileClose, openMobile }) => {
         top: 0,
         left: 0,
         borderBottom: '1px  #87878780 solid',
-        background: '#1A1C21',
+        background: 'var(--background-color-mode)',
         paddingRight: '6px',
         paddingTop: '6px',
         flexDirection: 'row',
