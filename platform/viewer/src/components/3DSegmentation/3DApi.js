@@ -6,12 +6,21 @@ import { Buffer } from 'buffer';
 import { getItem } from '@ohif/viewer/src/lib/localStorageUtils';
 
 window.Buffer = window.Buffer || require('buffer').Buffer;
-
-const email = 'nick.fragakis@thetatech.ai';
+let email =
+  window.store.getState().oidc.user.profile.email ||
+  'nick.fragakis@thetatech.ai';
 const storeName = getItem('dicomStore');
+
+const modalityToPayloadMapping = {
+  FLAIR: 'https://share-ohif.s3.amazonaws.com/flairpaylod.json',
+  T1: 'https://share-ohif.s3.amazonaws.com/t1paylod.json',
+  T2: 'https://share-ohif.s3.amazonaws.com/t2paylod.json',
+  T1CE: 'https://share-ohif.s3.amazonaws.com/ct1payload.json',
+};
 
 export class _3DSegmentationApiClass {
   static async get3DSegmentationData(config) {
+    if (config.email) email = config.email;
     const url = `${radcadapi}/morphology?email=${email}&series=${config.series_uid}&label=${config.label}`;
     // const url = `${radcadapi}/morphology?email=${email}&series=${config.series_uid}&label=${config.label}&gcp_data_store_id=${storeName}`;
     const response = await fetch(url, {
@@ -28,7 +37,8 @@ export class _3DSegmentationApiClass {
     );
   }
 
-  static async get3DLabels(series_uid) {
+  static async get3DLabels(series_uid, userEmail) {
+    if (userEmail) email = userEmail;
     const url = `${radcadapi}/segmentations?series=${series_uid}&email=${email}`;
     // const url = `${radcadapi}/segmentations?series=${series_uid}&email=${email}&gcp_data_store_id=${storeName}`;
     const response = await fetch(url, {
